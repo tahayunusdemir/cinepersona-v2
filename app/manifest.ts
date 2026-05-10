@@ -1,15 +1,16 @@
 import type { MetadataRoute } from "next";
+import { siteConfig } from "@/lib/site";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "CinePersona",
-    short_name: "CinePersona",
-    description: "CinePersona Progressive Web App",
+    name: siteConfig.name,
+    short_name: siteConfig.shortName,
+    description: siteConfig.description,
     start_url: "/",
     scope: "/",
     display: "standalone",
-    background_color: "#ffffff",
-    theme_color: "#000000",
+    background_color: siteConfig.themeColor.light,
+    theme_color: siteConfig.themeColor.dark,
     orientation: "portrait",
     icons: [
       {

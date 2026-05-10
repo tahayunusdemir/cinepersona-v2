@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CinePersona
 
-## Getting Started
+Progressive Web App built with [Next.js 16](https://nextjs.org).
 
-First, run the development server:
+## Requirements
+
+- Node.js `20` (matches the Netlify build — see `NODE_VERSION` in `netlify.toml`)
+- npm `>= 10`
+
+## Getting started
 
 ```bash
+npm install
+cp .env.example .env.local   # then fill in real values
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+For PWA install / offline testing, run over local HTTPS:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npx next dev --experimental-https
+```
 
-## Learn More
+## Scripts
 
-To learn more about Next.js, take a look at the following resources:
+| Script          | Purpose                              |
+| --------------- | ------------------------------------ |
+| `npm run dev`   | Start the dev server                 |
+| `npm run build` | Production build                     |
+| `npm start`     | Run the production build             |
+| `npm run lint`  | ESLint (`eslint-config-next`)        |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Environment variables
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Copy `.env.example` to `.env.local` and fill in real values. Every required key is listed there.
 
-## Deploy on Vercel
+| Key                                  | Used by                                          |
+| ------------------------------------ | ------------------------------------------------ |
+| `NEXT_PUBLIC_SITE_URL`               | `lib/site.ts` — absolute URLs, OG, redirects     |
+| `NEXT_PUBLIC_SUPABASE_URL`           | Supabase browser + server clients                |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase browser + server clients              |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`.env.local` is gitignored. `.env.example` is committed (no secrets).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project layout
+
+```
+app/
+  layout.tsx         root layout, fonts, metadata, viewport, SW registrar
+  page.tsx           home
+  loading.tsx        root suspense fallback
+  error.tsx          segment error boundary (Next.js 16 unstable_retry)
+  global-error.tsx   last-resort boundary, owns <html>/<body>
+  not-found.tsx      404 (also rendered by notFound())
+  offline/page.tsx   offline fallback served by sw.js
+  manifest.ts        web app manifest
+lib/
+  site.ts            shared site constants (name, url, description, theme)
+public/
+  sw.js              service worker (precache + offline fallback)
+  icon-*.png         PWA icons
+```
+
+## PWA
+
+- Manifest: `app/manifest.ts` (driven by `lib/site.ts`)
+- Service worker: `public/sw.js`, registered in production by `app/sw-register.tsx`
+- Offline fallback: `app/offline/page.tsx`
+- Security + SW headers: `next.config.ts`
+
+## Deployment (Netlify)
+
+- Adapter: `@netlify/plugin-nextjs`
+- Node version: `20` (set via `NODE_VERSION` in `netlify.toml`)
+- Required env vars in the Netlify dashboard:
+  - `NEXT_PUBLIC_SITE_URL`
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- Add the production + preview URLs to Supabase **Auth → Redirect URLs**.
+
+## Notes for contributors
+
+- This project tracks the latest Next.js 16 conventions — see `AGENTS.md`. When touching framework-level APIs, consult `node_modules/next/dist/docs/` rather than older external references.
+- `error.tsx` and `global-error.tsx` use the Next.js 16 `unstable_retry` prop (replaces `reset`).
+- Progress and remaining setup tasks live in `docs/TODO.md`.
