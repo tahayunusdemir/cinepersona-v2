@@ -150,7 +150,7 @@ export async function registerAction(
     return { ok: false, error: "unknown", message: profileError.message };
   }
 
-  redirect("/");
+  redirect(safeNextForm(formData.get("next")));
 }
 
 // ---------------------------------------------------------------------------

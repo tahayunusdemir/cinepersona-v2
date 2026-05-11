@@ -95,12 +95,6 @@ export default async function ProfileOverviewPage({
           </CardContent>
         </Card>
       )}
-
-      <ComingSoon
-        icon={ActivityIcon}
-        title="Activity feed"
-        description="Recent reviews, lists, and ratings will appear here once the films section ships."
-      />
     </div>
   );
 }

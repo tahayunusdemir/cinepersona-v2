@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogOutIcon, SettingsIcon, UserIcon } from "lucide-react";
+import { LogOutIcon, MessageSquareIcon, SettingsIcon, UserIcon } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,10 @@ export function UserMenu({ username, displayName, avatarUrl }: Props) {
           <DropdownMenuItem render={<Link href={`/${username}`} />}>
             <UserIcon />
             Profile
+          </DropdownMenuItem>
+          <DropdownMenuItem render={<Link href="/messages" />}>
+            <MessageSquareIcon />
+            Messages
           </DropdownMenuItem>
           <DropdownMenuItem render={<Link href="/settings" />}>
             <SettingsIcon />

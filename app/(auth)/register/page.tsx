@@ -6,7 +6,26 @@ import { RegisterForm } from "@/components/auth/register-form";
 
 export const metadata: Metadata = { title: "Sign up" };
 
-export default function RegisterPage() {
+type SearchParams = Promise<{ next?: string | string[] }>;
+
+function pickFirst(v: string | string[] | undefined): string | undefined {
+  if (Array.isArray(v)) return v[0];
+  return v;
+}
+
+export default async function RegisterPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const params = await searchParams;
+  const next = pickFirst(params.next);
+  const safeNext =
+    next && next.startsWith("/") && !next.startsWith("//") ? next : undefined;
+  const signInHref = safeNext
+    ? `/login?next=${encodeURIComponent(safeNext)}`
+    : "/login";
+
   return (
     <AuthShell
       title="Create your account"
@@ -14,13 +33,13 @@ export default function RegisterPage() {
       footer={
         <span>
           Already have an account?{" "}
-          <Link href="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
+          <Link href={signInHref} className="font-medium text-foreground underline-offset-4 hover:underline">
             Sign in
           </Link>
         </span>
       }
     >
-      <RegisterForm />
+      <RegisterForm next={safeNext} />
     </AuthShell>
   );
 }

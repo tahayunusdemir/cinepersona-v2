@@ -1,27 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import {
-  FilmIcon,
-  HeartIcon,
-  MessagesSquareIcon,
-  SparklesIcon,
-} from "lucide-react";
+import { MessagesSquareIcon } from "lucide-react";
 
+import { EligibilityProgress } from "@/components/cinematch/eligibility-progress";
+import { HowItWorks } from "@/components/cinematch/how-it-works";
 import { JoinPoolButton } from "@/components/cinematch/join-pool-button";
 import { PoolStatusCard } from "@/components/cinematch/pool-status-card";
+import { QuotaCard } from "@/components/cinematch/quota-card";
 import { RequestMatchButton } from "@/components/cinematch/request-match-button";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   getEligibility,
   getPoolEntry,
   getRequestQuota,
   getViewerId,
+  nowMs,
 } from "@/lib/match/queries";
-import { WATCHED_MIN, WEEKLY_REQUEST_LIMIT } from "@/lib/match/types";
+import { WEEKLY_REQUEST_LIMIT } from "@/lib/match/types";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
@@ -61,21 +58,32 @@ export default async function CineMatchIntroPage() {
         </p>
       </header>
 
-      <section className="mt-10 grid gap-3 sm:grid-cols-3">
-        <FactCard icon={HeartIcon} label="4 personality axes" />
-        <FactCard icon={FilmIcon} label={`${WATCHED_MIN}+ watched films`} />
-        <FactCard icon={SparklesIcon} label="90%+ similarity" />
+      <section className="mt-10" aria-label="How CineMatch works">
+        <HowItWorks />
       </section>
 
-      <section className="mt-10">
+      <section className="mt-8 space-y-3">
         {eligibility.ok ? (
-          <PoolStatusCard entry={poolEntry} />
+          <>
+            <PoolStatusCard entry={poolEntry} />
+            {quota ? (
+              <QuotaCard
+                used={quota.used}
+                pending={quota.pending.length}
+                nextSlotAt={quota.nextSlotAt}
+                nowMs={nowMs()}
+              />
+            ) : null}
+          </>
         ) : (
-          <StatusBlock eligibility={eligibility} />
+          <EligibilityProgress
+            reason={eligibility.reason}
+            watchedCount={eligibility.watchedCount}
+          />
         )}
       </section>
 
-      <section className="mt-8 grid gap-3 sm:grid-cols-2">
+      <section className="mt-6 grid gap-3 sm:grid-cols-2">
         {eligibility.ok ? (
           eligibility.alreadyJoined ? (
             <RequestMatchButton
@@ -109,66 +117,12 @@ export default async function CineMatchIntroPage() {
         </Link>
       </section>
 
-      {eligibility.ok && quota ? (
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          {quota.used} of {WEEKLY_REQUEST_LIMIT} requests used this week
-          {quota.pending.length > 0
-            ? ` · ${quota.pending.length} pending`
-            : ""}
+      {eligibility.ok && quota?.pending.length ? (
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          We&apos;ll page you the moment a 90%+ match lands. After 7 days the
+          closest available person becomes a fallback.
         </p>
       ) : null}
     </div>
-  );
-}
-
-function FactCard({
-  icon: Icon,
-  label,
-}: {
-  icon: typeof HeartIcon;
-  label: string;
-}) {
-  return (
-    <Card size="sm">
-      <CardHeader className="flex-row items-center gap-2 space-y-0">
-        <Icon className="size-4 text-muted-foreground" />
-        <CardTitle className="text-sm">{label}</CardTitle>
-      </CardHeader>
-    </Card>
-  );
-}
-
-type IneligibleState = Extract<
-  Awaited<ReturnType<typeof getEligibility>>,
-  { ok: false }
->;
-
-function StatusBlock({ eligibility }: { eligibility: IneligibleState }) {
-  if (eligibility.reason === "no_test") {
-    return (
-      <Alert variant="destructive">
-        <AlertTitle>Take the CineTest first.</AlertTitle>
-        <AlertDescription>
-          The match depends on your personality axes.{" "}
-          <Link className="underline" href="/cinetest">
-            Start the test
-          </Link>
-          .
-        </AlertDescription>
-      </Alert>
-    );
-  }
-  return (
-    <Alert variant="destructive">
-      <AlertTitle>Mark {WATCHED_MIN} watched films.</AlertTitle>
-      <AlertDescription>
-        You have {eligibility.watchedCount}. We need at least {WATCHED_MIN}{" "}
-        watched films to measure overlap.{" "}
-        <Link className="underline" href="/films">
-          Browse films
-        </Link>
-        .
-      </AlertDescription>
-    </Alert>
   );
 }

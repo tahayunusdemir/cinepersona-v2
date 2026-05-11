@@ -30,6 +30,15 @@ export async function getViewerId(supabase: Supabase): Promise<string | null> {
   return data?.claims?.sub ?? null;
 }
 
+/**
+ * Read the wall clock from a server context. Wrapped in a helper so that
+ * server components can pass a `now` value to child components without
+ * tripping React's purity rules on `Date.now()` inside the render path.
+ */
+export function nowMs(): number {
+  return Date.now();
+}
+
 // ---------------------------------------------------------------------------
 // eligibility — gate on test result + ≥WATCHED_MIN watched films.
 // ---------------------------------------------------------------------------
@@ -382,6 +391,52 @@ function makeAxisBreakdown(
 
 // Expose axes scoring helper for previews (admin / debug UIs).
 export { axesScore };
+
+// ---------------------------------------------------------------------------
+// shared watched films — used by the match detail page to show concrete
+// "we both watched these" thumbnails. Capped to keep the round-trip small.
+// ---------------------------------------------------------------------------
+
+export type SharedFilmPoster = {
+  id: number;
+  tmdb_id: number;
+  title: string;
+  poster_path: string | null;
+};
+
+export async function listSharedWatched(
+  supabase: Supabase,
+  viewerId: string,
+  partnerId: string,
+  limit = 8,
+): Promise<SharedFilmPoster[]> {
+  const { data: viewerRows } = await supabase
+    .from("user_movies")
+    .select("movie_id")
+    .eq("user_id", viewerId)
+    .eq("status", "watched");
+  const viewerIds = new Set(
+    ((viewerRows ?? []) as { movie_id: number }[]).map((r) => r.movie_id),
+  );
+  if (viewerIds.size === 0) return [];
+
+  const { data: partnerRows } = await supabase
+    .from("user_movies")
+    .select("movie_id")
+    .eq("user_id", partnerId)
+    .eq("status", "watched")
+    .in("movie_id", Array.from(viewerIds));
+  const sharedIds = ((partnerRows ?? []) as { movie_id: number }[])
+    .map((r) => r.movie_id)
+    .slice(0, limit);
+  if (sharedIds.length === 0) return [];
+
+  const { data: movies } = await supabase
+    .from("movies")
+    .select("id, tmdb_id, title, poster_path")
+    .in("id", sharedIds);
+  return ((movies ?? []) as SharedFilmPoster[]).filter((m) => m.poster_path);
+}
 
 // ---------------------------------------------------------------------------
 // messages

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeftIcon, ArrowRightIcon, FilmIcon, ClapperboardIcon, TagIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon, ClapperboardIcon, FilmIcon, TagIcon, UserIcon } from "lucide-react";
 
 import { TypeCard } from "@/components/cinepersona/type-card";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ import {
   typesInGroup,
   typesWithStrategy,
 } from "@/lib/cinepersona";
+import { resolveRecommendations } from "@/lib/cinepersona/recommendations-tmdb";
 import { cn } from "@/lib/utils";
 
 type PageParams = { params: Promise<{ slug: string }> };
@@ -68,9 +70,10 @@ export default async function TypeProfilePage({ params }: PageParams) {
   const strengths = profile.traits.filter((t) => t.kind === "strength");
   const weaknesses = profile.traits.filter((t) => t.kind === "weakness");
 
-  const directors = profile.recommendations.filter((r) => r.kind === "director");
-  const films = profile.recommendations.filter((r) => r.kind === "film");
-  const genres = profile.recommendations.filter((r) => r.kind === "genre");
+  const resolved = await resolveRecommendations(profile.recommendations);
+  const directors = resolved.filter((r) => r.kind === "director");
+  const films = resolved.filter((r) => r.kind === "film");
+  const genres = resolved.filter((r) => r.kind === "genre");
 
   const peers = typesInGroup(group.slug).filter((t) => t.code !== type.code);
 
@@ -210,52 +213,94 @@ export default async function TypeProfilePage({ params }: PageParams) {
               {s.body}
             </p>
           ))}
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
-          <Card>
-            <CardHeader className="flex-row items-center gap-2 space-y-0">
-              <ClapperboardIcon className="size-4 text-muted-foreground" />
-              <CardTitle className="text-sm">Directors</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-1 text-sm text-foreground/90">
-                {directors.map((r) => (
-                  <li key={r.title}>{r.title}</li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex-row items-center gap-2 space-y-0">
-              <FilmIcon className="size-4 text-muted-foreground" />
-              <CardTitle className="text-sm">Films</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-1 text-sm text-foreground/90">
-                {films.map((r) => (
-                  <li key={r.title}>
+        <Card className="mt-4">
+          <CardHeader className="flex-row items-center gap-2 space-y-0">
+            <ClapperboardIcon className="size-4 text-muted-foreground" />
+            <CardTitle className="text-sm">Directors</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="grid grid-cols-3 gap-3">
+              {directors.map((r) => (
+                <li key={r.title} className="flex flex-col gap-2">
+                  <div className="relative aspect-[2/3] overflow-hidden rounded-md bg-muted ring-1 ring-border/40">
+                    {r.imagePath ? (
+                      <Image
+                        src={`https://image.tmdb.org/t/p/w342${r.imagePath}`}
+                        alt={`${r.title} portrait`}
+                        fill
+                        sizes="(max-width: 768px) 33vw, 200px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                        <UserIcon className="size-7" />
+                      </div>
+                    )}
+                  </div>
+                  <p className="line-clamp-2 text-sm font-medium text-foreground">
                     {r.title}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+
+        <Card className="mt-4">
+          <CardHeader className="flex-row items-center gap-2 space-y-0">
+            <FilmIcon className="size-4 text-muted-foreground" />
+            <CardTitle className="text-sm">Films</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+              {films.map((r) => (
+                <li key={r.title} className="flex flex-col gap-2">
+                  <div className="relative aspect-[2/3] overflow-hidden rounded-md bg-muted ring-1 ring-border/40">
+                    {r.imagePath ? (
+                      <Image
+                        src={`https://image.tmdb.org/t/p/w342${r.imagePath}`}
+                        alt={`${r.title} poster`}
+                        fill
+                        sizes="(max-width: 768px) 45vw, 180px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                        <FilmIcon className="size-6" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="line-clamp-2 text-sm font-medium text-foreground">
+                      {r.title}
+                    </p>
                     {r.year ? (
-                      <span className="text-muted-foreground"> ({r.year})</span>
+                      <p className="text-[11px] text-muted-foreground">
+                        {r.year}
+                      </p>
                     ) : null}
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex-row items-center gap-2 space-y-0">
-              <TagIcon className="size-4 text-muted-foreground" />
-              <CardTitle className="text-sm">Genres</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-1 text-sm text-foreground/90">
-                {genres.map((r) => (
-                  <li key={r.title}>{r.title}</li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+
+        <Card className="mt-4">
+          <CardHeader className="flex-row items-center gap-2 space-y-0">
+            <TagIcon className="size-4 text-muted-foreground" />
+            <CardTitle className="text-sm">Tags</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {genres.map((r) => (
+                <Badge key={r.title} variant="secondary" className="font-mono text-xs lowercase">
+                  #{r.title.replace(/\s+/g, "-")}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </section>
 
       {peers.length > 0 ? (

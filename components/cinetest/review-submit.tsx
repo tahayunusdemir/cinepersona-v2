@@ -9,6 +9,7 @@ import {
   ArrowRightIcon,
   CheckCircle2Icon,
   FilmIcon,
+  LockIcon,
   RotateCcwIcon,
   UserIcon,
 } from "lucide-react";
@@ -40,7 +41,10 @@ import { cn } from "@/lib/utils";
 type Props = {
   state: TestStateV2;
   onReset: () => void;
+  signedIn: boolean;
 };
+
+const SIGNUP_NEXT = "/cinetest/take/review";
 
 function thumbUrl(selection: PickSelection): string | null {
   if (!selection.posterPath) return null;
@@ -60,7 +64,7 @@ function valueColor(v: LikertValue | undefined): string {
   return "bg-rose-500";
 }
 
-export function ReviewSubmit({ state, onReset }: Props) {
+export function ReviewSubmit({ state, onReset, signedIn }: Props) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -285,9 +289,11 @@ export function ReviewSubmit({ state, onReset }: Props) {
 
       <div className="flex flex-col gap-3 rounded-xl border border-border/60 p-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">
-          {ready
-            ? "Ready when you are. We'll save your result and show your CineType."
-            : "Finish the highlighted sections above to enable submit."}
+          {!ready
+            ? "Finish the highlighted sections above to enable submit."
+            : signedIn
+              ? "Ready when you are. We'll save your result and show your CineType."
+              : "Sign up to see your result — we'll save it to your profile."}
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <Button
@@ -315,26 +321,54 @@ export function ReviewSubmit({ state, onReset }: Props) {
             <ArrowLeftIcon className="size-4" />
             Back
           </Link>
-          <Button
-            type="button"
-            size="sm"
-            disabled={!ready || pending}
-            onClick={submit}
-          >
-            {pending ? (
-              <>
-                <CheckCircle2Icon className="size-4 animate-pulse" />
-                Saving…
-              </>
-            ) : (
-              <>
-                See my result
-                <ArrowRightIcon className="size-4" />
-              </>
-            )}
-          </Button>
+          {signedIn ? (
+            <Button
+              type="button"
+              size="sm"
+              disabled={!ready || pending}
+              onClick={submit}
+            >
+              {pending ? (
+                <>
+                  <CheckCircle2Icon className="size-4 animate-pulse" />
+                  Saving…
+                </>
+              ) : (
+                <>
+                  See my result
+                  <ArrowRightIcon className="size-4" />
+                </>
+              )}
+            </Button>
+          ) : (
+            <Link
+              href={`/register?next=${encodeURIComponent(SIGNUP_NEXT)}`}
+              aria-disabled={!ready || undefined}
+              tabIndex={!ready ? -1 : undefined}
+              className={cn(
+                buttonVariants({ size: "sm" }),
+                !ready && "pointer-events-none opacity-50",
+              )}
+            >
+              <LockIcon className="size-4" />
+              Sign up to see your result
+              <ArrowRightIcon className="size-4" />
+            </Link>
+          )}
         </div>
       </div>
+      {!signedIn && ready ? (
+        <p className="text-center text-xs text-muted-foreground">
+          Already have an account?{" "}
+          <Link
+            href={`/login?next=${encodeURIComponent(SIGNUP_NEXT)}`}
+            className="font-medium text-foreground underline-offset-4 hover:underline"
+          >
+            Sign in
+          </Link>{" "}
+          to save this to your profile.
+        </p>
+      ) : null}
     </div>
   );
 }

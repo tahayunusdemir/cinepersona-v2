@@ -22,7 +22,7 @@ import { authErrorMessages } from "@/lib/auth/errors";
 
 const initialState: AuthActionState = {};
 
-export function RegisterForm() {
+export function RegisterForm({ next }: { next?: string }) {
   const [state, formAction, pending] = useActionState(
     registerAction,
     initialState,
@@ -37,6 +37,7 @@ export function RegisterForm() {
   return (
     <form action={formAction} noValidate>
       <FieldGroup>
+        {next ? <input type="hidden" name="next" value={next} /> : null}
         <Field data-invalid={Boolean(state?.fieldErrors?.username) || undefined}>
           <FieldLabel htmlFor="register-username">Username</FieldLabel>
           <Input

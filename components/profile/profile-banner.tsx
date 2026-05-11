@@ -29,7 +29,7 @@ export function ProfileBanner({ banner }: Props) {
   return (
     <div
       aria-hidden
-      className="relative h-80 w-full overflow-hidden sm:h-[28rem]"
+      className="pointer-events-none relative h-80 w-full overflow-hidden sm:h-[28rem]"
     >
       <Image
         src={`https://image.tmdb.org/t/p/w1280${banner.posterPath}`}

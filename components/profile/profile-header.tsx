@@ -4,6 +4,7 @@ import { GlobeIcon, PencilIcon } from "lucide-react";
 
 import { FollowButton } from "@/components/community/follow-button";
 import { ShareMenu } from "@/components/community/share-menu";
+import { FriendButton } from "@/components/friends/friend-button";
 import { BlockedBanner } from "@/components/profile/blocked-banner";
 import { ProfileMoreMenu } from "@/components/profile/profile-more-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -86,6 +87,14 @@ export function ProfileHeader({ profile }: Props) {
                       initiallyFollowing={profile.isFollowing}
                       isSelf={false}
                       isAuthed={profile.isAuth}
+                      isBlockedByViewer={profile.isBlocked}
+                    />
+                    <FriendButton
+                      targetId={profile.id}
+                      targetUsername={profile.username}
+                      state={profile.friendship}
+                      isAuth={profile.isAuth}
+                      isSelf={false}
                       isBlockedByViewer={profile.isBlocked}
                     />
                     <ShareMenu

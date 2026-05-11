@@ -3,12 +3,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { MatchListRow } from "@/components/cinematch/match-list-item";
+import { PendingRequestRow } from "@/components/cinematch/pending-request-row";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
 import {
   getRequestQuota,
   getViewerId,
   listMatches,
+  nowMs,
 } from "@/lib/match/queries";
 import { WEEKLY_REQUEST_LIMIT } from "@/lib/match/types";
 import { createClient } from "@/lib/supabase/server";
@@ -28,6 +30,10 @@ export default async function CineMatchListPage() {
     getRequestQuota(supabase, viewerId),
   ]);
 
+  const pending = quota.pending;
+  const isEmpty = pending.length === 0 && matches.length === 0;
+  const renderedAt = nowMs();
+
   return (
     <div className="mx-auto w-full max-w-3xl px-4 pb-24 pt-12 sm:px-6">
       <header className="mb-6 flex items-baseline justify-between gap-4">
@@ -39,20 +45,7 @@ export default async function CineMatchListPage() {
         </span>
       </header>
 
-      {quota.pending.length > 0 ? (
-        <Alert className="mb-4">
-          <AlertTitle>
-            {quota.pending.length} request
-            {quota.pending.length > 1 ? "s" : ""} searching…
-          </AlertTitle>
-          <AlertDescription>
-            We&apos;ll land a 90%+ match as soon as one shows up. After 7 days
-            we fall back to the closest available person.
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
-      {matches.length === 0 ? (
+      {isEmpty ? (
         <Alert>
           <AlertTitle>No matches yet.</AlertTitle>
           <AlertDescription className="space-y-3">
@@ -70,6 +63,14 @@ export default async function CineMatchListPage() {
         </Alert>
       ) : (
         <ul className="space-y-2">
+          {pending.map((req) => (
+            <li key={req.id}>
+              <PendingRequestRow
+                requestedAt={req.requested_at}
+                nowMs={renderedAt}
+              />
+            </li>
+          ))}
           {matches.map((m) => (
             <li key={m.id}>
               <MatchListRow item={m} />

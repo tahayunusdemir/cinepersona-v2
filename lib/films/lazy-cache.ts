@@ -15,6 +15,10 @@ function normalizeLanguage(raw: string | null | undefined): string {
   return /^[a-z]{2}$/.test(lower) ? lower : "en";
 }
 
+// Search payloads carry no credits, so we deliberately leave `fetched_at`
+// unset here. That column marks "we've done a /movie/{id} detail fetch"
+// and gates the 24h refetch window in detail.ts — letting search writes
+// touch it would conflate the two and block detail refetches.
 function shapeSearchRow(m: TmdbSearchMovie) {
   return {
     tmdb_id: m.id,
@@ -31,7 +35,6 @@ function shapeSearchRow(m: TmdbSearchMovie) {
     backdrop_path: m.backdrop_path ?? null,
     adult: Boolean(m.adult),
     video: Boolean(m.video),
-    fetched_at: new Date().toISOString(),
   };
 }
 

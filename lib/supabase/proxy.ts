@@ -7,7 +7,7 @@ const AUTH_ONLY_ROUTES = [
   "/forgot-password",
 ];
 
-const PROTECTED_PREFIXES = ["/settings"];
+const PROTECTED_PREFIXES = ["/settings", "/cine-match"];
 const PROTECTED_EXACT = new Set<string>(["/community/me"]);
 
 function needsAuth(pathname: string): boolean {

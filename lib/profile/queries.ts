@@ -1,5 +1,7 @@
 import { cache } from "react";
 
+import { getFriendshipState } from "@/lib/friends/queries";
+import type { FriendshipState } from "@/lib/friends/types";
 import { createClient } from "@/lib/supabase/server";
 
 export type ProfileBanner = {
@@ -22,6 +24,7 @@ export type ProfileViewModel = {
   isFollowing: boolean;
   isBlocked: boolean;
   banner: ProfileBanner | null;
+  friendship: FriendshipState;
 };
 
 export type ProfileFetchResult =
@@ -88,24 +91,28 @@ async function _getProfileByUsername(
 
   let isFollowing = false;
   let isBlocked = false;
+  let friendship: FriendshipState = { kind: "none" };
 
   if (viewerId && !isSelf) {
-    const [{ data: follow }, { data: block }] = await Promise.all([
-      supabase
-        .from("follows")
-        .select("follower_id")
-        .eq("follower_id", viewerId)
-        .eq("following_id", profileRow.id)
-        .maybeSingle(),
-      supabase
-        .from("blocks")
-        .select("blocker_id")
-        .eq("blocker_id", viewerId)
-        .eq("blocked_id", profileRow.id)
-        .maybeSingle(),
-    ]);
+    const [{ data: follow }, { data: block }, friendshipState] =
+      await Promise.all([
+        supabase
+          .from("follows")
+          .select("follower_id")
+          .eq("follower_id", viewerId)
+          .eq("following_id", profileRow.id)
+          .maybeSingle(),
+        supabase
+          .from("blocks")
+          .select("blocker_id")
+          .eq("blocker_id", viewerId)
+          .eq("blocked_id", profileRow.id)
+          .maybeSingle(),
+        getFriendshipState(supabase, viewerId, profileRow.id),
+      ]);
     isFollowing = Boolean(follow);
     isBlocked = Boolean(block);
+    friendship = friendshipState;
   }
 
   return {
@@ -125,6 +132,7 @@ async function _getProfileByUsername(
       isFollowing,
       isBlocked,
       banner,
+      friendship,
     },
   };
 }
