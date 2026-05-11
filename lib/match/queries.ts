@@ -2,18 +2,25 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import type { MovieRow } from "@/lib/films/types";
+import { axes as cinepersonaAxes } from "@/lib/cinepersona";
 
+import { axesScore } from "./score";
 import {
+  FALLBACK_WAIT_DAYS,
   WATCHED_MIN,
+  WEEKLY_REQUEST_LIMIT,
+  type AxisBreakdown,
+  type BreakdownJson,
   type EligibilityState,
   type MatchBreakdown,
   type MatchDetail,
   type MatchListItem,
   type MatchMessage,
   type MatchPartner,
-  type MatchPool,
+  type MatchPoolEntry,
+  type MatchRequest,
   type MatchRow,
+  type RequestQuota,
 } from "./types";
 
 type Supabase = SupabaseClient;
@@ -24,61 +31,13 @@ export async function getViewerId(supabase: Supabase): Promise<string | null> {
 }
 
 // ---------------------------------------------------------------------------
-// pools
-// ---------------------------------------------------------------------------
-
-export async function getCurrentPool(
-  supabase: Supabase,
-): Promise<MatchPool | null> {
-  const today = new Date().toISOString().slice(0, 10);
-  const { data } = await supabase
-    .from("match_pools")
-    .select("id, period_start, period_end, status, created_at")
-    .lte("period_start", today)
-    .gte("period_end", today)
-    .order("period_start", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  return (data as MatchPool) ?? null;
-}
-
-export async function getPool(
-  supabase: Supabase,
-  poolId: number,
-): Promise<MatchPool | null> {
-  const { data } = await supabase
-    .from("match_pools")
-    .select("id, period_start, period_end, status, created_at")
-    .eq("id", poolId)
-    .maybeSingle();
-  return (data as MatchPool) ?? null;
-}
-
-export function poolWindowLabel(pool: MatchPool): string {
-  const start = new Date(`${pool.period_start}T00:00:00Z`);
-  return start.toLocaleString("en-US", {
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  });
-}
-
-export function daysUntilPoolClose(pool: MatchPool): number {
-  const end = new Date(`${pool.period_end}T23:59:59Z`).getTime();
-  const ms = end - Date.now();
-  return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
-}
-
-// ---------------------------------------------------------------------------
-// eligibility
+// eligibility — gate on test result + ≥WATCHED_MIN watched films.
 // ---------------------------------------------------------------------------
 
 export async function getEligibility(
   supabase: Supabase,
   viewerId: string,
 ): Promise<EligibilityState> {
-  const pool = await getCurrentPool(supabase);
-
   const { data: latestResult } = await supabase
     .from("cp_results")
     .select("type_code")
@@ -86,13 +45,8 @@ export async function getEligibility(
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
-
   const typeCode = (latestResult as { type_code: string | null } | null)
     ?.type_code;
-
-  if (!typeCode) {
-    return { ok: false, reason: "no_test", pool };
-  }
 
   const { count } = await supabase
     .from("user_movies")
@@ -100,121 +54,77 @@ export async function getEligibility(
     .eq("user_id", viewerId)
     .eq("status", "watched");
   const watchedCount = count ?? 0;
-  if (watchedCount < WATCHED_MIN) {
-    return { ok: false, reason: "watched_too_few", watchedCount, pool };
-  }
 
-  if (!pool) {
-    return { ok: false, reason: "no_pool" };
-  }
-  if (pool.status !== "open") {
-    return { ok: false, reason: "pool_locked", pool };
+  if (!typeCode) return { ok: false, reason: "no_test", watchedCount };
+  if (watchedCount < WATCHED_MIN) {
+    return { ok: false, reason: "watched_too_few", watchedCount };
   }
 
   const { data: entry } = await supabase
-    .from("match_pool_entries")
+    .from("match_pool")
     .select("user_id")
-    .eq("pool_id", pool.id)
     .eq("user_id", viewerId)
     .maybeSingle();
 
-  return { ok: true, pool, alreadyJoined: !!entry };
+  return { ok: true, alreadyJoined: !!entry, watchedCount };
 }
 
 // ---------------------------------------------------------------------------
-// own picks for current pool (used by the wizard edit screen)
+// pool membership (current viewer)
 // ---------------------------------------------------------------------------
 
-export async function getOwnPoolPicks(
-  supabase: Supabase,
-  poolId: number,
-  viewerId: string,
-): Promise<MovieRow[]> {
-  const { data: picks } = await supabase
-    .from("match_pool_picks")
-    .select("movie_id, sort_order")
-    .eq("pool_id", poolId)
-    .eq("user_id", viewerId)
-    .order("sort_order", { ascending: true });
-  const rows = (picks ?? []) as { movie_id: number; sort_order: number }[];
-  if (rows.length === 0) return [];
-  const ids = rows.map((r) => r.movie_id);
-
-  const { data: movies } = await supabase
-    .from("movies")
-    .select(
-      "id, tmdb_id, title, original_title, release_date, poster_path, vote_average, vote_count, popularity, original_language",
-    )
-    .in("id", ids);
-
-  const byId = new Map(
-    ((movies ?? []) as Partial<MovieRow>[]).map((m) => [m.id as number, m]),
-  );
-  return rows
-    .map((r) => byId.get(r.movie_id))
-    .filter((m): m is Partial<MovieRow> => !!m)
-    .map((m) => ({
-      ...m,
-      watched: false,
-      in_watchlist: false,
-    })) as MovieRow[];
-}
-
-// Films a user can pick from: their own watched + watchlist.
-export async function getOwnLibraryForPicker(
+export async function getPoolEntry(
   supabase: Supabase,
   viewerId: string,
-  query?: string,
-): Promise<MovieRow[]> {
-  const { data: lib } = await supabase
-    .from("user_movies")
-    .select("movie_id, status, created_at")
-    .eq("user_id", viewerId)
-    .order("created_at", { ascending: false })
-    .limit(500);
-
-  const rows = (lib ?? []) as {
-    movie_id: number;
-    status: "watched" | "watchlist";
-    created_at: string;
-  }[];
-  if (rows.length === 0) return [];
-  const ids = Array.from(new Set(rows.map((r) => r.movie_id)));
-  const statusByMovie = new Map<number, { watched: boolean; watchlist: boolean }>();
-  for (const r of rows) {
-    const cur = statusByMovie.get(r.movie_id) ?? {
-      watched: false,
-      watchlist: false,
-    };
-    if (r.status === "watched") cur.watched = true;
-    else cur.watchlist = true;
-    statusByMovie.set(r.movie_id, cur);
-  }
-
-  let q = supabase
-    .from("movies")
+): Promise<MatchPoolEntry | null> {
+  const { data } = await supabase
+    .from("match_pool")
     .select(
-      "id, tmdb_id, title, original_title, release_date, poster_path, vote_average, vote_count, popularity, original_language",
+      "user_id, type_code, axis_1_pct, axis_2_pct, axis_3_pct, axis_4_pct, watched_count, joined_at, refreshed_at",
     )
-    .in("id", ids)
-    .order("popularity", { ascending: false, nullsFirst: false })
-    .limit(200);
-
-  if (query && query.trim().length >= 1) {
-    const term = query.trim().replace(/[%_]/g, "");
-    q = q.ilike("title", `%${term}%`);
-  }
-
-  const { data: movies } = await q;
-  return ((movies ?? []) as Partial<MovieRow>[]).map((m) => ({
-    ...m,
-    watched: statusByMovie.get(m.id as number)?.watched ?? false,
-    in_watchlist: statusByMovie.get(m.id as number)?.watchlist ?? false,
-  })) as MovieRow[];
+    .eq("user_id", viewerId)
+    .maybeSingle();
+  return (data as MatchPoolEntry) ?? null;
 }
 
 // ---------------------------------------------------------------------------
-// matches (list + detail)
+// request quota — used / remaining for the rolling 7-day window.
+// ---------------------------------------------------------------------------
+
+export async function getRequestQuota(
+  supabase: Supabase,
+  viewerId: string,
+): Promise<RequestQuota> {
+  const sinceMs = Date.now() - FALLBACK_WAIT_DAYS * 24 * 60 * 60 * 1000;
+  const since = new Date(sinceMs).toISOString();
+
+  const { data } = await supabase
+    .from("match_requests")
+    .select("id, user_id, requested_at, status, match_id, resolved_at")
+    .eq("user_id", viewerId)
+    .gte("requested_at", since)
+    .order("requested_at", { ascending: true });
+
+  const rows = (data ?? []) as MatchRequest[];
+  const used = rows.length;
+  const oldest = rows[0];
+  const nextSlotAt = oldest
+    ? new Date(
+        new Date(oldest.requested_at).getTime() +
+          FALLBACK_WAIT_DAYS * 24 * 60 * 60 * 1000,
+      ).toISOString()
+    : null;
+
+  return {
+    used,
+    remaining: Math.max(0, WEEKLY_REQUEST_LIMIT - used),
+    nextSlotAt,
+    pending: rows.filter((r) => r.status === "pending"),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// matches list + detail
 // ---------------------------------------------------------------------------
 
 async function attachPartners(
@@ -231,20 +141,24 @@ async function attachPartners(
     .select("id, username, display_name, avatar_url")
     .in("id", partnerIds);
 
-  const { data: results } = await supabase
-    .from("cp_results")
-    .select("user_id, type_code, created_at")
-    .in("user_id", partnerIds)
-    .order("created_at", { ascending: false });
-  const latestTypeByUser = new Map<string, string>();
-  for (const r of (results ?? []) as {
+  // Pull each partner's type from the pool snapshot first (cheap, current),
+  // fall back to the breakdown_json embedded on the match row otherwise.
+  const { data: poolRows } = await supabase
+    .from("match_pool")
+    .select("user_id, type_code")
+    .in("user_id", partnerIds);
+  const typeByUser = new Map<string, string>();
+  for (const r of (poolRows ?? []) as {
     user_id: string;
     type_code: string;
-    created_at: string;
   }[]) {
-    if (!latestTypeByUser.has(r.user_id)) {
-      latestTypeByUser.set(r.user_id, r.type_code);
-    }
+    typeByUser.set(r.user_id, r.type_code);
+  }
+  // Fallback: extract from breakdown_json on the match rows themselves.
+  for (const row of rows) {
+    const bd = row.breakdown_json;
+    if (!typeByUser.has(bd.a.user_id)) typeByUser.set(bd.a.user_id, bd.a.type_code);
+    if (!typeByUser.has(bd.b.user_id)) typeByUser.set(bd.b.user_id, bd.b.type_code);
   }
 
   const map = new Map<string, MatchPartner>();
@@ -254,7 +168,7 @@ async function attachPartners(
       username: row.username,
       display_name: row.display_name,
       avatar_url: row.avatar_url,
-      type_code: latestTypeByUser.get(row.id) ?? null,
+      type_code: typeByUser.get(row.id) ?? null,
     });
   }
   return map;
@@ -309,39 +223,22 @@ async function attachUnread(
   return result;
 }
 
-export type ListMatchesParams = {
-  scope: "current" | "past";
-  limit?: number;
-};
+const MATCH_SELECT =
+  "id, user_a, user_b, similarity_pct, axes_pct, watched_pct, breakdown_json, is_fallback, hidden_at, created_at";
 
 export async function listMatches(
   supabase: Supabase,
   viewerId: string,
-  params: ListMatchesParams,
+  limit = 50,
 ): Promise<MatchListItem[]> {
-  const limit = params.limit ?? 25;
-
-  let q = supabase
+  const { data, error } = await supabase
     .from("matches")
-    .select(
-      "id, pool_id, user_a, user_b, similarity_pct, axes_pct, picks_pct, watched_pct, breakdown_json, hidden_at, created_at",
-    )
+    .select(MATCH_SELECT)
     .or(`user_a.eq.${viewerId},user_b.eq.${viewerId}`)
     .is("hidden_at", null)
     .order("similarity_pct", { ascending: false })
     .order("created_at", { ascending: false })
     .limit(limit);
-
-  if (params.scope === "current") {
-    const pool = await getCurrentPool(supabase);
-    if (!pool) return [];
-    q = q.eq("pool_id", pool.id);
-  } else {
-    const pool = await getCurrentPool(supabase);
-    if (pool) q = q.neq("pool_id", pool.id);
-  }
-
-  const { data, error } = await q;
   if (error) {
     console.error("listMatches failed:", error.message);
     return [];
@@ -371,18 +268,13 @@ export async function listMatches(
       avatar_url: null,
       type_code: null,
     };
-    const c = consents.get(r.id) ?? {
-      both: false,
-      partner: false,
-      viewer: false,
-    };
+    const c = consents.get(r.id) ?? { both: false, partner: false, viewer: false };
     return {
       id: r.id,
-      pool_id: r.pool_id,
       similarity_pct: r.similarity_pct,
       axes_pct: r.axes_pct,
-      picks_pct: r.picks_pct,
       watched_pct: r.watched_pct,
+      is_fallback: r.is_fallback,
       hidden_at: r.hidden_at,
       created_at: r.created_at,
       partner,
@@ -401,17 +293,12 @@ export async function getMatchDetail(
 ): Promise<MatchDetail | null> {
   const { data, error } = await supabase
     .from("matches")
-    .select(
-      "id, pool_id, user_a, user_b, similarity_pct, axes_pct, picks_pct, watched_pct, breakdown_json, hidden_at, created_at",
-    )
+    .select(MATCH_SELECT)
     .eq("id", matchId)
     .maybeSingle();
   if (error || !data) return null;
   const row = data as MatchRow;
   if (row.user_a !== viewerId && row.user_b !== viewerId) return null;
-
-  const pool = await getPool(supabase, row.pool_id);
-  if (!pool) return null;
 
   const [partners, consents, unread] = await Promise.all([
     attachPartners(supabase, [row], viewerId),
@@ -427,87 +314,74 @@ export async function getMatchDetail(
     avatar_url: null,
     type_code: null,
   };
-  const c = consents.get(row.id) ?? {
-    both: false,
-    partner: false,
-    viewer: false,
-  };
+  const c = consents.get(row.id) ?? { both: false, partner: false, viewer: false };
 
-  // Re-orient breakdown to viewer's perspective: stored breakdown is in
-  // user_a/user_b order. Compute job emits it that way.
-  const breakdown = row.breakdown_json as MatchBreakdown;
-  const reoriented = row.user_a === viewerId
-    ? breakdown
-    : flipBreakdown(breakdown);
+  const breakdown = buildBreakdown(row.breakdown_json, viewerId);
 
   return {
     id: row.id,
-    pool_id: row.pool_id,
     similarity_pct: row.similarity_pct,
     axes_pct: row.axes_pct,
-    picks_pct: row.picks_pct,
     watched_pct: row.watched_pct,
+    is_fallback: row.is_fallback,
     hidden_at: row.hidden_at,
     created_at: row.created_at,
-    pool,
-    breakdown: reoriented,
     partner,
     both_consented: c.both,
     partner_consented: c.partner,
     viewer_consented: c.viewer,
     unread_count: unread.get(row.id) ?? 0,
+    breakdown,
     is_user_a: row.user_a === viewerId,
   };
 }
 
-function flipBreakdown(b: MatchBreakdown): MatchBreakdown {
-  const flipAxis = (a: MatchBreakdown["axes"]["axis_1"]) => ({
-    self_pct: a.other_pct,
-    other_pct: a.self_pct,
-    delta: a.delta,
-    label_self: a.label_other,
-    label_other: a.label_self,
-  });
+// ---------------------------------------------------------------------------
+// breakdown — turn the stored JSON snapshot into the UI's perspective view.
+// ---------------------------------------------------------------------------
+
+function buildBreakdown(
+  raw: BreakdownJson,
+  viewerId: string,
+): MatchBreakdown {
+  const isViewerA = raw.a.user_id === viewerId;
+  const selfAxes = isViewerA ? raw.a.axes : raw.b.axes;
+  const otherAxes = isViewerA ? raw.b.axes : raw.a.axes;
+
+  const sharedCount = raw.watched_shared_count ?? 0;
+
   return {
     axes: {
-      axis_1: flipAxis(b.axes.axis_1),
-      axis_2: flipAxis(b.axes.axis_2),
-      axis_3: flipAxis(b.axes.axis_3),
-      axis_4: flipAxis(b.axes.axis_4),
+      axis_1: makeAxisBreakdown(0, selfAxes, otherAxes),
+      axis_2: makeAxisBreakdown(1, selfAxes, otherAxes),
+      axis_3: makeAxisBreakdown(2, selfAxes, otherAxes),
+      axis_4: makeAxisBreakdown(3, selfAxes, otherAxes),
     },
-    picks: {
-      self: b.picks.other,
-      other: b.picks.self,
-      shared: b.picks.shared,
-      shared_count: b.picks.shared_count,
-      union_count: b.picks.union_count,
-      jaccard_pct: b.picks.jaccard_pct,
-    },
-    watched: b.watched,
+    watched: { shared_count: sharedCount },
   };
 }
 
-// ---------------------------------------------------------------------------
-// movies by tmdb_id (used in detail page poster lookup)
-// ---------------------------------------------------------------------------
-
-export async function getMoviesByTmdbIds(
-  supabase: Supabase,
-  tmdbIds: number[],
-): Promise<MovieRow[]> {
-  if (tmdbIds.length === 0) return [];
-  const { data } = await supabase
-    .from("movies")
-    .select(
-      "id, tmdb_id, title, original_title, release_date, poster_path, vote_average, vote_count, popularity, original_language",
-    )
-    .in("tmdb_id", tmdbIds);
-  return ((data ?? []) as Partial<MovieRow>[]).map((m) => ({
-    ...m,
-    watched: false,
-    in_watchlist: false,
-  })) as MovieRow[];
+function makeAxisBreakdown(
+  idx: number,
+  self: readonly number[],
+  other: readonly number[],
+): AxisBreakdown {
+  const axis = cinepersonaAxes[idx];
+  const selfPct = self[idx] ?? 50;
+  const otherPct = other[idx] ?? 50;
+  return {
+    self_pct: selfPct,
+    other_pct: otherPct,
+    delta: Math.abs(selfPct - otherPct),
+    label_self:
+      selfPct >= 50 ? axis?.primary.name ?? "" : axis?.opposite.name ?? "",
+    label_other:
+      otherPct >= 50 ? axis?.primary.name ?? "" : axis?.opposite.name ?? "",
+  };
 }
+
+// Expose axes scoring helper for previews (admin / debug UIs).
+export { axesScore };
 
 // ---------------------------------------------------------------------------
 // messages

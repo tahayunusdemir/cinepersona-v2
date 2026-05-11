@@ -38,7 +38,7 @@ async function _getProfileByUsername(
   const { data: profileRow, error: profileError } = await supabase
     .from("profiles")
     .select(
-      "id, username, display_name, bio, link, avatar_url, is_admin, deactivated_at, banner:movies!profiles_banner_movie_id_fkey(title, poster_path)",
+      "id, username, display_name, bio, link, avatar_url, is_admin, deactivated_at, banner_movie_id",
     )
     .eq("username", username)
     .maybeSingle<{
@@ -50,21 +50,25 @@ async function _getProfileByUsername(
       avatar_url: string | null;
       is_admin: boolean;
       deactivated_at: string | null;
-      banner:
-        | { title: string; poster_path: string | null }
-        | { title: string; poster_path: string | null }[]
-        | null;
+      banner_movie_id: number | null;
     }>();
 
   if (profileError || !profileRow) return { kind: "not_found" };
 
-  const bannerRow = Array.isArray(profileRow.banner)
-    ? (profileRow.banner[0] ?? null)
-    : profileRow.banner;
-  const banner: ProfileBanner | null =
-    bannerRow && bannerRow.poster_path
-      ? { posterPath: bannerRow.poster_path, title: bannerRow.title }
-      : null;
+  // Two-step fetch instead of PostgREST embed so we don't depend on the FK
+  // constraint name resolving correctly (and the profile page keeps
+  // rendering even if the join would otherwise fail).
+  let banner: ProfileBanner | null = null;
+  if (profileRow.banner_movie_id) {
+    const { data: movie } = await supabase
+      .from("movies")
+      .select("title, poster_path")
+      .eq("id", profileRow.banner_movie_id)
+      .maybeSingle<{ title: string; poster_path: string | null }>();
+    if (movie?.poster_path) {
+      banner = { posterPath: movie.poster_path, title: movie.title };
+    }
+  }
 
   const { data: userData } = await supabase.auth.getUser();
   const viewerId = userData.user?.id ?? null;
@@ -111,6 +115,7 @@ async function _getProfileByUsername(
       username: profileRow.username,
       displayName: profileRow.display_name,
       bio: profileRow.bio,
+      link: profileRow.link,
       avatarUrl: profileRow.avatar_url,
       isAdmin: profileRow.is_admin,
       followersCount: Number(stats?.followers_count ?? 0),

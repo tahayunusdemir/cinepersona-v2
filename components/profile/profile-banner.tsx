@@ -7,50 +7,49 @@ type Props = {
 };
 
 /**
- * Soft poster background that sits behind the profile header.
+ * Hero poster band that sits above the profile header.
  *
- * The poster fades to transparent toward the sides and bottom (and is
- * lightly blurred) so the foreground header card stays readable — the
- * intent is "hint of the film," not a billboard.
+ * The poster occupies the top of the page and dissolves toward the sides
+ * and bottom so the page background takes back over. The header card is
+ * pulled up into the lower edge of the fade by the parent layout's
+ * negative margin.
  */
 export function ProfileBanner({ banner }: Props) {
   if (!banner || !banner.posterPath) return null;
 
-  // Two-axis mask: fade out at the sides AND down the page. We intersect
-  // the two gradients so the visible region is a soft horizontal band that
-  // also dissolves toward the bottom.
+  // Vertical fade (mostly visible up top, vanishing by the bottom) combined
+  // with a side fade (visible in the middle, vanishing at the edges).
+  // Two stacked linear gradients with `mask-composite: intersect` give a
+  // soft halo without the radial gradient hiding most of the poster.
+  const verticalFade =
+    "linear-gradient(to bottom, black 0%, black 55%, transparent 100%)";
   const sideFade =
-    "linear-gradient(to right, transparent 0%, black 18%, black 82%, transparent 100%)";
-  const bottomFade =
-    "linear-gradient(to bottom, black 0%, black 35%, transparent 100%)";
+    "linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)";
 
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute inset-x-0 -top-12 -z-10 h-[420px] overflow-hidden sm:h-[480px]"
+      className="relative h-80 w-full overflow-hidden sm:h-[28rem]"
     >
-      <div
-        className="relative h-full w-full"
+      <Image
+        src={`https://image.tmdb.org/t/p/w1280${banner.posterPath}`}
+        alt=""
+        fill
+        priority
+        sizes="(max-width: 768px) 100vw, 768px"
+        className="object-cover object-top"
         style={{
-          WebkitMaskImage: `${bottomFade}, ${sideFade}`,
-          maskImage: `${bottomFade}, ${sideFade}`,
-          WebkitMaskComposite: "source-in",
+          maskImage: `${verticalFade}, ${sideFade}`,
+          WebkitMaskImage: `${verticalFade}, ${sideFade}`,
+          maskRepeat: "no-repeat, no-repeat",
+          WebkitMaskRepeat: "no-repeat, no-repeat",
+          maskSize: "100% 100%, 100% 100%",
+          WebkitMaskSize: "100% 100%, 100% 100%",
           maskComposite: "intersect",
-          WebkitMaskRepeat: "no-repeat",
-          maskRepeat: "no-repeat",
-          WebkitMaskSize: "100% 100%",
-          maskSize: "100% 100%",
+          WebkitMaskComposite: "source-in",
+          filter: "blur(1px)",
         }}
-      >
-        <Image
-          src={`https://image.tmdb.org/t/p/w1280${banner.posterPath}`}
-          alt=""
-          fill
-          priority
-          sizes="(max-width: 768px) 100vw, 768px"
-          className="scale-110 object-cover object-top opacity-55 blur-xl saturate-110 dark:opacity-45"
-        />
-      </div>
+      />
     </div>
   );
 }

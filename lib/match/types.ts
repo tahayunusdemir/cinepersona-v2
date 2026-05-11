@@ -1,34 +1,9 @@
 // CineMatch — domain types.
-// See docs/specs/cinematch.md for the full feature spec.
-
-export type MatchPoolStatus = "open" | "locked" | "computing" | "closed";
-
-export type MatchPool = {
-  id: number;
-  period_start: string; // ISO date "YYYY-MM-DD"
-  period_end: string;
-  status: MatchPoolStatus;
-  created_at: string;
-};
-
-export type MatchPoolEntry = {
-  pool_id: number;
-  user_id: string;
-  type_code: string;
-  axis_1_pct: number;
-  axis_2_pct: number;
-  axis_3_pct: number;
-  axis_4_pct: number;
-  joined_at: string;
-  locked_at: string | null;
-};
-
-export type MatchPoolPick = {
-  pool_id: number;
-  user_id: string;
-  movie_id: number;
-  sort_order: number;
-};
+//
+// v2 model: anytime pool + weekly "find a new match" requests (max 3 / 7d).
+// Scoring: 70% personality axes + 30% watched-films overlap.
+// Matches land at ≥90% similarity, or after 7 days the closest candidate
+// becomes a fallback match (is_fallback=true).
 
 export type AxisBreakdown = {
   self_pct: number;
@@ -45,32 +20,27 @@ export type MatchBreakdown = {
     axis_3: AxisBreakdown;
     axis_4: AxisBreakdown;
   };
-  picks: {
-    self: number[]; // tmdb_ids
-    other: number[];
-    shared: number[];
-    shared_count: number;
-    union_count: number;
-    jaccard_pct: number;
-  };
   watched: {
     shared_count: number;
-    union_count: number;
-    jaccard_pct: number;
-    top_shared_tmdb_ids: number[];
   };
+};
+
+// Wire shape the matcher writes to matches.breakdown_json.
+export type BreakdownJson = {
+  a: { user_id: string; type_code: string; axes: [number, number, number, number] };
+  b: { user_id: string; type_code: string; axes: [number, number, number, number] };
+  watched_shared_count: number;
 };
 
 export type MatchRow = {
   id: string;
-  pool_id: number;
   user_a: string;
   user_b: string;
   similarity_pct: number;
   axes_pct: number;
-  picks_pct: number;
   watched_pct: number;
-  breakdown_json: MatchBreakdown;
+  breakdown_json: BreakdownJson;
+  is_fallback: boolean;
   hidden_at: string | null;
   created_at: string;
 };
@@ -85,11 +55,10 @@ export type MatchPartner = {
 
 export type MatchListItem = {
   id: string;
-  pool_id: number;
   similarity_pct: number;
   axes_pct: number;
-  picks_pct: number;
   watched_pct: number;
+  is_fallback: boolean;
   hidden_at: string | null;
   created_at: string;
   partner: MatchPartner;
@@ -100,7 +69,6 @@ export type MatchListItem = {
 };
 
 export type MatchDetail = MatchListItem & {
-  pool: MatchPool;
   breakdown: MatchBreakdown;
   is_user_a: boolean;
 };
@@ -114,18 +82,44 @@ export type MatchMessage = {
   read_at: string | null;
 };
 
+export type MatchPoolEntry = {
+  user_id: string;
+  type_code: string;
+  axis_1_pct: number;
+  axis_2_pct: number;
+  axis_3_pct: number;
+  axis_4_pct: number;
+  watched_count: number;
+  joined_at: string;
+  refreshed_at: string;
+};
+
+export type MatchRequest = {
+  id: string;
+  user_id: string;
+  requested_at: string;
+  status: "pending" | "fulfilled" | "cancelled";
+  match_id: string | null;
+  resolved_at: string | null;
+};
+
+export type RequestQuota = {
+  used: number;            // 0..3
+  remaining: number;       // 3 - used
+  nextSlotAt: string | null; // when the oldest non-expired request rolls off
+  pending: MatchRequest[];
+};
+
 export type EligibilityState =
-  | { ok: true; pool: MatchPool; alreadyJoined: boolean }
-  | { ok: false; reason: "no_test"; pool: MatchPool | null }
-  | { ok: false; reason: "watched_too_few"; watchedCount: number; pool: MatchPool | null }
-  | { ok: false; reason: "pool_locked"; pool: MatchPool }
-  | { ok: false; reason: "no_pool" };
+  | { ok: true; alreadyJoined: boolean; watchedCount: number }
+  | { ok: false; reason: "no_test"; watchedCount: number }
+  | { ok: false; reason: "watched_too_few"; watchedCount: number };
 
 export const MATCH_THRESHOLD = 90;
-export const PICKS_MIN = 5;
-export const PICKS_MAX = 10;
-export const WATCHED_MIN = 10;
-export const WATCHED_RECENT_CAP = 200;
-export const TOP_SHARED_MAX = 8;
+export const WATCHED_MIN = 20;
+export const WEEKLY_REQUEST_LIMIT = 3;
+export const FALLBACK_WAIT_DAYS = 7;
+export const AXES_WEIGHT = 0.7;
+export const WATCHED_WEIGHT = 0.3;
 export const MESSAGE_MAX_LEN = 2000;
 export const MESSAGE_RATE_PER_MIN = 30;

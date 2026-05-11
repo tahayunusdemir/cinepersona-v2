@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRightIcon, MessageCircleIcon } from "lucide-react";
+import { ChevronRightIcon, MessageCircleIcon, SparklesIcon } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -32,11 +32,21 @@ export function MatchListRow({ item }: Props) {
       </Avatar>
 
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="truncate text-sm font-medium">{display}</span>
           {partner.type_code ? (
             <Badge variant="secondary" className="font-mono text-[10px]">
               {partner.type_code}
+            </Badge>
+          ) : null}
+          {item.is_fallback ? (
+            <Badge
+              variant="outline"
+              className="gap-1 px-1.5 text-[10px]"
+              aria-label="Fallback match"
+            >
+              <SparklesIcon className="size-3" />
+              closest
             </Badge>
           ) : null}
           {partnerHinted ? (

@@ -2,40 +2,48 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
-  CalendarIcon,
   FilmIcon,
   HeartIcon,
   MessagesSquareIcon,
+  SparklesIcon,
 } from "lucide-react";
 
+import { JoinPoolButton } from "@/components/cinematch/join-pool-button";
+import { PoolStatusCard } from "@/components/cinematch/pool-status-card";
+import { RequestMatchButton } from "@/components/cinematch/request-match-button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  daysUntilPoolClose,
   getEligibility,
+  getPoolEntry,
+  getRequestQuota,
   getViewerId,
-  poolWindowLabel,
 } from "@/lib/match/queries";
+import { WATCHED_MIN, WEEKLY_REQUEST_LIMIT } from "@/lib/match/types";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "CineMatch",
   description:
-    "Find people whose taste, personality and watching history line up with yours each month.",
+    "Find people whose personality and watch history line up with yours. Three match requests per week.",
 };
 
 export default async function CineMatchIntroPage() {
   const supabase = await createClient();
   const viewerId = await getViewerId(supabase);
-  if (!viewerId) {
-    redirect("/login?next=/cine-match");
-  }
+  if (!viewerId) redirect("/login?next=/cine-match");
 
   const eligibility = await getEligibility(supabase, viewerId);
-  const pool = "pool" in eligibility ? eligibility.pool : null;
+  const quota = eligibility.ok
+    ? await getRequestQuota(supabase, viewerId)
+    : null;
+  const poolEntry =
+    eligibility.ok && eligibility.alreadyJoined
+      ? await getPoolEntry(supabase, viewerId)
+      : null;
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 pb-24 pt-12 sm:px-6">
@@ -44,37 +52,51 @@ export default async function CineMatchIntroPage() {
           CineMatch
         </Badge>
         <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
-          A monthly match — based on how you actually watch.
+          Find people whose taste lines up with yours.
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-balance text-muted-foreground">
-          Once a month, we cross-check everyone in the pool on three fronts:
-          your CinePersona axes, the films you picked to represent you, and
-          your watch history. Matches above 90% land in your inbox.
+          We match on your CinePersona axes and the films you&apos;ve actually
+          watched. Each match lands at 90%+ similarity. You get{" "}
+          {WEEKLY_REQUEST_LIMIT} requests per rolling week.
         </p>
       </header>
 
       <section className="mt-10 grid gap-3 sm:grid-cols-3">
         <FactCard icon={HeartIcon} label="4 personality axes" />
-        <FactCard icon={FilmIcon} label="5–10 films you pick" />
-        <FactCard icon={CalendarIcon} label="watch history overlap" />
+        <FactCard icon={FilmIcon} label={`${WATCHED_MIN}+ watched films`} />
+        <FactCard icon={SparklesIcon} label="90%+ similarity" />
       </section>
 
       <section className="mt-10">
-        <PoolStatus eligibility={eligibility} />
+        {eligibility.ok ? (
+          <PoolStatusCard entry={poolEntry} />
+        ) : (
+          <StatusBlock eligibility={eligibility} />
+        )}
       </section>
 
       <section className="mt-8 grid gap-3 sm:grid-cols-2">
-        <Link
-          href="/cine-match/join"
-          className={cn(
-            buttonVariants({ variant: "default", size: "lg" }),
-            "w-full",
-          )}
-        >
-          {eligibility.ok && eligibility.alreadyJoined
-            ? "Edit my picks"
-            : "Join this month's pool"}
-        </Link>
+        {eligibility.ok ? (
+          eligibility.alreadyJoined ? (
+            <RequestMatchButton
+              remaining={quota?.remaining ?? WEEKLY_REQUEST_LIMIT}
+              nextSlotAt={quota?.nextSlotAt ?? null}
+              pendingCount={quota?.pending.length ?? 0}
+            />
+          ) : (
+            <JoinPoolButton />
+          )
+        ) : (
+          <span
+            className={cn(
+              buttonVariants({ variant: "secondary", size: "lg" }),
+              "w-full cursor-not-allowed opacity-50",
+            )}
+            aria-disabled
+          >
+            Join the pool
+          </span>
+        )}
         <Link
           href="/cine-match/matches"
           className={cn(
@@ -87,10 +109,12 @@ export default async function CineMatchIntroPage() {
         </Link>
       </section>
 
-      {pool ? (
+      {eligibility.ok && quota ? (
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          {poolWindowLabel(pool)} pool · closes in {daysUntilPoolClose(pool)}{" "}
-          day{daysUntilPoolClose(pool) === 1 ? "" : "s"}
+          {quota.used} of {WEEKLY_REQUEST_LIMIT} requests used this week
+          {quota.pending.length > 0
+            ? ` · ${quota.pending.length} pending`
+            : ""}
         </p>
       ) : null}
     </div>
@@ -114,40 +138,18 @@ function FactCard({
   );
 }
 
-function PoolStatus({
-  eligibility,
-}: {
-  eligibility: Awaited<ReturnType<typeof getEligibility>>;
-}) {
-  if (eligibility.ok) {
-    if (eligibility.alreadyJoined) {
-      return (
-        <Alert>
-          <AlertTitle>You&apos;re in.</AlertTitle>
-          <AlertDescription>
-            You&apos;re already part of the {poolWindowLabel(eligibility.pool)}{" "}
-            pool. Results land when the month closes.
-          </AlertDescription>
-        </Alert>
-      );
-    }
-    return (
-      <Alert>
-        <AlertTitle>Pool is open.</AlertTitle>
-        <AlertDescription>
-          {poolWindowLabel(eligibility.pool)} pool — pick 5 to 10 films and
-          you&apos;re in.
-        </AlertDescription>
-      </Alert>
-    );
-  }
+type IneligibleState = Extract<
+  Awaited<ReturnType<typeof getEligibility>>,
+  { ok: false }
+>;
 
+function StatusBlock({ eligibility }: { eligibility: IneligibleState }) {
   if (eligibility.reason === "no_test") {
     return (
       <Alert variant="destructive">
         <AlertTitle>Take the CineTest first.</AlertTitle>
         <AlertDescription>
-          We need your personality axes to match you.{" "}
+          The match depends on your personality axes.{" "}
           <Link className="underline" href="/cinetest">
             Start the test
           </Link>
@@ -156,35 +158,16 @@ function PoolStatus({
       </Alert>
     );
   }
-  if (eligibility.reason === "watched_too_few") {
-    return (
-      <Alert variant="destructive">
-        <AlertTitle>Mark at least 10 watched films.</AlertTitle>
-        <AlertDescription>
-          You have {eligibility.watchedCount}.{" "}
-          <Link className="underline" href="/films">
-            Browse and mark some
-          </Link>
-          .
-        </AlertDescription>
-      </Alert>
-    );
-  }
-  if (eligibility.reason === "pool_locked") {
-    return (
-      <Alert>
-        <AlertTitle>This month&apos;s pool is locked.</AlertTitle>
-        <AlertDescription>
-          We&apos;re computing matches now. Check back soon.
-        </AlertDescription>
-      </Alert>
-    );
-  }
   return (
-    <Alert>
-      <AlertTitle>No active pool.</AlertTitle>
+    <Alert variant="destructive">
+      <AlertTitle>Mark {WATCHED_MIN} watched films.</AlertTitle>
       <AlertDescription>
-        The next monthly pool opens on the 1st.
+        You have {eligibility.watchedCount}. We need at least {WATCHED_MIN}{" "}
+        watched films to measure overlap.{" "}
+        <Link className="underline" href="/films">
+          Browse films
+        </Link>
+        .
       </AlertDescription>
     </Alert>
   );

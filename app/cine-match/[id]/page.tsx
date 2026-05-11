@@ -1,23 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeftIcon, MessageSquareIcon, UserIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  MessageSquareIcon,
+  SparklesIcon,
+  UserIcon,
+} from "lucide-react";
 
 import { ConsentButton } from "@/components/cinematch/consent-button";
 import { HideMatchButton } from "@/components/cinematch/hide-button";
 import { MatchAxisRow } from "@/components/cinematch/match-axis-row";
-import { PicksCard } from "@/components/cinematch/picks-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { axes as cinepersonaAxes } from "@/lib/cinepersona";
 import {
-  getMatchDetail,
-  getMoviesByTmdbIds,
-  getViewerId,
-  poolWindowLabel,
-} from "@/lib/match/queries";
+  AXES_WEIGHT,
+  WATCHED_WEIGHT,
+} from "@/lib/match/types";
+import { getMatchDetail, getViewerId } from "@/lib/match/queries";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
@@ -46,32 +49,8 @@ export default async function CineMatchDetailPage({
   const ownGranted = detail.viewer_consented;
 
   const breakdown = detail.breakdown;
-
-  const allTmdbIds = Array.from(
-    new Set([
-      ...breakdown.picks.self,
-      ...breakdown.picks.other,
-      ...breakdown.picks.shared,
-      ...breakdown.watched.top_shared_tmdb_ids,
-    ]),
-  );
-  const movies = await getMoviesByTmdbIds(supabase, allTmdbIds);
-  const byTmdb = new Map(movies.map((m) => [m.tmdb_id, m]));
-  const sharedSet = new Set(breakdown.picks.shared);
-  const selfOnly = breakdown.picks.self
-    .filter((id) => !sharedSet.has(id))
-    .map((id) => byTmdb.get(id))
-    .filter((m): m is NonNullable<typeof m> => Boolean(m));
-  const otherOnly = breakdown.picks.other
-    .filter((id) => !sharedSet.has(id))
-    .map((id) => byTmdb.get(id))
-    .filter((m): m is NonNullable<typeof m> => Boolean(m));
-  const shared = breakdown.picks.shared
-    .map((id) => byTmdb.get(id))
-    .filter((m): m is NonNullable<typeof m> => Boolean(m));
-  const sharedWatched = breakdown.watched.top_shared_tmdb_ids
-    .map((id) => byTmdb.get(id))
-    .filter((m): m is NonNullable<typeof m> => Boolean(m));
+  const axesWeightPct = Math.round(AXES_WEIGHT * 100);
+  const watchedWeightPct = Math.round(WATCHED_WEIGHT * 100);
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 pb-24 pt-8 sm:px-6">
@@ -89,16 +68,33 @@ export default async function CineMatchDetailPage({
         </Avatar>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{display}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              {display}
+            </h1>
             <span className="text-sm text-muted-foreground">@{username}</span>
             {partner.type_code ? (
               <Badge variant="secondary" className="font-mono text-[10px]">
                 {partner.type_code}
               </Badge>
             ) : null}
+            {detail.is_fallback ? (
+              <Badge
+                variant="outline"
+                className="gap-1 px-1.5 text-[10px]"
+                aria-label="Fallback match"
+              >
+                <SparklesIcon className="size-3" />
+                closest available
+              </Badge>
+            ) : null}
           </div>
           <p className="text-xs text-muted-foreground">
-            {poolWindowLabel(detail.pool)} pool
+            Matched{" "}
+            {new Date(detail.created_at).toLocaleDateString(undefined, {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}
           </p>
         </div>
         <div className="text-right">
@@ -125,10 +121,7 @@ export default async function CineMatchDetailPage({
             <MessageSquareIcon className="size-4" />
             Open chat
             {detail.unread_count > 0 ? (
-              <Badge
-                variant="default"
-                className="ml-1 px-1.5 text-[10px]"
-              >
+              <Badge variant="default" className="ml-1 px-1.5 text-[10px]">
                 {detail.unread_count}
               </Badge>
             ) : null}
@@ -152,7 +145,7 @@ export default async function CineMatchDetailPage({
             <CardTitle className="flex items-baseline justify-between">
               <span>Personality axes</span>
               <span className="text-xs font-normal text-muted-foreground">
-                40% · {detail.axes_pct}%
+                {axesWeightPct}% · {detail.axes_pct}%
               </span>
             </CardTitle>
           </CardHeader>
@@ -162,11 +155,11 @@ export default async function CineMatchDetailPage({
               data={breakdown.axes.axis_1}
             />
             <MatchAxisRow
-              axisName={cinepersonaAxes[1]?.name ?? "Reading"}
+              axisName={cinepersonaAxes[1]?.name ?? "Meaning"}
               data={breakdown.axes.axis_2}
             />
             <MatchAxisRow
-              axisName={cinepersonaAxes[2]?.name ?? "Engagement"}
+              axisName={cinepersonaAxes[2]?.name ?? "Evaluation"}
               data={breakdown.axes.axis_3}
             />
             <MatchAxisRow
@@ -176,58 +169,20 @@ export default async function CineMatchDetailPage({
           </CardContent>
         </Card>
 
-        <PicksCard
-          title="Picked films"
-          weightLabel={`30% · ${detail.picks_pct}%`}
-          description={`${breakdown.picks.shared_count} shared of ${breakdown.picks.union_count} total · Jaccard ${breakdown.picks.jaccard_pct}%`}
-          groups={[
-            { label: "Shared", movies: shared },
-            { label: "Only you", movies: selfOnly },
-            { label: "Only them", movies: otherOnly },
-          ]}
-        />
-
         <Card>
           <CardHeader>
             <CardTitle className="flex items-baseline justify-between">
-              <span>Watch history</span>
+              <span>Watched-films overlap</span>
               <span className="text-xs font-normal text-muted-foreground">
-                30% · {detail.watched_pct}%
+                {watchedWeightPct}% · {detail.watched_pct}%
               </span>
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              {breakdown.watched.shared_count} shared films · Jaccard{" "}
-              {breakdown.watched.jaccard_pct}%
+              {breakdown.watched.shared_count} shared film
+              {breakdown.watched.shared_count === 1 ? "" : "s"} between your
+              watch histories.
             </p>
           </CardHeader>
-          <CardContent>
-            {sharedWatched.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No overlap to highlight.
-              </p>
-            ) : (
-              <ul className="flex flex-wrap gap-2">
-                {sharedWatched.slice(0, 8).map((m) => (
-                  <li key={m.id} className="w-[88px]">
-                    <span className="block w-[88px] overflow-hidden rounded-md bg-muted ring-1 ring-border/50">
-                      {m.poster_path ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={`https://image.tmdb.org/t/p/w185${m.poster_path}`}
-                          alt={m.title}
-                          className="aspect-[2/3] w-full object-cover"
-                        />
-                      ) : (
-                        <span className="flex aspect-[2/3] w-full items-center justify-center p-2 text-center text-[10px] text-muted-foreground">
-                          {m.title}
-                        </span>
-                      )}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
         </Card>
       </div>
     </div>

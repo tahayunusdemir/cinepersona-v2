@@ -21,9 +21,7 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select(
-      "username, display_name, bio, link, banner_movie_id, banner:movies!profiles_banner_movie_id_fkey(id, tmdb_id, title, release_date, poster_path)",
-    )
+    .select("username, display_name, bio, link, banner_movie_id")
     .eq("id", userData.user.id)
     .maybeSingle<{
       username: string;
@@ -31,7 +29,6 @@ export default async function SettingsPage() {
       bio: string | null;
       link: string | null;
       banner_movie_id: number | null;
-      banner: BannerFilmRow | BannerFilmRow[] | null;
     }>();
 
   if (!profile) {
@@ -40,10 +37,15 @@ export default async function SettingsPage() {
     redirect("/login");
   }
 
-  // PostgREST returns embedded rows as an array even on a single FK; flatten.
-  const bannerFilm: BannerFilmRow | null = Array.isArray(profile.banner)
-    ? (profile.banner[0] ?? null)
-    : profile.banner;
+  let bannerFilm: BannerFilmRow | null = null;
+  if (profile.banner_movie_id) {
+    const { data: movie } = await supabase
+      .from("movies")
+      .select("id, tmdb_id, title, release_date, poster_path")
+      .eq("id", profile.banner_movie_id)
+      .maybeSingle<BannerFilmRow>();
+    bannerFilm = movie ?? null;
+  }
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 pt-12 pb-24 sm:px-6">

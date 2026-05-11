@@ -5,12 +5,11 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient, hasServiceRole } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
-import { picksSchema, messageSchema } from "./schemas";
+import { messageSchema } from "./schemas";
 import {
   MESSAGE_RATE_PER_MIN,
-  PICKS_MAX,
-  PICKS_MIN,
   WATCHED_MIN,
+  WEEKLY_REQUEST_LIMIT,
 } from "./types";
 
 export type ActionResult<T = void> =
@@ -19,14 +18,12 @@ export type ActionResult<T = void> =
 
 export type ActionError =
   | "unauthorized"
-  | "not_eligible"
   | "no_test"
   | "watched_too_few"
-  | "no_pool"
-  | "pool_locked"
-  | "already_joined"
   | "not_joined"
-  | "invalid_picks"
+  | "already_joined"
+  | "weekly_limit"
+  | "no_candidates"
   | "not_party"
   | "no_consent"
   | "rate_limited"
@@ -41,103 +38,15 @@ async function requireUser(supabase: Awaited<ReturnType<typeof createClient>>) {
   return data.user;
 }
 
-function periodBoundsFor(d: Date): { start: string; end: string } {
-  const y = d.getUTCFullYear();
-  const m = d.getUTCMonth();
-  const start = new Date(Date.UTC(y, m, 1));
-  const end = new Date(Date.UTC(y, m + 1, 0));
-  const fmt = (x: Date) => x.toISOString().slice(0, 10);
-  return { start: fmt(start), end: fmt(end) };
-}
-
 // ---------------------------------------------------------------------------
-// 5.7 ensureCurrentPool — lazy creator (cron backup).
+// joinPool — gate on test + ≥20 watched, then snapshot axes.
 // ---------------------------------------------------------------------------
 
-export async function ensureCurrentPool(): Promise<
-  ActionResult<{ pool_id: number }>
-> {
-  const supabase = await createClient();
-  const today = new Date().toISOString().slice(0, 10);
-
-  const { data: existing } = await supabase
-    .from("match_pools")
-    .select("id")
-    .lte("period_start", today)
-    .gte("period_end", today)
-    .order("period_start", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (existing) return { ok: true, pool_id: (existing as { id: number }).id };
-
-  if (!hasServiceRole()) {
-    return { ok: false, error: "unknown", message: "service role missing" };
-  }
-  const admin = createAdminClient();
-  const { start, end } = periodBoundsFor(new Date());
-  const { data, error } = await admin
-    .from("match_pools")
-    .upsert(
-      { period_start: start, period_end: end, status: "open" },
-      { onConflict: "period_start,period_end", ignoreDuplicates: false },
-    )
-    .select("id")
-    .single();
-
-  if (error || !data)
-    return { ok: false, error: "unknown", message: error?.message };
-  return { ok: true, pool_id: (data as { id: number }).id };
-}
-
-// ---------------------------------------------------------------------------
-// 5.1 joinPool
-// ---------------------------------------------------------------------------
-
-export async function joinPool(input: {
-  picks: number[];
-}): Promise<ActionResult<{ entry_id: string }>> {
+export async function joinPool(): Promise<ActionResult> {
   const supabase = await createClient();
   const user = await requireUser(supabase);
   if (!user) return { ok: false, error: "unauthorized" };
 
-  const parsed = picksSchema.safeParse(input.picks);
-  if (!parsed.success) return { ok: false, error: "invalid_picks" };
-  const picks = parsed.data;
-
-  // Watched gate
-  const { count: watchedCount } = await supabase
-    .from("user_movies")
-    .select("movie_id", { count: "exact", head: true })
-    .eq("user_id", user.id)
-    .eq("status", "watched");
-  if ((watchedCount ?? 0) < WATCHED_MIN) {
-    return { ok: false, error: "watched_too_few" };
-  }
-
-  // Active pool (lazy create)
-  const ensured = await ensureCurrentPool();
-  if (!ensured.ok) return ensured;
-  const poolId = ensured.pool_id;
-
-  const { data: poolRow } = await supabase
-    .from("match_pools")
-    .select("status")
-    .eq("id", poolId)
-    .maybeSingle();
-  if (!poolRow || (poolRow as { status: string }).status !== "open") {
-    return { ok: false, error: "pool_locked" };
-  }
-
-  // Already joined?
-  const { data: existing } = await supabase
-    .from("match_pool_entries")
-    .select("user_id")
-    .eq("pool_id", poolId)
-    .eq("user_id", user.id)
-    .maybeSingle();
-  if (existing) return { ok: false, error: "already_joined" };
-
-  // Latest test result (axes snapshot)
   const { data: cp } = await supabase
     .from("cp_results")
     .select("type_code, axis_1_pct, axis_2_pct, axis_3_pct, axis_4_pct")
@@ -154,134 +63,57 @@ export async function joinPool(input: {
     axis_4_pct: number;
   };
 
-  // Validate every pick is one of the user's own library entries (prevents
-  // arbitrary movie_id submission outside of the picker UI).
-  const { data: lib } = await supabase
+  const { count } = await supabase
     .from("user_movies")
-    .select("movie_id")
+    .select("movie_id", { count: "exact", head: true })
     .eq("user_id", user.id)
-    .in("movie_id", picks);
-  const ownIds = new Set(
-    ((lib ?? []) as { movie_id: number }[]).map((r) => r.movie_id),
-  );
-  if (picks.some((id) => !ownIds.has(id))) {
-    return { ok: false, error: "invalid_picks" };
+    .eq("status", "watched");
+  const watchedCount = count ?? 0;
+  if (watchedCount < WATCHED_MIN) {
+    return { ok: false, error: "watched_too_few" };
   }
 
-  // Insert entry then picks. RLS gates both on pool.status='open'.
-  const { error: entryErr } = await supabase
-    .from("match_pool_entries")
-    .insert({
-      pool_id: poolId,
+  const { data: existing } = await supabase
+    .from("match_pool")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (existing) {
+    // Refresh the snapshot (axes may have changed since last join).
+    const { error } = await supabase
+      .from("match_pool")
+      .update({
+        type_code: cpRow.type_code,
+        axis_1_pct: cpRow.axis_1_pct,
+        axis_2_pct: cpRow.axis_2_pct,
+        axis_3_pct: cpRow.axis_3_pct,
+        axis_4_pct: cpRow.axis_4_pct,
+        watched_count: watchedCount,
+        refreshed_at: new Date().toISOString(),
+      })
+      .eq("user_id", user.id);
+    if (error) return { ok: false, error: "unknown", message: error.message };
+  } else {
+    const { error } = await supabase.from("match_pool").insert({
       user_id: user.id,
       type_code: cpRow.type_code,
       axis_1_pct: cpRow.axis_1_pct,
       axis_2_pct: cpRow.axis_2_pct,
       axis_3_pct: cpRow.axis_3_pct,
       axis_4_pct: cpRow.axis_4_pct,
+      watched_count: watchedCount,
     });
-  if (entryErr) {
-    return { ok: false, error: "unknown", message: entryErr.message };
-  }
-
-  const pickRows = picks.map((movie_id, i) => ({
-    pool_id: poolId,
-    user_id: user.id,
-    movie_id,
-    sort_order: i,
-  }));
-  const { error: picksErr } = await supabase
-    .from("match_pool_picks")
-    .insert(pickRows);
-  if (picksErr) {
-    // Best-effort cleanup of the entry row so the user can retry cleanly.
-    await supabase
-      .from("match_pool_entries")
-      .delete()
-      .eq("pool_id", poolId)
-      .eq("user_id", user.id);
-    return { ok: false, error: "unknown", message: picksErr.message };
+    if (error) return { ok: false, error: "unknown", message: error.message };
   }
 
   revalidatePath("/cine-match");
   revalidatePath("/cine-match/matches");
-  return { ok: true, entry_id: `${poolId}:${user.id}` };
-}
-
-// ---------------------------------------------------------------------------
-// 5.2 updatePoolPicks
-// ---------------------------------------------------------------------------
-
-export async function updatePoolPicks(input: {
-  picks: number[];
-}): Promise<ActionResult> {
-  const supabase = await createClient();
-  const user = await requireUser(supabase);
-  if (!user) return { ok: false, error: "unauthorized" };
-
-  const parsed = picksSchema.safeParse(input.picks);
-  if (!parsed.success) return { ok: false, error: "invalid_picks" };
-  const picks = parsed.data;
-
-  const today = new Date().toISOString().slice(0, 10);
-  const { data: pool } = await supabase
-    .from("match_pools")
-    .select("id, status")
-    .lte("period_start", today)
-    .gte("period_end", today)
-    .order("period_start", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (!pool) return { ok: false, error: "no_pool" };
-  const p = pool as { id: number; status: string };
-  if (p.status !== "open") return { ok: false, error: "pool_locked" };
-
-  const { data: entry } = await supabase
-    .from("match_pool_entries")
-    .select("user_id")
-    .eq("pool_id", p.id)
-    .eq("user_id", user.id)
-    .maybeSingle();
-  if (!entry) return { ok: false, error: "not_joined" };
-
-  // Library check
-  const { data: lib } = await supabase
-    .from("user_movies")
-    .select("movie_id")
-    .eq("user_id", user.id)
-    .in("movie_id", picks);
-  const ownIds = new Set(
-    ((lib ?? []) as { movie_id: number }[]).map((r) => r.movie_id),
-  );
-  if (picks.some((id) => !ownIds.has(id))) {
-    return { ok: false, error: "invalid_picks" };
-  }
-
-  // Replace picks: delete then insert (no update path on a composite PK row set).
-  const { error: delErr } = await supabase
-    .from("match_pool_picks")
-    .delete()
-    .eq("pool_id", p.id)
-    .eq("user_id", user.id);
-  if (delErr) return { ok: false, error: "unknown", message: delErr.message };
-
-  const pickRows = picks.map((movie_id, i) => ({
-    pool_id: p.id,
-    user_id: user.id,
-    movie_id,
-    sort_order: i,
-  }));
-  const { error: insErr } = await supabase
-    .from("match_pool_picks")
-    .insert(pickRows);
-  if (insErr) return { ok: false, error: "unknown", message: insErr.message };
-
-  revalidatePath("/cine-match");
   return { ok: true };
 }
 
 // ---------------------------------------------------------------------------
-// 5.3 leavePool
+// leavePool — drop pool membership. Existing matches remain.
 // ---------------------------------------------------------------------------
 
 export async function leavePool(): Promise<ActionResult> {
@@ -289,24 +121,9 @@ export async function leavePool(): Promise<ActionResult> {
   const user = await requireUser(supabase);
   if (!user) return { ok: false, error: "unauthorized" };
 
-  const today = new Date().toISOString().slice(0, 10);
-  const { data: pool } = await supabase
-    .from("match_pools")
-    .select("id, status")
-    .lte("period_start", today)
-    .gte("period_end", today)
-    .order("period_start", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (!pool) return { ok: false, error: "no_pool" };
-  const p = pool as { id: number; status: string };
-  if (p.status !== "open") return { ok: false, error: "pool_locked" };
-
-  // ON DELETE CASCADE on match_pool_picks → entry delete also clears picks.
   const { error } = await supabase
-    .from("match_pool_entries")
+    .from("match_pool")
     .delete()
-    .eq("pool_id", p.id)
     .eq("user_id", user.id);
   if (error) return { ok: false, error: "unknown", message: error.message };
 
@@ -315,7 +132,85 @@ export async function leavePool(): Promise<ActionResult> {
 }
 
 // ---------------------------------------------------------------------------
-// 5.4 hideMatch / unhideMatch
+// requestMatch — user pushed "find me a new match" (max 3 / rolling 7 days).
+//
+// Strategy: insert a row (RLS-enforced cap is the security gate), then call
+// the SECURITY DEFINER matcher synchronously to resolve immediately when
+// possible. If no ≥90 candidate yet, the row stays pending and the hourly
+// cron + fallback-after-7-days logic takes over.
+// ---------------------------------------------------------------------------
+
+export async function requestMatch(): Promise<
+  ActionResult<{ match_id: string | null; request_id: string }>
+> {
+  const supabase = await createClient();
+  const user = await requireUser(supabase);
+  if (!user) return { ok: false, error: "unauthorized" };
+
+  // Must be in the pool to request.
+  const { data: pool } = await supabase
+    .from("match_pool")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (!pool) return { ok: false, error: "not_joined" };
+
+  // Pre-check the weekly cap for a friendlier error message. RLS will
+  // re-enforce server-side if the client tries to bypass.
+  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const { count } = await supabase
+    .from("match_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .gte("requested_at", since);
+  if ((count ?? 0) >= WEEKLY_REQUEST_LIMIT) {
+    return { ok: false, error: "weekly_limit" };
+  }
+
+  const { data: inserted, error: insertErr } = await supabase
+    .from("match_requests")
+    .insert({ user_id: user.id })
+    .select("id")
+    .single();
+  if (insertErr || !inserted) {
+    // Postgres code 23514 = check constraint, 42501 = RLS deny → both mean
+    // the weekly cap was hit (RLS enforces it inline). Anything else is
+    // surfaced verbatim so we don't silently mislabel real failures.
+    const code = insertErr?.code;
+    if (code === "23514" || code === "42501") {
+      return { ok: false, error: "weekly_limit", message: insertErr?.message };
+    }
+    console.error("requestMatch insert failed:", {
+      code,
+      message: insertErr?.message,
+      details: insertErr?.details,
+      hint: insertErr?.hint,
+    });
+    return {
+      ok: false,
+      error: "unknown",
+      message: insertErr?.message ?? "Insert returned no row.",
+    };
+  }
+  const requestId = (inserted as { id: string }).id;
+
+  // Try to resolve immediately via service role (DEFINER fn).
+  let matchId: string | null = null;
+  if (hasServiceRole()) {
+    const admin = createAdminClient();
+    const { data: resolved } = await admin.rpc("resolve_match_request", {
+      req_id: requestId,
+    });
+    matchId = (resolved as string | null) ?? null;
+  }
+
+  revalidatePath("/cine-match");
+  revalidatePath("/cine-match/matches");
+  return { ok: true, request_id: requestId, match_id: matchId };
+}
+
+// ---------------------------------------------------------------------------
+// hideMatch / unhideMatch
 // ---------------------------------------------------------------------------
 
 export async function hideMatch(matchId: string): Promise<ActionResult> {
@@ -352,7 +247,7 @@ export async function unhideMatch(matchId: string): Promise<ActionResult> {
 }
 
 // ---------------------------------------------------------------------------
-// 5.5 setMatchConsent
+// setMatchConsent — mutual gate for chat.
 // ---------------------------------------------------------------------------
 
 export async function setMatchConsent(
@@ -363,7 +258,6 @@ export async function setMatchConsent(
   const user = await requireUser(supabase);
   if (!user) return { ok: false, error: "unauthorized" };
 
-  // Match exists + viewer is a party.
   const { data: match } = await supabase
     .from("matches")
     .select("id, user_a, user_b")
@@ -375,7 +269,6 @@ export async function setMatchConsent(
     return { ok: false, error: "not_party" };
   }
 
-  // Block check: refuse if either side blocks the other.
   const partnerId = m.user_a === user.id ? m.user_b : m.user_a;
   const { data: blocks } = await supabase
     .from("blocks")
@@ -383,9 +276,7 @@ export async function setMatchConsent(
     .or(
       `and(blocker_id.eq.${user.id},blocked_id.eq.${partnerId}),and(blocker_id.eq.${partnerId},blocked_id.eq.${user.id})`,
     );
-  if ((blocks ?? []).length > 0) {
-    return { ok: false, error: "blocked" };
-  }
+  if ((blocks ?? []).length > 0) return { ok: false, error: "blocked" };
 
   if (granted) {
     const { error } = await supabase
@@ -416,7 +307,7 @@ export async function setMatchConsent(
 }
 
 // ---------------------------------------------------------------------------
-// 5.6 sendMatchMessage
+// sendMatchMessage
 // ---------------------------------------------------------------------------
 
 export async function sendMatchMessage(
@@ -431,8 +322,6 @@ export async function sendMatchMessage(
   if (!parsed.success) return { ok: false, error: "too_long" };
   const trimmed = parsed.data;
 
-  // Party + block + consent — DB policies enforce the same; we surface clean
-  // error codes for UI toasts.
   const { data: match } = await supabase
     .from("matches")
     .select("id, user_a, user_b")
@@ -460,7 +349,6 @@ export async function sendMatchMessage(
     return { ok: false, error: "no_consent" };
   }
 
-  // Rate limit: 30 / 60s across all matches for this user.
   const since = new Date(Date.now() - 60 * 1000).toISOString();
   const { count } = await supabase
     .from("match_messages")
@@ -482,10 +370,6 @@ export async function sendMatchMessage(
   return { ok: true, id: (data as { id: string }).id };
 }
 
-// ---------------------------------------------------------------------------
-// markMessagesRead — flip read_at on partner messages.
-// ---------------------------------------------------------------------------
-
 export async function markMessagesRead(matchId: string): Promise<ActionResult> {
   const supabase = await createClient();
   const user = await requireUser(supabase);
@@ -500,10 +384,3 @@ export async function markMessagesRead(matchId: string): Promise<ActionResult> {
   if (error) return { ok: false, error: "unknown", message: error.message };
   return { ok: true };
 }
-
-// ---------------------------------------------------------------------------
-// Re-export so the picks bounds are reachable from server pages without
-// importing the types module separately.
-// ---------------------------------------------------------------------------
-
-export const limits = { PICKS_MIN, PICKS_MAX } as const;
