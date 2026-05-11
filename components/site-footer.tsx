@@ -4,9 +4,8 @@ import { siteConfig } from "@/lib/site";
 
 const footerLinks = [
   { href: "/about", label: "About" },
+  { href: "/pricing", label: "Pricing" },
   { href: "/community", label: "Community" },
-  { href: "#", label: "Privacy" },
-  { href: "#", label: "Terms" },
 ];
 
 export function SiteFooter() {

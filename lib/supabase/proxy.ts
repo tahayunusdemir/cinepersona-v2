@@ -1,6 +1,25 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const AUTH_ONLY_ROUTES = [
+  "/login",
+  "/register",
+  "/forgot-password",
+];
+
+const PROTECTED_PREFIXES = ["/settings"];
+const PROTECTED_EXACT = new Set<string>(["/community/me"]);
+
+function needsAuth(pathname: string): boolean {
+  if (PROTECTED_EXACT.has(pathname)) return true;
+  if (PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
+    return true;
+  }
+  // /community/<board>/new
+  if (/^\/community\/[^/]+\/new\/?$/.test(pathname)) return true;
+  return false;
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -32,10 +51,26 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: do not put any code between createServerClient and getClaims.
   // If you skip getClaims while using SSR, users may be randomly logged out.
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
+  const authed = Boolean(data);
 
-  // Auth-gated redirects can be added here once `/login` and `/auth/*` routes
-  // exist. For now we only refresh the session and pass the response through.
+  const { pathname, search } = request.nextUrl;
+
+  // Logged-out → /settings, /community/me, /community/*/new bounce to login.
+  if (!authed && needsAuth(pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.search = `?next=${encodeURIComponent(pathname + search)}`;
+    return NextResponse.redirect(url);
+  }
+
+  // Logged-in → auth-only pages bounce home.
+  if (authed && AUTH_ONLY_ROUTES.includes(pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
 
   // IMPORTANT: return supabaseResponse as-is. If you build a new response,
   // copy its cookies over with `cookies.setAll(supabaseResponse.cookies.getAll())`.

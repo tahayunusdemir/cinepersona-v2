@@ -1,25 +1,38 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 import { ModeToggle } from "@/components/mode-toggle";
+import { SiteNav } from "@/components/site-nav";
+import { UserMenu } from "@/components/auth/user-menu";
 import { buttonVariants } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/server";
 import { siteConfig } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-const navItems = [
-  { href: "/cinetype", label: "CineType" },
-  { href: "/cinetest", label: "CineTest" },
-  { href: "/cinematch", label: "CineMatch" },
-  { href: "/films", label: "Films" },
-  { href: "/community", label: "Community" },
-  { href: "/about", label: "About" },
-];
+async function getViewer() {
+  const supabase = await createClient();
+  const { data: claims } = await supabase.auth.getClaims();
+  if (!claims) return null;
 
-export function SiteHeader() {
-  const pathname = usePathname();
+  const userId = claims.claims.sub;
+  if (!userId) return null;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("username, display_name, avatar_url")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (!profile) return null;
+  return profile as {
+    username: string;
+    display_name: string | null;
+    avatar_url: string | null;
+  };
+}
+
+export async function SiteHeader() {
+  const viewer = await getViewer();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -40,37 +53,24 @@ export function SiteHeader() {
           <span className="text-sm sm:text-base">{siteConfig.name}</span>
         </Link>
 
-        <nav
-          aria-label="Primary"
-          className="hidden flex-1 items-center justify-center gap-1 md:flex"
-        >
-          {navItems.map((item) => {
-            const active =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors hover:text-foreground",
-                  active ? "text-foreground" : "text-muted-foreground",
-                )}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+        <SiteNav />
 
         <div className="ml-auto flex items-center gap-2 md:ml-0">
           <ModeToggle />
-          <Link
-            href="/login"
-            className={cn(buttonVariants({ variant: "default", size: "sm" }))}
-          >
-            Sign in
-          </Link>
+          {viewer ? (
+            <UserMenu
+              username={viewer.username}
+              displayName={viewer.display_name}
+              avatarUrl={viewer.avatar_url}
+            />
+          ) : (
+            <Link
+              href="/login"
+              className={cn(buttonVariants({ variant: "default", size: "sm" }))}
+            >
+              Sign in
+            </Link>
+          )}
         </div>
       </div>
     </header>
