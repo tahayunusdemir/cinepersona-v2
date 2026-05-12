@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
+import { SiteLogo } from "@/components/site-logo";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -13,7 +13,7 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { siteConfig } from "@/lib/site";
+import { familyAt } from "@/lib/ui-tokens";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -50,32 +50,11 @@ export function MobileNav() {
       />
       <SheetContent
         side="left"
-        className="w-[88%] max-w-sm overflow-hidden border-r-foreground/10 bg-panel p-0 text-foreground sm:max-w-sm"
+        className="w-[88%] max-w-sm border-r-foreground/10 bg-background p-0 text-foreground sm:max-w-sm"
       >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -left-24 top-0 h-[420px] w-[420px] rounded-full bg-[radial-gradient(closest-side,var(--bloom)_0%,transparent_72%)] opacity-60 blur-[6px]"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-20 bottom-10 h-[260px] w-[260px] rounded-full bg-[radial-gradient(closest-side,#ecb756_0%,transparent_70%)] opacity-15 blur-[8px]"
-        />
-
-        <div className="relative flex h-full flex-col">
+        <div className="flex h-full flex-col">
           <div className="flex items-center justify-between border-b border-foreground/10 px-5 py-4">
-            <Link href="/" className="flex items-center gap-2.5">
-              <Image
-                src="/logo.png"
-                alt=""
-                width={28}
-                height={28}
-                className="size-7 rounded-md"
-              />
-              <span className="font-display text-lg tracking-tight">
-                {siteConfig.name.replace("Persona", "")}
-                <span className="text-[#ecb756]">Persona</span>
-              </span>
-            </Link>
+            <SiteLogo size="sm" />
             <SheetClose
               render={
                 <Button
@@ -92,10 +71,11 @@ export function MobileNav() {
 
           <nav aria-label="Mobile" className="flex-1 overflow-y-auto px-2 py-4">
             <ul className="space-y-1">
-              {navItems.map((item) => {
+              {navItems.map((item, i) => {
                 const active =
                   pathname === item.href ||
                   pathname.startsWith(`${item.href}/`);
+                const hue = familyAt(i);
                 return (
                   <li key={item.href}>
                     <Link
@@ -109,16 +89,12 @@ export function MobileNav() {
                     >
                       <span className="flex items-center gap-4">
                         <span
-                          className={cn(
-                            "font-mono text-[10px] tracking-[0.18em]",
-                            active
-                              ? "text-[#ecb756]"
-                              : "text-muted-foreground",
-                          )}
+                          className="font-mono text-[10px] tracking-[0.18em]"
+                          style={{ color: active ? hue : undefined }}
                         >
                           {item.code}
                         </span>
-                        <span className="font-display text-2xl tracking-tight">
+                        <span className="text-xl font-medium tracking-tight">
                           {item.label}
                         </span>
                       </span>
@@ -126,10 +102,16 @@ export function MobileNav() {
                         aria-hidden
                         className={cn(
                           "size-1.5 rounded-full transition-all",
-                          active
-                            ? "bg-[#ecb756] shadow-[0_0_12px_#ecb75688]"
-                            : "bg-foreground/15 group-hover:bg-foreground/40",
+                          !active && "bg-foreground/15 group-hover:bg-foreground/40",
                         )}
+                        style={
+                          active
+                            ? {
+                                background: hue,
+                                boxShadow: `0 0 12px ${hue}88`,
+                              }
+                            : undefined
+                        }
                       />
                     </Link>
                   </li>
@@ -138,14 +120,6 @@ export function MobileNav() {
             </ul>
           </nav>
 
-          <div className="border-t border-foreground/10 px-5 py-4">
-            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-              — Fin —
-            </div>
-            <p className="mt-2 max-w-xs text-xs leading-relaxed text-muted-foreground">
-              A small, sharp test for how you actually watch.
-            </p>
-          </div>
         </div>
       </SheetContent>
     </Sheet>

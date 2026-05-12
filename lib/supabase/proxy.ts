@@ -7,12 +7,18 @@ const AUTH_ONLY_ROUTES = [
   "/forgot-password",
 ];
 
-const PROTECTED_PREFIXES = ["/settings", "/cine-match"];
+const PROTECTED_PREFIXES = ["/settings"];
+// Prefixes whose sub-routes require auth, but whose index page stays public
+// so the marketing landing can render for guests.
+const PROTECTED_SUBROUTE_PREFIXES = ["/cine-match"];
 const PROTECTED_EXACT = new Set<string>(["/community/me"]);
 
 function needsAuth(pathname: string): boolean {
   if (PROTECTED_EXACT.has(pathname)) return true;
   if (PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
+    return true;
+  }
+  if (PROTECTED_SUBROUTE_PREFIXES.some((p) => pathname.startsWith(`${p}/`))) {
     return true;
   }
   // /community/<board>/new

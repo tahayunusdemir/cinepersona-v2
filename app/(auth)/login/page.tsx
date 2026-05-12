@@ -35,36 +35,31 @@ export default async function LoginPage({
 
   return (
     <AuthShell
-      title="Sign in"
-      description="Use your email and password to access your account."
+      title="Welcome back."
+      description="Sign in to pick up where you left off."
       footer={
         <span>
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="font-medium text-foreground underline-offset-4 hover:underline">
-            Sign up
+          New here?{" "}
+          <Link
+            href={safeNext ? `/register?next=${encodeURIComponent(safeNext)}` : "/register"}
+            className="font-medium text-foreground underline-offset-4 hover:underline"
+          >
+            Create an account
           </Link>
+          .
         </span>
       }
     >
       {initialError ? (
         <p
           role="alert"
-          className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          className="mb-5 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
         >
           {initialError}
         </p>
       ) : null}
 
       <LoginForm next={safeNext} />
-
-      <div className="mt-4 text-right text-sm">
-        <Link
-          href="/forgot-password"
-          className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-        >
-          Forgot password?
-        </Link>
-      </div>
     </AuthShell>
   );
 }

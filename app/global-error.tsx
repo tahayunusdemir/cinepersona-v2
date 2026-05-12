@@ -19,7 +19,7 @@ export default function GlobalError({
         style={{
           margin: 0,
           minHeight: "100dvh",
-          background: "#0a0820",
+          background: "#000",
           color: "#f4f1e8",
           display: "flex",
           flexDirection: "column",
@@ -30,22 +30,9 @@ export default function GlobalError({
           textAlign: "center",
           fontFamily:
             "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
-          position: "relative",
-          overflow: "hidden",
         }}
       >
         <title>Projection error · CinePersona</title>
-        <div
-          aria-hidden
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(ellipse at top, #2e2a64 0%, transparent 55%)",
-            opacity: 0.5,
-            pointerEvents: "none",
-          }}
-        />
         <div
           style={{
             position: "relative",

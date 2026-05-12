@@ -1,8 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Clapperboard, Film, Mail } from "lucide-react";
+import { Film } from "lucide-react";
 
+import { SiteLogo } from "@/components/site-logo";
 import { siteConfig } from "@/lib/site";
+import { credit, FAMILY_HEX, familyAt } from "@/lib/ui-tokens";
 
 const explore = [
   { href: "/cinetype", label: "CineType", code: "01" },
@@ -15,69 +16,43 @@ const explore = [
 const account = [
   { href: "/login", label: "Sign in" },
   { href: "/register", label: "Create account" },
-  { href: "/pricing", label: "Pricing" },
   { href: "/settings", label: "Settings" },
   { href: "/messages", label: "Messages" },
 ];
 
 const company = [
-  { href: "/about", label: "About" },
   { href: "/badges", label: "Badges" },
   { href: "/contact", label: "Contact" },
-  { href: "/privacy", label: "Privacy" },
-  { href: "/terms", label: "Terms" },
 ];
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
-  const brandLead = siteConfig.name.replace("Persona", "");
 
   return (
-    <footer className="relative isolate overflow-hidden border-t border-foreground/10 bg-panel text-foreground dark:bg-[#070514]">
-      {/* Atmospheric glows */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10"
-      >
-        <div className="absolute left-1/2 top-[-260px] h-[520px] w-[1000px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,var(--bloom)_0%,var(--bloom)_45%,transparent_72%)] opacity-50 blur-[2px]" />
-        <div className="absolute -right-32 top-10 h-[320px] w-[320px] rounded-full bg-[radial-gradient(closest-side,#ecb756_0%,transparent_70%)] opacity-[0.08] blur-[18px]" />
-      </div>
-
-      {/* Hair-thin gold leader */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#ecb756]/50 to-transparent"
-      />
-
-      {/* Perforation strip */}
-      <div
-        aria-hidden
-        className="flex h-3 items-center justify-between gap-2 border-b border-foreground/5 px-6"
-      >
-        {Array.from({ length: 30 }).map((_, i) => (
-          <span
-            key={i}
-            className="size-1 rounded-full bg-foreground/10"
-            style={{ opacity: 0.35 + (i % 4) * 0.12 }}
-          />
-        ))}
-      </div>
-
+    <footer className="border-t border-foreground/10 bg-background text-foreground">
       <div className="mx-auto w-full max-w-6xl px-4 pb-10 pt-14 sm:px-6 lg:pt-20">
         {/* Top label row */}
         <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
           <div>
             <h2 className="max-w-xl font-display text-3xl leading-tight tracking-tight sm:text-4xl">
               Until the next reel,{" "}
-              <span className="text-[#ecb756]">enjoy the show.</span>
+              <span
+                className="bg-clip-text text-transparent"
+                style={{
+                  backgroundImage: `linear-gradient(90deg, ${FAMILY_HEX.aut}, ${FAMILY_HEX.vis} 40%, ${FAMILY_HEX.con} 70%, ${FAMILY_HEX.esc})`,
+                }}
+              >
+                enjoy the show
+              </span>
             </h2>
           </div>
           <div className="hidden text-right md:block">
-            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-              Currently
-            </div>
+            <div className={credit}>Currently</div>
             <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-foreground/[0.02] px-3 py-1.5 text-xs">
-              <span className="size-1.5 rounded-full bg-[#ecb756] animate-pulse-dot" />
+              <span
+                className="size-1.5 rounded-full"
+                style={{ background: FAMILY_HEX.aut }}
+              />
               <span className="text-foreground/80">16 CineTypes indexed</span>
             </div>
           </div>
@@ -87,73 +62,14 @@ export function SiteFooter() {
         <div className="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-12">
           {/* Brand column */}
           <div className="col-span-2 md:col-span-5">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2.5"
-              aria-label={`${siteConfig.name} home`}
-            >
-              <span className="grid size-9 place-items-center rounded-lg border border-foreground/10 bg-panel">
-                <Image
-                  src="/logo.png"
-                  alt=""
-                  width={22}
-                  height={22}
-                  className="size-[22px]"
-                />
-              </span>
-              <span className="font-display text-2xl leading-none tracking-tight">
-                {brandLead}
-                <span className="text-[#ecb756]">Persona</span>
-              </span>
-            </Link>
+            <SiteLogo size="sm" />
 
             <p className="mt-5 max-w-sm text-pretty text-sm leading-relaxed text-muted-foreground">
-              A personality test for cinephiles. Take the 60-second CineTest,
+              A personality test for cinephiles. Take the 10-minute CineTest,
               get your CineType, and match with films — and viewers — who
               already think like you.
             </p>
 
-            {/* Newsletter / dispatch card */}
-            <div className="mt-7 max-w-md overflow-hidden rounded-2xl border border-foreground/10 bg-panel/80 p-4">
-              <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                  <Clapperboard className="size-3 text-[#ecb756]" />
-                  Weekly dispatch
-                </span>
-              </div>
-              <form
-                aria-label="Subscribe to the weekly dispatch"
-                className="mt-3 flex items-center gap-2"
-                action="/community"
-              >
-                <label htmlFor="footer-email" className="sr-only">
-                  Email
-                </label>
-                <div className="flex flex-1 items-center gap-2 rounded-full border border-foreground/10 bg-foreground/[0.02] px-3 py-2 transition-colors focus-within:border-[#ecb756]/40">
-                  <Mail
-                    aria-hidden
-                    className="size-3.5 shrink-0 text-muted-foreground"
-                  />
-                  <input
-                    id="footer-email"
-                    type="email"
-                    placeholder="you@inthemoodfor.love"
-                    className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="inline-flex h-9 items-center gap-1 rounded-full bg-[#ecb756] px-4 text-xs font-medium text-[#1a1840] transition-colors hover:bg-[#f3cd84]"
-                >
-                  Subscribe
-                  <ArrowUpRight className="size-3.5" />
-                </button>
-              </form>
-              <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
-                One double-feature, one essay, every Friday. No spam, no
-                blockbuster bait.
-              </p>
-            </div>
           </div>
 
           {/* Spacer */}
@@ -163,23 +79,49 @@ export function SiteFooter() {
           <FooterColumn
             label="Explore"
             number="A"
+            hue={FAMILY_HEX.aut}
             items={explore.map((i) => ({
               href: i.href,
               label: i.label,
               prefix: i.code,
             }))}
           />
-          <FooterColumn label="Account" number="B" items={account} />
-          <FooterColumn label="Studio" number="C" items={company} />
+          <FooterColumn
+            label="Account"
+            number="B"
+            hue={FAMILY_HEX.vis}
+            items={account}
+          />
+          <FooterColumn
+            label="Studio"
+            number="C"
+            hue={FAMILY_HEX.con}
+            items={company}
+          />
         </div>
 
         {/* Marquee separator */}
         <div className="mt-16 flex items-center gap-4">
-          <span className="h-px flex-1 bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
-          <span className="font-display text-2xl tracking-tight text-[#ecb756]/70">
+          <span
+            className="h-px flex-1"
+            style={{
+              backgroundImage: `linear-gradient(to right, transparent, ${FAMILY_HEX.aut}40, ${FAMILY_HEX.vis}40, transparent)`,
+            }}
+          />
+          <span
+            className="font-display text-2xl tracking-tight bg-clip-text text-transparent"
+            style={{
+              backgroundImage: `linear-gradient(90deg, ${FAMILY_HEX.aut}b3, ${FAMILY_HEX.esc}b3)`,
+            }}
+          >
             Fin
           </span>
-          <span className="h-px flex-1 bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
+          <span
+            className="h-px flex-1"
+            style={{
+              backgroundImage: `linear-gradient(to right, transparent, ${FAMILY_HEX.con}40, ${FAMILY_HEX.esc}40, transparent)`,
+            }}
+          />
         </div>
 
         {/* Bottom bar */}
@@ -190,11 +132,11 @@ export function SiteFooter() {
             </span>
             <span className="hidden text-foreground/15 sm:inline">/</span>
             <span className="inline-flex items-center gap-1.5 font-mono uppercase tracking-[0.18em]">
-              <Film className="size-3 text-[#ecb756]" />
+              <Film className="size-3" style={{ color: FAMILY_HEX.esc }} />
               Made by fans for the cinephiles
             </span>
             <span className="hidden text-foreground/15 sm:inline">/</span>
-            <span className="font-mono normal-case tracking-normal text-muted-foreground/80">
+            <span className="text-muted-foreground/80">
               Film data and posters from{" "}
               <a
                 href="https://www.themoviedb.org/"
@@ -233,17 +175,22 @@ export function SiteFooter() {
 function FooterColumn({
   label,
   number,
+  hue,
   items,
 }: {
   label: string;
   number: string;
+  hue: string;
   items: { href: string; label: string; prefix?: string }[];
 }) {
   return (
     <div className="col-span-1 md:col-span-2">
       <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-        <span className="text-[#ecb756]">{number}</span>
-        <span className="h-px w-3 bg-foreground/15" />
+        <span style={{ color: hue }}>{number}</span>
+        <span
+          className="h-px w-3"
+          style={{ background: `${hue}66` }}
+        />
         <span>{label}</span>
       </div>
       <ul className="mt-5 space-y-2.5">
@@ -254,7 +201,10 @@ function FooterColumn({
               className="group inline-flex items-baseline gap-2.5 text-sm text-foreground/75 transition-colors hover:text-foreground"
             >
               {item.prefix && (
-                <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground transition-colors group-hover:text-[#ecb756]">
+                <span
+                  className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground transition-colors"
+                  style={{ ["--hue" as string]: hue }}
+                >
                   {item.prefix}
                 </span>
               )}
@@ -262,7 +212,8 @@ function FooterColumn({
                 {item.label}
                 <span
                   aria-hidden
-                  className="absolute -bottom-0.5 left-0 h-px w-0 bg-[#ecb756]/60 transition-all duration-300 group-hover:w-full"
+                  className="absolute -bottom-0.5 left-0 h-px w-0 transition-all duration-300 group-hover:w-full"
+                  style={{ background: `${hue}99` }}
                 />
               </span>
             </Link>

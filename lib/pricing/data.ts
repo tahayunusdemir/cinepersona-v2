@@ -32,8 +32,8 @@ export const plans: Plan[] = [
   {
     id: "plus",
     name: "Plus",
-    monthly: 5,
-    yearly: 48,
+    monthly: 4.99,
+    yearly: 47.99,
     tagline: "Unlock the full Cinepersona experience.",
     description: "More matches, smarter filters, no ads.",
     features: [
@@ -49,8 +49,8 @@ export const plans: Plan[] = [
   {
     id: "pro",
     name: "Pro",
-    monthly: 10,
-    yearly: 96,
+    monthly: 9.99,
+    yearly: 95.99,
     tagline: "Go beyond matching. Build your film circle.",
     description: "Private groups, Movie Nights, AI picks.",
     features: [
@@ -67,8 +67,8 @@ export const plans: Plan[] = [
   {
     id: "elite",
     name: "Elite",
-    monthly: 20,
-    yearly: 192,
+    monthly: 19.99,
+    yearly: 191.99,
     tagline: "For true cinema lovers.",
     description: "Curated communities, events, and perks.",
     features: [

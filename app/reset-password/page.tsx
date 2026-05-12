@@ -20,8 +20,8 @@ export default async function ResetPasswordPage() {
 
   return (
     <AuthShell
-      title="Set a new password"
-      description="Choose a new password for your account."
+      title="Set a new password."
+      description="Pick something memorable. We'll use it the next time you sign in."
     >
       <ResetForm />
     </AuthShell>

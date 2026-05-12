@@ -28,14 +28,18 @@ export default async function RegisterPage({
 
   return (
     <AuthShell
-      title="Create your account"
-      description="Pick a username, then add your email and password."
+      title="Find your CineType."
+      description="Twelve picks, forty-eight statements, one profile."
       footer={
         <span>
           Already have an account?{" "}
-          <Link href={signInHref} className="font-medium text-foreground underline-offset-4 hover:underline">
+          <Link
+            href={signInHref}
+            className="font-medium text-foreground underline-offset-4 hover:underline"
+          >
             Sign in
           </Link>
+          .
         </span>
       }
     >

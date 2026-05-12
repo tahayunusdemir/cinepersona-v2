@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { familyAt } from "@/lib/ui-tokens";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -24,9 +25,10 @@ export function SiteNav() {
       className="hidden flex-1 items-center justify-center md:flex"
     >
       <ul className="flex items-center gap-1">
-        {navItems.map((item) => {
+        {navItems.map((item, i) => {
           const active =
             pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const hue = familyAt(i);
           return (
             <li key={item.href}>
               <Link
@@ -44,9 +46,10 @@ export function SiteNav() {
                   className={cn(
                     "mr-1.5 size-1 rounded-full transition-all duration-300",
                     active
-                      ? "bg-[#ecb756] opacity-100"
-                      : "bg-[#ecb756] opacity-0 -translate-x-1 group-hover:opacity-70 group-hover:translate-x-0",
+                      ? "opacity-100"
+                      : "opacity-0 -translate-x-1 group-hover:opacity-70 group-hover:translate-x-0",
                   )}
+                  style={{ background: hue }}
                 />
                 {item.label}
                 <span
@@ -56,9 +59,20 @@ export function SiteNav() {
                     active ? "opacity-100" : "opacity-0",
                   )}
                 >
-                  <span className="size-[3px] rounded-full bg-[#ecb756]" />
-                  <span className="h-px flex-1 mx-1 bg-gradient-to-r from-[#ecb756]/70 via-[#ecb756]/40 to-[#ecb756]/70" />
-                  <span className="size-[3px] rounded-full bg-[#ecb756]" />
+                  <span
+                    className="size-[3px] rounded-full"
+                    style={{ background: hue }}
+                  />
+                  <span
+                    className="h-px flex-1 mx-1"
+                    style={{
+                      backgroundImage: `linear-gradient(to right, ${hue}b3, ${hue}66, ${hue}b3)`,
+                    }}
+                  />
+                  <span
+                    className="size-[3px] rounded-full"
+                    style={{ background: hue }}
+                  />
                 </span>
               </Link>
             </li>

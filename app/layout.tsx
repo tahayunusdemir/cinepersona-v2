@@ -8,8 +8,6 @@ import {
 import "./globals.css";
 import { ServiceWorkerRegister } from "./sw-register";
 import { FlashToast } from "@/components/flash-toast";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { siteConfig } from "@/lib/site";
@@ -50,6 +48,16 @@ export const metadata: Metadata = {
   applicationName: siteConfig.name,
   title: { default: siteConfig.name, template: `%s · ${siteConfig.name}` },
   description: siteConfig.description,
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/logo.png", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: ["/favicon.ico"],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -85,9 +93,7 @@ export default function RootLayout({
           defaultTheme="dark"
           disableTransitionOnChange
         >
-          <SiteHeader />
-          <main className="flex-1">{children}</main>
-          <SiteFooter />
+          {children}
           <Toaster />
           <FlashToast />
         </ThemeProvider>

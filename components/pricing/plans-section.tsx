@@ -5,15 +5,23 @@ import { useState } from "react";
 import { Check } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { plans, type Plan } from "@/lib/pricing/data";
+import {
+  badgeBrandSolid,
+  cardFeatured,
+  cardInteractive,
+  credit,
+  ctaPrimary,
+  ctaSecondary,
+  familyAt,
+} from "@/lib/ui-tokens";
 import { cn } from "@/lib/utils";
 
 type Period = "monthly" | "yearly";
 
 function formatPrice(value: number) {
-  return `$${value.toFixed(2).replace(/\.00$/, "")}`;
+  return `$${value.toFixed(2)}`;
 }
 
 function priceForPeriod(plan: Plan, period: Period) {
@@ -77,26 +85,23 @@ export function PlansSection() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {plans.map((plan, i) => {
           const price = priceForPeriod(plan, period);
+          const hue = familyAt(i);
           return (
             <article
               key={plan.id}
               className={cn(
-                "relative flex h-full flex-col overflow-hidden rounded-2xl border p-7 transition-all",
-                plan.highlighted
-                  ? "border-[#ecb756]/40 bg-gradient-to-b from-panel-2 to-panel"
-                  : "border-foreground/10 bg-panel hover:border-foreground/20",
+                "flex h-full flex-col p-7",
+                plan.highlighted ? cardFeatured : cardInteractive,
               )}
+              style={!plan.highlighted ? { borderColor: `${hue}33` } : undefined}
             >
-              {plan.highlighted ? (
-                <div
-                  aria-hidden
-                  className="absolute -right-24 -top-24 size-72 rounded-full bg-[#ecb756]/10 blur-3xl"
-                />
-              ) : null}
-              <div className="relative flex flex-1 flex-col">
+              <div className="flex flex-1 flex-col">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                    <div
+                      className="font-mono text-[10px] uppercase tracking-[0.22em]"
+                      style={{ color: hue }}
+                    >
                       Plan 0{i + 1} / 04
                     </div>
                     <h3 className="mt-2 font-display text-2xl tracking-tight">
@@ -104,9 +109,7 @@ export function PlansSection() {
                     </h3>
                   </div>
                   {plan.highlighted ? (
-                    <Badge className="border-0 bg-[#ecb756] text-[#1a1840] hover:bg-[#f3cd84]">
-                      Popular
-                    </Badge>
+                    <Badge className={badgeBrandSolid}>Popular</Badge>
                   ) : null}
                 </div>
 
@@ -115,16 +118,17 @@ export function PlansSection() {
                 </p>
 
                 <div className="mt-6 flex items-baseline gap-2">
-                  <span className="font-display text-5xl leading-none text-[#ecb756]">
+                  <span
+                    className="font-display text-5xl leading-none"
+                    style={{ color: hue }}
+                  >
                     {price.display}
                   </span>
                   <span className="text-sm text-muted-foreground">
                     {price.suffix}
                   </span>
                 </div>
-                <p className="mt-1 h-4 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                  {price.note ?? ""}
-                </p>
+                <p className={cn(credit, "mt-1 h-4")}>{price.note ?? ""}</p>
 
                 <p className="mt-5 text-sm text-foreground/85">
                   {plan.description}
@@ -134,7 +138,8 @@ export function PlansSection() {
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2.5">
                       <Check
-                        className="mt-0.5 size-3.5 shrink-0 text-[#ecb756]"
+                        className="mt-0.5 size-3.5 shrink-0"
+                        style={{ color: hue }}
                         aria-hidden
                       />
                       <span className="text-foreground/85">{feature}</span>
@@ -146,10 +151,7 @@ export function PlansSection() {
                   {plan.id === "free" ? (
                     <Link
                       href="/register"
-                      className={cn(
-                        buttonVariants({ size: "lg" }),
-                        "h-11 w-full rounded-full border border-foreground/15 bg-foreground/[0.02] text-foreground hover:bg-foreground/[0.06]",
-                      )}
+                      className={cn(ctaSecondary, "w-full")}
                     >
                       {plan.cta}
                     </Link>
@@ -157,11 +159,8 @@ export function PlansSection() {
                     <Link
                       href={`/checkout/${plan.id}?period=${period}`}
                       className={cn(
-                        buttonVariants({ size: "lg" }),
-                        "h-11 w-full rounded-full",
-                        plan.highlighted
-                          ? "bg-[#ecb756] text-[#1a1840] hover:bg-[#f3cd84] hover:text-[#1a1840]"
-                          : "border border-foreground/15 bg-foreground/[0.02] text-foreground hover:bg-foreground/[0.06]",
+                        plan.highlighted ? ctaPrimary : ctaSecondary,
+                        "w-full",
                       )}
                     >
                       {plan.cta}
