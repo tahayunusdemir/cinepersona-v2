@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Inbox } from "lucide-react";
 
 import { MatchListRow } from "@/components/cinematch/match-list-item";
 import { PendingRequestRow } from "@/components/cinematch/pending-request-row";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
 import {
   getRequestQuota,
@@ -35,49 +35,62 @@ export default async function CineMatchListPage() {
   const renderedAt = nowMs();
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 pb-24 pt-12 sm:px-6">
-      <header className="mb-6 flex items-baseline justify-between gap-4">
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          My matches
-        </h1>
-        <span className="text-xs text-muted-foreground">
-          {quota.used}/{WEEKLY_REQUEST_LIMIT} requests this week
-        </span>
-      </header>
+    <div className="relative isolate overflow-hidden">
 
-      {isEmpty ? (
-        <Alert>
-          <AlertTitle>No matches yet.</AlertTitle>
-          <AlertDescription className="space-y-3">
-            <p>
-              Press &quot;Find a new match&quot; from CineMatch to send a
-              request.
+      <div className="mx-auto w-full max-w-3xl px-4 pb-24 pt-12 sm:px-6 sm:pt-16">
+        <header className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="mt-4 font-display text-3xl tracking-tight sm:text-5xl">
+              My matches.
+            </h1>
+          </div>
+          <div className="inline-flex items-center gap-3 rounded-full border border-foreground/10 bg-foreground/[0.02] px-4 py-2">
+            <span className="size-1.5 rounded-full bg-[#ecb756]" />
+            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              {quota.used}/{WEEKLY_REQUEST_LIMIT} requests this week
+            </span>
+          </div>
+        </header>
+
+        {isEmpty ? (
+          <div className="rounded-2xl border border-dashed border-foreground/15 bg-foreground/[0.015] p-10 text-center">
+            <div className="mx-auto grid size-12 place-items-center rounded-full border border-[#ecb756]/20 bg-[#ecb756]/10 text-[#ecb756]">
+              <Inbox className="size-5" />
+            </div>
+            <h2 className="mt-5 font-display text-2xl tracking-tight">
+              The reel hasn’t started.
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Press “Find a new match” on CineMatch to send your first request.
             </p>
             <Link
               href="/cine-match"
-              className={cn(buttonVariants({ size: "sm" }), "w-fit")}
+              className={cn(
+                buttonVariants({ size: "lg" }),
+                "mt-6 inline-flex h-11 rounded-full bg-[#ecb756] px-6 text-sm font-medium text-[#1a1840] hover:bg-[#f3cd84] hover:text-[#1a1840]",
+              )}
             >
               Back to CineMatch
             </Link>
-          </AlertDescription>
-        </Alert>
-      ) : (
-        <ul className="space-y-2">
-          {pending.map((req) => (
-            <li key={req.id}>
-              <PendingRequestRow
-                requestedAt={req.requested_at}
-                nowMs={renderedAt}
-              />
-            </li>
-          ))}
-          {matches.map((m) => (
-            <li key={m.id}>
-              <MatchListRow item={m} />
-            </li>
-          ))}
-        </ul>
-      )}
+          </div>
+        ) : (
+          <ul className="space-y-2">
+            {pending.map((req) => (
+              <li key={req.id}>
+                <PendingRequestRow
+                  requestedAt={req.requested_at}
+                  nowMs={renderedAt}
+                />
+              </li>
+            ))}
+            {matches.map((m) => (
+              <li key={m.id}>
+                <MatchListRow item={m} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }

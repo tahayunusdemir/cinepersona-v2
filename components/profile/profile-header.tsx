@@ -189,7 +189,7 @@ function Bio({ bio, isSelf }: { bio: string | null; isSelf: boolean }) {
       </p>
     );
   }
-  return <p className="text-sm italic text-muted-foreground">No bio yet.</p>;
+  return <p className="text-sm text-muted-foreground">No bio yet.</p>;
 }
 
 function formatCount(n: number): string {

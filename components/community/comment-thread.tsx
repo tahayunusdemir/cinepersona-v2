@@ -135,7 +135,7 @@ function CommentNode({
         <div className="min-w-0 flex-1">
           <header className="flex flex-wrap items-center gap-2 text-xs">
             {isDeleted ? (
-              <span className="text-muted-foreground italic">
+              <span className="text-muted-foreground">
                 [deleted]
               </span>
             ) : (
@@ -164,7 +164,7 @@ function CommentNode({
             {!isDeleted && comment.updated_at !== comment.created_at ? (
               <>
                 <span className="text-muted-foreground">·</span>
-                <span className="text-muted-foreground italic">edited</span>
+                <span className="text-muted-foreground">edited</span>
               </>
             ) : null}
             <div className="ml-auto flex items-center gap-1">
@@ -185,7 +185,7 @@ function CommentNode({
 
           <div className="mt-1.5">
             {isDeleted ? (
-              <p className="text-sm italic text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 [comment deleted]
               </p>
             ) : (

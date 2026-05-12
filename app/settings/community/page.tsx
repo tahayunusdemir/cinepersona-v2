@@ -3,22 +3,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ChevronLeftIcon, ShieldOffIcon } from "lucide-react";
 
+import { FrameTag } from "@/components/cinema/atoms";
 import { UnblockButton } from "@/components/settings/unblock-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Community settings" };
@@ -74,61 +61,64 @@ export default async function SettingsCommunityPage() {
     );
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 pt-12 pb-24 sm:px-6">
-      <header className="mb-8 flex flex-col gap-2">
-        <Link
-          href="/settings"
-          className="inline-flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ChevronLeftIcon className="size-4" />
-          Settings
-        </Link>
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          Community
-        </h1>
-        <p className="text-base text-muted-foreground sm:text-lg">
-          People you have blocked. Their threads and comments are hidden from
-          you across CinePersona.
-        </p>
-      </header>
+    <div className="relative isolate overflow-hidden">
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Blocked users</CardTitle>
-          <CardDescription>
-            {items.length === 0
-              ? "You have not blocked anyone."
-              : `${items.length} ${items.length === 1 ? "person" : "people"} blocked.`}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      <main className="mx-auto w-full max-w-4xl px-4 pt-12 pb-24 sm:px-6 sm:pt-16">
+        <header className="mb-10">
+          <Link
+            href="/settings"
+            className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:text-[#ecb756]"
+          >
+            <ChevronLeftIcon className="size-3" />
+            Settings
+          </Link>
+          <h1 className="mt-3 font-display text-3xl tracking-tight sm:text-5xl">
+            Community.
+          </h1>
+          <p className="mt-2 max-w-xl text-base text-muted-foreground">
+            People you have blocked. Their threads and comments are hidden from
+            you across CinePersona.
+          </p>
+        </header>
+
+        <section className="overflow-hidden rounded-2xl border border-foreground/10 bg-panel">
+          <div className="border-b border-foreground/5 p-6">
+            <FrameTag>Blocked users</FrameTag>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {items.length === 0
+                ? "You have not blocked anyone."
+                : `${items.length} ${items.length === 1 ? "person" : "people"} blocked.`}
+            </p>
+          </div>
+
           {items.length === 0 ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <ShieldOffIcon />
-                </EmptyMedia>
-                <EmptyTitle>No blocked users</EmptyTitle>
-                <EmptyDescription>
-                  Block someone from their profile to hide their content from
-                  your feed.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
+            <div className="p-10 text-center">
+              <div className="mx-auto grid size-12 place-items-center rounded-full border border-[#ecb756]/20 bg-[#ecb756]/10 text-[#ecb756]">
+                <ShieldOffIcon className="size-5" />
+              </div>
+              <h2 className="mt-5 font-display text-xl tracking-tight">
+                No blocked users.
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Block someone from their profile to hide their content from
+                your feed.
+              </p>
+            </div>
           ) : (
-            <ul className="divide-y">
+            <ul className="divide-y divide-white/5">
               {items.map(({ block, profile }) => {
-                const label = profile.display_name?.trim() || `@${profile.username}`;
+                const label =
+                  profile.display_name?.trim() || `@${profile.username}`;
                 return (
                   <li
                     key={block.blocked_id}
-                    className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
+                    className="flex items-center justify-between gap-4 px-6 py-4"
                   >
                     <Link
                       href={`/${profile.username}`}
                       className="flex min-w-0 items-center gap-3"
                     >
-                      <Avatar className="size-9">
+                      <Avatar className="size-10 border border-foreground/10">
                         <AvatarImage
                           src={profile.avatar_url ?? "/user.png"}
                           alt=""
@@ -136,8 +126,10 @@ export default async function SettingsCommunityPage() {
                         <AvatarFallback />
                       </Avatar>
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">{label}</p>
-                        <p className="truncate text-xs text-muted-foreground">
+                        <p className="truncate font-display text-base tracking-tight">
+                          {label}
+                        </p>
+                        <p className="truncate font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                           @{profile.username}
                         </p>
                       </div>
@@ -151,8 +143,8 @@ export default async function SettingsCommunityPage() {
               })}
             </ul>
           )}
-        </CardContent>
-      </Card>
-    </main>
+        </section>
+      </main>
+    </div>
   );
 }

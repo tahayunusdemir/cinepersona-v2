@@ -50,7 +50,7 @@ export function SampleResult() {
         ))}
       </ul>
 
-      <p className="border-t pt-4 text-xs italic text-muted-foreground">
+      <p className="border-t pt-4 text-xs text-muted-foreground">
         “{type.quote}”
       </p>
     </div>

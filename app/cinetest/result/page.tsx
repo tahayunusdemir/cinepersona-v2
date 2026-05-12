@@ -38,19 +38,25 @@ export default async function ResultPage({
 
   if (!answers) {
     return (
-      <div className="mx-auto w-full max-w-2xl px-4 pt-16 pb-24 text-center sm:px-6">
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          We couldn&apos;t read your result.
-        </h1>
-        <p className="mt-3 text-sm text-muted-foreground">
-          The link looks incomplete. Take the test again to get your CineType.
-        </p>
-        <Link
-          href="/cinetest/take"
-          className={cn(buttonVariants({ variant: "default" }), "mt-6 inline-flex")}
-        >
-          Take the CineTest
-        </Link>
+      <div className="relative isolate overflow-hidden">
+        <div className="mx-auto flex w-full max-w-2xl flex-col items-center px-4 pt-20 pb-24 text-center sm:px-6">
+          <h1 className="mt-5 font-display text-3xl tracking-tight sm:text-5xl">
+            We couldn’t read{" "}
+            <span className="text-[#ecb756]">your result.</span>
+          </h1>
+          <p className="mt-4 max-w-md text-sm text-muted-foreground">
+            The link looks incomplete. Take the test again to get your CineType.
+          </p>
+          <Link
+            href="/cinetest/take"
+            className={cn(
+              buttonVariants({ size: "lg" }),
+              "mt-8 inline-flex h-12 rounded-full bg-[#ecb756] px-6 text-base font-medium text-[#1a1840] hover:bg-[#f3cd84] hover:text-[#1a1840]",
+            )}
+          >
+            Take the CineTest
+          </Link>
+        </div>
       </div>
     );
   }

@@ -1,17 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LockIcon, MessageSquareIcon, UsersIcon } from "lucide-react";
+import { ArrowRight, LockIcon, UsersIcon } from "lucide-react";
 
+import { FrameTag } from "@/components/cinema/atoms";
 import { BoardIcon } from "@/components/community/board-icon";
-import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   getViewerId,
   listBoards,
@@ -26,9 +19,6 @@ export const metadata: Metadata = {
     "Discuss films, TV, and franchises with the CinePersona community.",
 };
 
-// Render dynamically — viewer-specific data (vote state, blocks, follow
-// edges) is woven into the listing, so a shared revalidate cache would
-// leak one user's vote highlights to the next visitor.
 export const dynamic = "force-dynamic";
 
 export default async function CommunityHomePage() {
@@ -40,43 +30,53 @@ export default async function CommunityHomePage() {
   ]);
 
   return (
-    <div>
-      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
+    <div className="relative isolate">
+
+      <header className="mb-10 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Community
+          <h1 className="mt-3 font-display text-4xl tracking-tight sm:text-5xl">
+            Community.
           </h1>
-          <p className="mt-2 text-base text-muted-foreground sm:text-lg">
+          <p className="mt-2 max-w-xl text-base text-muted-foreground">
             Pick a board to dive in, or browse the directory of members.
           </p>
         </div>
         <Link
           href="/community/people"
-          className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+          className={cn(
+            buttonVariants({ variant: "outline", size: "sm" }),
+            "h-10 rounded-full border-foreground/15 bg-foreground/[0.02] hover:bg-foreground/[0.06]",
+          )}
         >
           <UsersIcon /> People
         </Link>
       </header>
 
       {hot.rows.length > 0 ? (
-        <section className="mb-10">
-          <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Hot today
-          </h2>
+        <section className="mb-12">
+          <div className="mb-4 flex items-baseline gap-3">
+            <FrameTag>Hot today</FrameTag>
+            <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 to-transparent" />
+          </div>
           <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible lg:grid-cols-3">
-            {hot.rows.map((t) => (
+            {hot.rows.map((t, i) => (
               <Link
                 key={t.id}
                 href={`/community/${t.board.slug}/${t.id}`}
-                className="block min-w-[260px] snap-start rounded-lg border bg-card p-4 transition-colors hover:bg-card/80 sm:min-w-0"
+                className="group relative block min-w-[260px] snap-start overflow-hidden rounded-2xl border border-foreground/10 bg-panel p-5 transition-all hover:border-[#ecb756]/40 sm:min-w-0"
               >
-                <Badge variant="outline" className="mb-2 text-[10px]">
-                  {t.board.name}
-                </Badge>
-                <h3 className="line-clamp-2 text-sm font-semibold leading-snug">
+                <div className="flex items-center justify-between">
+                  <span className="rounded-full border border-foreground/10 bg-foreground/[0.02] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                    {t.board.name}
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#ecb756]">
+                    0{i + 1}
+                  </span>
+                </div>
+                <h3 className="mt-4 line-clamp-2 font-display text-base leading-snug">
                   {t.title}
                 </h3>
-                <p className="mt-2 text-xs text-muted-foreground">
+                <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                   ▲ {t.score} · {t.comment_count}{" "}
                   {t.comment_count === 1 ? "comment" : "comments"}
                 </p>
@@ -87,49 +87,50 @@ export default async function CommunityHomePage() {
       ) : null}
 
       <section>
-        <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          Boards
-        </h2>
+        <div className="mb-4 flex items-baseline gap-3">
+          <FrameTag>Boards</FrameTag>
+          <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 to-transparent" />
+        </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {boards.map((b) => {
-            return (
-              <Link key={b.id} href={`/community/${b.slug}`} className="group">
-                <Card className="h-full transition-colors group-hover:bg-card/80">
-                  <CardHeader>
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="flex size-9 items-center justify-center rounded-md bg-muted text-foreground">
-                        <BoardIcon slug={b.slug} className="size-4" />
-                      </span>
-                      {b.locked ? (
-                        <Badge variant="outline" className="gap-1 text-[10px]">
-                          <LockIcon className="size-3" /> Locked
-                        </Badge>
-                      ) : null}
-                    </div>
-                    <CardTitle className="text-base">{b.name}</CardTitle>
-                    {b.description ? (
-                      <CardDescription className="line-clamp-2">
-                        {b.description}
-                      </CardDescription>
-                    ) : null}
-                  </CardHeader>
-                  <CardContent className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <MessageSquareIcon className="size-3.5" />
-                    Open board →
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })}
+          {boards.map((b) => (
+            <Link
+              key={b.id}
+              href={`/community/${b.slug}`}
+              className="group relative block overflow-hidden rounded-2xl border border-foreground/10 bg-panel p-5 transition-all hover:border-[#ecb756]/40"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <span className="grid size-10 place-items-center rounded-xl border border-[#ecb756]/20 bg-[#ecb756]/10 text-[#ecb756]">
+                  <BoardIcon slug={b.slug} className="size-4" />
+                </span>
+                {b.locked ? (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-foreground/10 bg-foreground/[0.02] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                    <LockIcon className="size-3" /> Locked
+                  </span>
+                ) : null}
+              </div>
+              <h3 className="mt-5 font-display text-lg leading-tight tracking-tight">
+                {b.name}
+              </h3>
+              {b.description ? (
+                <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                  {b.description}
+                </p>
+              ) : null}
+              <p className="mt-4 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground transition-colors group-hover:text-[#ecb756]">
+                Open board
+                <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
+              </p>
+            </Link>
+          ))}
         </div>
       </section>
 
       {viewerId ? null : (
-        <p className="mt-8 text-center text-xs text-muted-foreground">
-          <Link href="/login" className="underline-offset-4 hover:underline">
+        <p className="mt-10 text-center font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+          <Link href="/login" className="underline-offset-4 hover:text-[#ecb756] hover:underline">
             Sign in
           </Link>{" "}
-          to comment, vote, and follow other members.
+          to comment, vote, and follow other members
         </p>
       )}
     </div>

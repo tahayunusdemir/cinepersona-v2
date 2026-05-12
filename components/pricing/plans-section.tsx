@@ -6,14 +6,6 @@ import { Check } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { plans, type Plan } from "@/lib/pricing/data";
 import { cn } from "@/lib/utils";
@@ -48,106 +40,136 @@ export function PlansSection() {
   const [period, setPeriod] = useState<Period>("monthly");
 
   return (
-    <section aria-label="Plans" className="flex flex-col gap-8">
+    <section aria-label="Plans" className="flex flex-col gap-10">
       <div className="flex flex-col items-center gap-3">
         <Tabs
           value={period}
           onValueChange={(value) => setPeriod(value as Period)}
         >
-          <TabsList>
-            <TabsTrigger value="monthly">Monthly</TabsTrigger>
-            <TabsTrigger value="yearly">
+          <TabsList className="rounded-full border border-foreground/10 bg-foreground/[0.03] p-1">
+            <TabsTrigger
+              value="monthly"
+              className="rounded-full px-5 data-[state=active]:bg-foreground/10 data-[state=active]:text-foreground"
+            >
+              Monthly
+            </TabsTrigger>
+            <TabsTrigger
+              value="yearly"
+              className="rounded-full px-5 data-[state=active]:bg-[#ecb756] data-[state=active]:text-[#1a1840] data-[state=active]:hover:bg-[#f3cd84]"
+            >
               Yearly
               <Badge
                 variant="secondary"
-                className="ml-1.5 px-1.5 text-[10px] tracking-wide"
+                className="ml-1.5 border-0 bg-foreground/15 px-1.5 text-[10px] tracking-wide text-foreground data-[state=active]:bg-[#1a1840]/15"
               >
                 Save 20%
               </Badge>
             </TabsTrigger>
           </TabsList>
         </Tabs>
-        <p className="text-xs text-muted-foreground">
+        <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
           {period === "yearly"
-            ? "Yearly plans bill once a year. Switch back anytime."
-            : "Monthly plans renew every month. Cancel anytime."}
+            ? "Yearly bills once · switch back anytime"
+            : "Monthly renews · cancel anytime"}
         </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {plans.map((plan) => {
+        {plans.map((plan, i) => {
           const price = priceForPeriod(plan, period);
           return (
-            <Card
+            <article
               key={plan.id}
               className={cn(
-                "h-full",
-                plan.highlighted &&
-                  "ring-2 ring-foreground/40 shadow-lg shadow-foreground/5",
+                "relative flex h-full flex-col overflow-hidden rounded-2xl border p-7 transition-all",
+                plan.highlighted
+                  ? "border-[#ecb756]/40 bg-gradient-to-b from-panel-2 to-panel"
+                  : "border-foreground/10 bg-panel hover:border-foreground/20",
               )}
             >
-              <CardHeader>
+              {plan.highlighted ? (
+                <div
+                  aria-hidden
+                  className="absolute -right-24 -top-24 size-72 rounded-full bg-[#ecb756]/10 blur-3xl"
+                />
+              ) : null}
+              <div className="relative flex flex-1 flex-col">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">{plan.name}</CardTitle>
+                  <div>
+                    <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                      Plan 0{i + 1} / 04
+                    </div>
+                    <h3 className="mt-2 font-display text-2xl tracking-tight">
+                      {plan.name}
+                    </h3>
+                  </div>
                   {plan.highlighted ? (
-                    <Badge variant="default">Most popular</Badge>
+                    <Badge className="border-0 bg-[#ecb756] text-[#1a1840] hover:bg-[#f3cd84]">
+                      Popular
+                    </Badge>
                   ) : null}
                 </div>
-                <CardDescription>{plan.tagline}</CardDescription>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-3xl font-semibold tracking-tight text-foreground">
+
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {plan.tagline}
+                </p>
+
+                <div className="mt-6 flex items-baseline gap-2">
+                  <span className="font-display text-5xl leading-none text-[#ecb756]">
                     {price.display}
                   </span>
                   <span className="text-sm text-muted-foreground">
                     {price.suffix}
                   </span>
                 </div>
-                <p className="mt-1 h-4 text-xs text-muted-foreground">
+                <p className="mt-1 h-4 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                   {price.note ?? ""}
                 </p>
-              </CardHeader>
-              <CardContent className="flex flex-1 flex-col gap-4">
-                <p className="text-sm text-muted-foreground">
+
+                <p className="mt-5 text-sm text-foreground/85">
                   {plan.description}
                 </p>
-                <ul className="space-y-2 text-sm">
+
+                <ul className="mt-5 flex-1 space-y-2.5 text-sm">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex gap-2">
+                    <li key={feature} className="flex items-start gap-2.5">
                       <Check
-                        className="mt-0.5 size-4 shrink-0 text-foreground/70"
+                        className="mt-0.5 size-3.5 shrink-0 text-[#ecb756]"
                         aria-hidden
                       />
-                      <span className="text-foreground/90">{feature}</span>
+                      <span className="text-foreground/85">{feature}</span>
                     </li>
                   ))}
                 </ul>
-              </CardContent>
-              <CardFooter>
-                {plan.id === "free" ? (
-                  <Link
-                    href="/register"
-                    className={cn(
-                      buttonVariants({ variant: "outline" }),
-                      "w-full",
-                    )}
-                  >
-                    {plan.cta}
-                  </Link>
-                ) : (
-                  <Link
-                    href={`/checkout/${plan.id}?period=${period}`}
-                    className={cn(
-                      buttonVariants({
-                        variant: plan.highlighted ? "default" : "outline",
-                      }),
-                      "w-full",
-                    )}
-                  >
-                    {plan.cta}
-                  </Link>
-                )}
-              </CardFooter>
-            </Card>
+
+                <div className="mt-7">
+                  {plan.id === "free" ? (
+                    <Link
+                      href="/register"
+                      className={cn(
+                        buttonVariants({ size: "lg" }),
+                        "h-11 w-full rounded-full border border-foreground/15 bg-foreground/[0.02] text-foreground hover:bg-foreground/[0.06]",
+                      )}
+                    >
+                      {plan.cta}
+                    </Link>
+                  ) : (
+                    <Link
+                      href={`/checkout/${plan.id}?period=${period}`}
+                      className={cn(
+                        buttonVariants({ size: "lg" }),
+                        "h-11 w-full rounded-full",
+                        plan.highlighted
+                          ? "bg-[#ecb756] text-[#1a1840] hover:bg-[#f3cd84] hover:text-[#1a1840]"
+                          : "border border-foreground/15 bg-foreground/[0.02] text-foreground hover:bg-foreground/[0.06]",
+                      )}
+                    >
+                      {plan.cta}
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </article>
           );
         })}
       </div>

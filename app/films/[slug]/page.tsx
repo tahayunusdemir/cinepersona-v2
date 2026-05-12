@@ -10,7 +10,7 @@ import {
   StarIcon,
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
+import { FrameTag } from "@/components/cinema/atoms";
 import { FilmActions } from "@/components/films/film-actions";
 import { getFilmDetail, parseSlug } from "@/lib/films/detail";
 import { filmSlug } from "@/lib/films/slug";
@@ -55,8 +55,6 @@ export default async function FilmDetailPage({ params }: PageProps) {
   const detail = await getFilmDetail(tmdbId);
   if (!detail) notFound();
 
-  // Redirect non-canonical slugs (`/films/123`, `/films/123-old-title`) to
-  // the current canonical form so we don't serve duplicate-content 200s.
   const canonicalSlug = filmSlug(detail.tmdb_id, detail.title);
   if (slug !== canonicalSlug) redirect(`/films/${canonicalSlug}`);
 
@@ -76,47 +74,61 @@ export default async function FilmDetailPage({ params }: PageProps) {
   const topCast = detail.cast.slice(0, 10);
 
   return (
-    <article className="pb-16">
+    <article className="relative isolate overflow-hidden pb-20">
+      {/* Backdrop */}
       {detail.backdrop_path ? (
-        <div className="relative h-[180px] w-full overflow-hidden bg-muted sm:h-[260px] md:h-[320px]">
+        <div className="relative h-[220px] w-full overflow-hidden bg-panel sm:h-[320px] md:h-[420px]">
           <Image
             src={`https://image.tmdb.org/t/p/w1280${detail.backdrop_path}`}
             alt=""
             fill
             priority
             sizes="100vw"
-            className="object-cover opacity-50"
+            className="object-cover opacity-40"
           />
           <div
             aria-hidden
-            className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background"
+            className="absolute inset-0 bg-gradient-to-b from-panel/40 via-panel/70 to-background"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,var(--panel)_85%)]"
           />
         </div>
-      ) : null}
+      ) : (
+        <div className="h-[120px] w-full bg-[radial-gradient(ellipse_at_top,var(--bloom)_0%,transparent_55%)] opacity-50" />
+      )}
 
-      <div className="mx-auto w-full max-w-6xl px-4 pt-8 sm:px-6">
+      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
         <Link
           href="/films"
-          className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+          className="mt-6 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:text-[#ecb756]"
         >
-          <ChevronLeftIcon className="size-4" />
+          <ChevronLeftIcon className="size-3" />
           Back to films
         </Link>
 
-        <div className="flex flex-col gap-6 sm:flex-row">
+        <div
+          className={
+            detail.backdrop_path
+              ? "relative -mt-24 flex flex-col gap-7 sm:-mt-32 sm:flex-row"
+              : "mt-8 flex flex-col gap-7 sm:flex-row"
+          }
+        >
+          {/* Poster */}
           <div className="shrink-0">
-            <div className="overflow-hidden rounded-lg bg-muted shadow-lg">
+            <div className="overflow-hidden rounded-xl border border-foreground/10 bg-panel shadow-2xl ring-1 ring-[#ecb756]/10">
               {detail.poster_path ? (
                 <Image
                   src={`https://image.tmdb.org/t/p/w342${detail.poster_path}`}
                   alt={`${detail.title} poster`}
-                  width={220}
-                  height={330}
+                  width={240}
+                  height={360}
                   priority
-                  className="h-auto w-[180px] sm:w-[220px]"
+                  className="h-auto w-[200px] sm:w-[240px]"
                 />
               ) : (
-                <div className="flex h-[330px] w-[220px] flex-col items-center justify-center gap-2 text-muted-foreground">
+                <div className="flex h-[360px] w-[240px] flex-col items-center justify-center gap-2 text-muted-foreground">
                   <ClapperboardIcon className="size-8" />
                   <span className="px-3 text-center text-xs">
                     {detail.title}
@@ -126,50 +138,57 @@ export default async function FilmDetailPage({ params }: PageProps) {
             </div>
           </div>
 
-          <div className="flex min-w-0 flex-1 flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+          {/* Meta */}
+          <div className="flex min-w-0 flex-1 flex-col gap-5 pt-6 sm:pt-24">
+            <div className="flex flex-col gap-2">
+              <FrameTag>
+                {detail.tmdb_id} · {year ?? "—"}
+              </FrameTag>
+              <h1 className="font-display text-balance text-4xl leading-[1.04] tracking-tight sm:text-5xl">
                 {detail.title}
                 {year ? (
-                  <span className="ml-2 font-normal text-muted-foreground">
+                  <span className="ml-3 font-display text-3xl text-muted-foreground sm:text-4xl">
                     ({year})
                   </span>
                 ) : null}
               </h1>
               {detail.original_title !== detail.title ? (
-                <p className="text-sm text-muted-foreground italic">
+                <p className="text-sm text-muted-foreground">
                   {detail.original_title}
                 </p>
               ) : null}
               {detail.tagline ? (
-                <p className="text-sm text-muted-foreground italic">
-                  &ldquo;{detail.tagline}&rdquo;
+                <p className="mt-2 max-w-xl text-base text-foreground/70">
+                  “{detail.tagline}”
                 </p>
               ) : null}
             </div>
 
-            <dl className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+            <dl className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
               {detail.release_date ? (
-                <div className="flex items-center gap-1">
-                  <CalendarIcon className="size-3.5" aria-hidden />
+                <div className="flex items-center gap-1.5">
+                  <CalendarIcon className="size-3.5 text-[#ecb756]" aria-hidden />
                   <dd>{formatDate(detail.release_date)}</dd>
                 </div>
               ) : null}
               {detail.runtime ? (
-                <div className="flex items-center gap-1">
-                  <ClockIcon className="size-3.5" aria-hidden />
+                <div className="flex items-center gap-1.5">
+                  <ClockIcon className="size-3.5 text-[#ecb756]" aria-hidden />
                   <dd>{formatRuntime(detail.runtime)}</dd>
                 </div>
               ) : null}
               {detail.vote_average && detail.vote_count ? (
-                <div className="flex items-center gap-1">
-                  <StarIcon className="size-3.5 text-amber-500" aria-hidden />
+                <div className="flex items-center gap-1.5">
+                  <StarIcon
+                    className="size-3.5 fill-[#ecb756] text-[#ecb756]"
+                    aria-hidden
+                  />
                   <dd>
-                    <span className="text-foreground font-medium tabular-nums">
+                    <span className="font-medium tabular-nums text-foreground">
                       {detail.vote_average.toFixed(1)}
                     </span>{" "}
                     <span className="text-xs">
-                      ({detail.vote_count.toLocaleString("en-US")} votes)
+                      ({detail.vote_count.toLocaleString("en-US")})
                     </span>
                   </dd>
                 </div>
@@ -179,9 +198,12 @@ export default async function FilmDetailPage({ params }: PageProps) {
             {detail.genres.length > 0 ? (
               <div className="flex flex-wrap gap-1.5">
                 {detail.genres.map((g) => (
-                  <Badge key={g.id} variant="secondary">
+                  <span
+                    key={g.id}
+                    className="inline-flex items-center rounded-full border border-foreground/10 bg-foreground/[0.02] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground"
+                  >
                     {g.name}
-                  </Badge>
+                  </span>
                 ))}
               </div>
             ) : null}
@@ -197,16 +219,23 @@ export default async function FilmDetailPage({ params }: PageProps) {
         </div>
 
         {detail.overview ? (
-          <section className="mt-10 max-w-3xl">
-            <h2 className="mb-2 text-lg font-semibold">Overview</h2>
-            <p className="text-pretty leading-relaxed text-muted-foreground">
-              {detail.overview}
-            </p>
+          <section className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-12">
+            <div className="lg:col-span-3">
+              <FrameTag>Synopsis</FrameTag>
+              <h2 className="mt-3 font-display text-2xl tracking-tight">
+                Overview
+              </h2>
+            </div>
+            <div className="lg:col-span-9">
+              <p className="max-w-3xl text-pretty text-base leading-relaxed text-foreground/85">
+                {detail.overview}
+              </p>
+            </div>
           </section>
         ) : null}
 
         {(directors.length > 0 || writers.length > 0) && (
-          <section className="mt-8 grid gap-4 sm:grid-cols-2">
+          <section className="mt-12 grid gap-4 sm:grid-cols-2">
             {directors.length > 0 ? (
               <CrewBlock
                 label={directors.length > 1 ? "Directors" : "Director"}
@@ -220,15 +249,18 @@ export default async function FilmDetailPage({ params }: PageProps) {
         )}
 
         {topCast.length > 0 ? (
-          <section className="mt-10">
-            <h2 className="mb-3 text-lg font-semibold">Top cast</h2>
-            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5">
+          <section className="mt-14">
+            <FrameTag>Cast list</FrameTag>
+            <h2 className="mt-3 font-display text-2xl tracking-tight">
+              Top cast
+            </h2>
+            <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5">
               {topCast.map((person) => (
                 <li
                   key={person.credit_id}
-                  className="overflow-hidden rounded-md border"
+                  className="overflow-hidden rounded-xl border border-foreground/10 bg-panel"
                 >
-                  <div className="aspect-[2/3] bg-muted">
+                  <div className="aspect-[2/3] bg-foreground/[0.02]">
                     {person.profile_path ? (
                       <Image
                         src={`https://image.tmdb.org/t/p/w185${person.profile_path}`}
@@ -244,7 +276,7 @@ export default async function FilmDetailPage({ params }: PageProps) {
                       </div>
                     )}
                   </div>
-                  <div className="px-2 py-1.5">
+                  <div className="px-3 py-2">
                     <p className="truncate text-sm font-medium">{person.name}</p>
                     {person.character ? (
                       <p className="truncate text-xs text-muted-foreground">
@@ -270,11 +302,11 @@ function CrewBlock({
   people: { credit_id: string; name: string; job: string | null }[];
 }) {
   return (
-    <div>
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+    <div className="rounded-2xl border border-foreground/10 bg-panel p-5">
+      <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#ecb756]">
         {label}
       </h3>
-      <ul className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-sm">
+      <ul className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-sm">
         {people.map((p) => (
           <li key={p.credit_id}>
             <span className="font-medium">{p.name}</span>

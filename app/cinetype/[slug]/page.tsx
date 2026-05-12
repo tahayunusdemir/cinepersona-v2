@@ -2,18 +2,19 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeftIcon, ArrowRightIcon, ClapperboardIcon, FilmIcon, TagIcon, UserIcon } from "lucide-react";
-
-import { TypeCard } from "@/components/cinepersona/type-card";
-import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+  ArrowLeftIcon,
+  ArrowRight,
+  ArrowRightIcon,
+  ClapperboardIcon,
+  FilmIcon,
+  TagIcon,
+  UserIcon,
+} from "lucide-react";
+
+import { FrameTag } from "@/components/cinema/atoms";
+import { TypeCard } from "@/components/cinepersona/type-card";
+import { buttonVariants } from "@/components/ui/button";
 import {
   axes,
   getGroup,
@@ -45,9 +46,6 @@ export async function generateMetadata({
   };
 }
 
-// Render only the narrative arc here — overview / watching style /
-// discovery / conversation / conclusion. Strengths & weaknesses live in
-// their own dedicated cards below; recommendations have their own card too.
 const NARRATIVE_SECTIONS = new Set([
   "overview",
   "watching-style",
@@ -78,151 +76,197 @@ export default async function TypeProfilePage({ params }: PageParams) {
   const peers = typesInGroup(group.slug).filter((t) => t.code !== type.code);
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 pb-24 sm:px-6">
-      <nav aria-label="Breadcrumb" className="pt-8">
-        <Link
-          href="/cinetype"
-          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeftIcon className="size-3" />
-          All types
-        </Link>
-      </nav>
+    <div className="relative isolate overflow-hidden">
 
-      <header className="mt-6 space-y-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-            {type.code}
-          </span>
-          <Link href={`/cinetype/groups/${group.slug}`}>
-            <Badge variant="secondary" className="hover:bg-secondary/80">
-              {group.name}
-            </Badge>
+      <div className="mx-auto w-full max-w-5xl px-4 pb-24 sm:px-6">
+        <nav aria-label="Breadcrumb" className="pt-8">
+          <Link
+            href="/cinetype"
+            className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:text-[#ecb756]"
+          >
+            <ArrowLeftIcon className="size-3" />
+            All types
           </Link>
-          <Link href={`/cinetype/strategies/${strategy.slug}`}>
-            <Badge variant="outline" className="hover:bg-muted">
-              {strategy.name}
-            </Badge>
-          </Link>
-        </div>
-        <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
-          {type.name}
-        </h1>
-        <p className="text-base text-muted-foreground sm:text-lg">
-          {type.tagline}
-        </p>
-        <blockquote className="mt-2 border-l-2 border-foreground/30 pl-4 text-base italic text-foreground/80">
-          “{type.quote}”
-        </blockquote>
-      </header>
+        </nav>
 
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle className="text-base">Type breakdown</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {/* HEADER */}
+        <header className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12">
+          <div className="lg:col-span-8">
+
+            <div className="mt-5 flex items-baseline gap-5">
+              <span className="font-display text-[88px] leading-none text-[#ecb756] sm:text-[120px]">
+                {type.code}
+              </span>
+              <div className="flex flex-wrap gap-2 pb-3">
+                <Link
+                  href={`/cinetype/groups/${group.slug}`}
+                  className="rounded-full border border-foreground/15 bg-foreground/[0.02] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:border-[#ecb756]/40 hover:text-foreground"
+                >
+                  {group.name}
+                </Link>
+                <Link
+                  href={`/cinetype/strategies/${strategy.slug}`}
+                  className="rounded-full border border-foreground/15 bg-foreground/[0.02] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:border-[#ecb756]/40 hover:text-foreground"
+                >
+                  {strategy.name}
+                </Link>
+              </div>
+            </div>
+
+            <h1 className="mt-5 font-display text-balance text-4xl tracking-tight sm:text-6xl">
+              {type.name}
+            </h1>
+            <p className="mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
+              {type.tagline}
+            </p>
+          </div>
+
+          <div className="lg:col-span-4 lg:flex lg:items-end">
+            <blockquote className="relative rounded-2xl border border-foreground/10 bg-panel p-6">
+              <span
+                aria-hidden
+                className="absolute left-6 top-2 font-display text-5xl leading-none text-[#ecb756]/30"
+              >
+                “
+              </span>
+              <p className="relative pt-5 font-display text-lg leading-snug text-foreground/90">
+                {type.quote}
+              </p>
+            </blockquote>
+          </div>
+        </header>
+
+        {/* TYPE BREAKDOWN */}
+        <section className="mt-12">
+          <h2 className="mt-3 font-display text-2xl tracking-tight">
+            Type breakdown
+          </h2>
+          <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {axes.map((axis) => {
               const letter =
                 axis.id === 1
                   ? type.axes.a1
                   : axis.id === 2
-                  ? type.axes.a2
-                  : axis.id === 3
-                  ? type.axes.a3
-                  : type.axes.a4;
+                    ? type.axes.a2
+                    : axis.id === 3
+                      ? type.axes.a3
+                      : type.axes.a4;
               const pole =
                 axis.primary.letter === letter ? axis.primary : axis.opposite;
               return (
-                <li key={axis.id} className="space-y-1">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                <li
+                  key={axis.id}
+                  className="rounded-xl border border-foreground/10 bg-panel p-4"
+                >
+                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                     {axis.name}
                   </p>
-                  <p className="font-medium">
-                    <span className="font-mono text-foreground">{letter}</span>{" "}
-                    · {pole.name}
-                  </p>
+                  <div className="mt-3 flex items-baseline gap-2">
+                    <span className="font-display text-4xl leading-none text-[#ecb756]">
+                      {letter}
+                    </span>
+                    <span className="text-sm text-foreground/85">
+                      {pole.name}
+                    </span>
+                  </div>
                 </li>
               );
             })}
           </ul>
-        </CardContent>
-      </Card>
+        </section>
 
-      <Separator className="my-10" />
+        {/* NARRATIVE */}
+        <section className="mt-16 space-y-12">
+          {profile.sections
+            .filter((s) => NARRATIVE_SECTIONS.has(s.slug))
+            .map((section, i) => (
+              <article key={section.slug} className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+                <div className="lg:col-span-3">
+                  <h2 className="mt-3 font-display text-2xl leading-tight tracking-tight sm:text-3xl">
+                    {section.title}
+                  </h2>
+                </div>
+                <div className="space-y-4 lg:col-span-9">
+                  {section.body.split("\n\n").map((para, j) => (
+                    <p
+                      key={j}
+                      className="text-base leading-relaxed text-foreground/85"
+                    >
+                      {para}
+                    </p>
+                  ))}
+                </div>
+              </article>
+            ))}
+        </section>
 
-      {profile.sections
-        .filter((s) => NARRATIVE_SECTIONS.has(s.slug))
-        .map((section) => (
-          <section key={section.slug} className="mt-10 space-y-3">
-            <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
-              {section.title}
-            </h2>
-            {section.body.split("\n\n").map((para, i) => (
-              <p key={i} className="text-base leading-relaxed text-foreground/90">
-                {para}
+        {/* STRENGTHS / BLIND SPOTS */}
+        <section className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="rounded-2xl border border-foreground/10 bg-panel p-6">
+            <FrameTag>Strengths</FrameTag>
+            <h3 className="mt-3 font-display text-xl tracking-tight">
+              What sharpens the print.
+            </h3>
+            <ul className="mt-5 space-y-4 text-sm">
+              {strengths.map((s) => (
+                <li key={s.label} className="border-l-2 border-[#ecb756] pl-4">
+                  <p className="font-medium text-foreground">{s.label}</p>
+                  <p className="mt-0.5 text-muted-foreground">
+                    {s.description}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="rounded-2xl border border-foreground/10 bg-panel p-6">
+            <FrameTag>Blind spots</FrameTag>
+            <h3 className="mt-3 font-display text-xl tracking-tight">
+              Frames that go out of focus.
+            </h3>
+            <ul className="mt-5 space-y-4 text-sm">
+              {weaknesses.map((s) => (
+                <li
+                  key={s.label}
+                  className="border-l-2 border-foreground/15 pl-4"
+                >
+                  <p className="font-medium text-foreground">{s.label}</p>
+                  <p className="mt-0.5 text-muted-foreground">
+                    {s.description}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        {/* RECOMMENDATIONS */}
+        <section className="mt-16">
+          <h2 className="mt-3 font-display text-3xl tracking-tight sm:text-4xl">
+            What they’d love.
+          </h2>
+          {profile.sections
+            .filter((s) => s.slug === "recommendations")
+            .map((s) => (
+              <p
+                key={s.slug}
+                className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground"
+              >
+                {s.body}
               </p>
             ))}
-          </section>
-        ))}
 
-      <section className="mt-10 grid gap-6 sm:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Strengths</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-3 text-sm">
-              {strengths.map((s) => (
-                <li key={s.label}>
-                  <p className="font-medium text-foreground">{s.label}</p>
-                  <p className="text-muted-foreground">{s.description}</p>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Blind Spots</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-3 text-sm">
-              {weaknesses.map((s) => (
-                <li key={s.label}>
-                  <p className="font-medium text-foreground">{s.label}</p>
-                  <p className="text-muted-foreground">{s.description}</p>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section className="mt-10">
-        <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
-          What they&apos;d love
-        </h2>
-        {profile.sections
-          .filter((s) => s.slug === "recommendations")
-          .map((s) => (
-            <p
-              key={s.slug}
-              className="mt-3 text-base leading-relaxed text-foreground/80"
-            >
-              {s.body}
-            </p>
-          ))}
-        <Card className="mt-4">
-          <CardHeader className="flex-row items-center gap-2 space-y-0">
-            <ClapperboardIcon className="size-4 text-muted-foreground" />
-            <CardTitle className="text-sm">Directors</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="grid grid-cols-3 gap-3">
+          {/* Directors */}
+          <div className="mt-8 rounded-2xl border border-foreground/10 bg-panel p-6">
+            <div className="flex items-center gap-2">
+              <ClapperboardIcon className="size-4 text-[#ecb756]" />
+              <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                Directors
+              </h3>
+            </div>
+            <ul className="mt-5 grid grid-cols-3 gap-3 sm:gap-4">
               {directors.map((r) => (
                 <li key={r.title} className="flex flex-col gap-2">
-                  <div className="relative aspect-[2/3] overflow-hidden rounded-md bg-muted ring-1 ring-border/40">
+                  <div className="relative aspect-[2/3] overflow-hidden rounded-xl border border-foreground/10 bg-foreground/[0.02]">
                     {r.imagePath ? (
                       <Image
                         src={`https://image.tmdb.org/t/p/w342${r.imagePath}`}
@@ -237,25 +281,26 @@ export default async function TypeProfilePage({ params }: PageParams) {
                       </div>
                     )}
                   </div>
-                  <p className="line-clamp-2 text-sm font-medium text-foreground">
+                  <p className="line-clamp-2 text-sm font-medium">
                     {r.title}
                   </p>
                 </li>
               ))}
             </ul>
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card className="mt-4">
-          <CardHeader className="flex-row items-center gap-2 space-y-0">
-            <FilmIcon className="size-4 text-muted-foreground" />
-            <CardTitle className="text-sm">Films</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+          {/* Films */}
+          <div className="mt-4 rounded-2xl border border-foreground/10 bg-panel p-6">
+            <div className="flex items-center gap-2">
+              <FilmIcon className="size-4 text-[#ecb756]" />
+              <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                Films
+              </h3>
+            </div>
+            <ul className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
               {films.map((r) => (
                 <li key={r.title} className="flex flex-col gap-2">
-                  <div className="relative aspect-[2/3] overflow-hidden rounded-md bg-muted ring-1 ring-border/40">
+                  <div className="relative aspect-[2/3] overflow-hidden rounded-xl border border-foreground/10 bg-foreground/[0.02]">
                     {r.imagePath ? (
                       <Image
                         src={`https://image.tmdb.org/t/p/w342${r.imagePath}`}
@@ -271,11 +316,11 @@ export default async function TypeProfilePage({ params }: PageParams) {
                     )}
                   </div>
                   <div className="space-y-0.5">
-                    <p className="line-clamp-2 text-sm font-medium text-foreground">
+                    <p className="line-clamp-2 text-sm font-medium">
                       {r.title}
                     </p>
                     {r.year ? (
-                      <p className="text-[11px] text-muted-foreground">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                         {r.year}
                       </p>
                     ) : null}
@@ -283,77 +328,88 @@ export default async function TypeProfilePage({ params }: PageParams) {
                 </li>
               ))}
             </ul>
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card className="mt-4">
-          <CardHeader className="flex-row items-center gap-2 space-y-0">
-            <TagIcon className="size-4 text-muted-foreground" />
-            <CardTitle className="text-sm">Tags</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
+          {/* Tags */}
+          <div className="mt-4 rounded-2xl border border-foreground/10 bg-panel p-6">
+            <div className="flex items-center gap-2">
+              <TagIcon className="size-4 text-[#ecb756]" />
+              <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                Tags
+              </h3>
+            </div>
+            <div className="mt-5 flex flex-wrap gap-2">
               {genres.map((r) => (
-                <Badge key={r.title} variant="secondary" className="font-mono text-xs lowercase">
+                <span
+                  key={r.title}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[#ecb756]/20 bg-[#ecb756]/10 px-3 py-1 font-mono text-[11px] lowercase text-[#ecb756]"
+                >
                   #{r.title.replace(/\s+/g, "-")}
-                </Badge>
+                </span>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      </section>
-
-      {peers.length > 0 ? (
-        <section className="mt-12">
-          <div className="mb-4 flex items-baseline justify-between gap-2">
-            <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
-              Other {group.name}
-            </h2>
-            <Link
-              href={`/cinetype/groups/${group.slug}`}
-              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-            >
-              Open group
-              <ArrowRightIcon className="size-3" />
-            </Link>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {peers.map((peer) => (
-              <TypeCard key={peer.code} type={peer} />
-            ))}
           </div>
         </section>
-      ) : null}
 
-      <section className="mt-12 flex flex-col items-center gap-3 rounded-xl border border-dashed border-border p-6 text-center sm:flex-row sm:justify-between sm:text-left">
-        <div>
-          <p className="text-sm font-medium text-foreground">
-            Not sure if this is you?
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Take the 48-question CineTest — you&apos;ll know in about ten
-            minutes.
-          </p>
-        </div>
-        <Link
-          href="/cinetest"
-          className={cn(buttonVariants({ variant: "default" }))}
-        >
-          Take the test
-        </Link>
-      </section>
+        {/* PEERS */}
+        {peers.length > 0 && (
+          <section className="mt-16">
+            <div className="mb-5 flex items-baseline justify-between gap-2">
+              <div>
+                <h2 className="mt-3 font-display text-2xl tracking-tight sm:text-3xl">
+                  Other {group.name}
+                </h2>
+              </div>
+              <Link
+                href={`/cinetype/groups/${group.slug}`}
+                className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:text-[#ecb756]"
+              >
+                Open group
+                <ArrowRightIcon className="size-3" />
+              </Link>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {peers.map((peer) => (
+                <TypeCard key={peer.code} type={peer} />
+              ))}
+            </div>
+          </section>
+        )}
 
-      <p className="mt-8 text-xs text-muted-foreground">
-        Strategy: <span className="text-foreground">{strategy.name}</span> —{" "}
-        {strategy.tagline}{" "}
-        <Link
-          href={`/cinetype/strategies/${strategy.slug}`}
-          className="underline-offset-4 hover:text-foreground hover:underline"
-        >
-          Learn more
-        </Link>
-        {" "}({typesWithStrategy(strategy.slug).length} types share it).
-      </p>
+        {/* CTA */}
+        <section className="mt-16 overflow-hidden rounded-2xl border border-dashed border-foreground/15 bg-foreground/[0.015] p-7 sm:flex sm:items-center sm:justify-between sm:p-8">
+          <div>
+            <FrameTag>Curious?</FrameTag>
+            <p className="mt-3 font-display text-xl tracking-tight">
+              Not sure if this is you?
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Take the 48-question CineTest — you’ll know in about ten minutes.
+            </p>
+          </div>
+          <Link
+            href="/cinetest"
+            className={cn(
+              buttonVariants({ size: "lg" }),
+              "group mt-5 inline-flex h-11 rounded-full bg-[#ecb756] px-6 text-sm font-medium text-[#1a1840] hover:bg-[#f3cd84] hover:text-[#1a1840] sm:mt-0",
+            )}
+          >
+            Take the test
+            <ArrowRight className="ml-1 size-4 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </section>
+
+        <p className="mt-8 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+          Strategy · {strategy.name} — {strategy.tagline}{" "}
+          <Link
+            href={`/cinetype/strategies/${strategy.slug}`}
+            className="underline-offset-4 hover:text-[#ecb756] hover:underline"
+          >
+            Learn more
+          </Link>{" "}
+          ({typesWithStrategy(strategy.slug).length} types share it)
+        </p>
+      </div>
     </div>
   );
 }

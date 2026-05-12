@@ -6,7 +6,6 @@ import { CinePersonaCard } from "@/components/profile/cinepersona-card";
 import { ComingSoon } from "@/components/profile/coming-soon";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { getCinePersonaForUser } from "@/lib/profile/cinepersona-queries";
 import {
   getProfileByUsername,
@@ -73,27 +72,33 @@ export default async function ProfileOverviewPage({
           username={result.profile.username}
         />
       ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
-            <FilmIcon className="size-8 text-muted-foreground" />
-            <div className="space-y-1">
-              <Badge variant="secondary">No CineType yet</Badge>
-              <p className="text-sm text-muted-foreground">
-                {result.profile.isSelf
-                  ? "Take the CineTest to see your type and pin your film picks here."
-                  : `@${result.profile.username} hasn't saved a CineType result yet.`}
-              </p>
-            </div>
-            {result.profile.isSelf ? (
-              <Link
-                href="/cinetest/take"
-                className={cn(buttonVariants({ variant: "default" }))}
-              >
-                Take the CineTest
-              </Link>
-            ) : null}
-          </CardContent>
-        </Card>
+        <div className="relative overflow-hidden rounded-2xl border border-dashed border-foreground/15 bg-foreground/[0.015] p-10 text-center">
+          <div className="mx-auto grid size-12 place-items-center rounded-full border border-[#ecb756]/20 bg-[#ecb756]/10 text-[#ecb756]">
+            <FilmIcon className="size-5" />
+          </div>
+          <Badge
+            variant="outline"
+            className="mt-5 border-foreground/15 bg-foreground/[0.02] font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground"
+          >
+            No CineType yet
+          </Badge>
+          <p className="mx-auto mt-3 max-w-sm text-sm text-muted-foreground">
+            {result.profile.isSelf
+              ? "Take the CineTest to see your type and pin your film picks here."
+              : `@${result.profile.username} hasn’t saved a CineType result yet.`}
+          </p>
+          {result.profile.isSelf ? (
+            <Link
+              href="/cinetest/take"
+              className={cn(
+                buttonVariants({ size: "lg" }),
+                "mt-6 inline-flex h-11 rounded-full bg-[#ecb756] px-6 text-sm font-medium text-[#1a1840] hover:bg-[#f3cd84] hover:text-[#1a1840]",
+              )}
+            >
+              Take the CineTest
+            </Link>
+          ) : null}
+        </div>
       )}
     </div>
   );

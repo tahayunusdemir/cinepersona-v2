@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
+  ArrowRight,
   ClapperboardIcon,
   MailIcon,
   SparklesIcon,
@@ -13,10 +15,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
 import { siteConfig } from "@/lib/site";
 import { team, type TeamMember } from "@/lib/team";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "About",
@@ -38,19 +40,45 @@ function LinkedinIcon({ className }: { className?: string }) {
 
 const steps = [
   {
+    n: "01",
     icon: ClapperboardIcon,
-    title: "Take the test",
-    body: "A short set of focused prompts — no long quizzes or homework. Answer honestly; there are no right answers.",
+    title: "Take the CineTest",
+    body: "A short, focused set of prompts — no long quizzes or homework. Answer honestly; there are no right answers.",
   },
   {
+    n: "02",
     icon: SparklesIcon,
     title: "Learn your CineType",
     body: "We translate your answers into a CineType: a compact profile of how you watch and what you respond to on screen.",
   },
   {
+    n: "03",
     icon: WandSparklesIcon,
-    title: "Get matches",
+    title: "Get CineMatches",
     body: "CineMatch turns your CineType into film recommendations that feel like you — without the noise of generic top-100 lists.",
+  },
+];
+
+const principles = [
+  {
+    n: "I.",
+    title: "No 1–10 ratings.",
+    body: "A film is more than a score. We map texture, pace, era, and feel — not a single number that flattens it all.",
+  },
+  {
+    n: "II.",
+    title: "No favorite-director gatekeeping.",
+    body: "You don’t have to name-drop Tarkovsky to belong. The test reads how you watch, not what you’ve memorized.",
+  },
+  {
+    n: "III.",
+    title: "Small over scale.",
+    body: "We’d rather a sharp circle of viewers who get you than a billion ratings sliding past in a feed.",
+  },
+  {
+    n: "IV.",
+    title: "Recommendations you can defend.",
+    body: "Every match comes with reasoning you can read — and disagree with. No black box. No engagement bait.",
   },
 ];
 
@@ -65,15 +93,15 @@ const faqs = [
   },
   {
     q: "Is it free?",
-    a: `${siteConfig.name} is in early access — every feature is open and there's no card on file. Paid plans aren't live yet; when they launch, upgrading will always be opt-in.`,
+    a: `${siteConfig.name} is in early access — every feature is open and there’s no card on file. Paid plans aren’t live yet; when they launch, upgrading will always be opt-in.`,
   },
   {
     q: "How is my data handled?",
-    a: "We store the minimum needed to run your account and produce recommendations. We don't sell your data. You can deactivate your account from settings at any time.",
+    a: "We store the minimum needed to run your account and produce recommendations. We don’t sell your data. You can deactivate your account from settings at any time.",
   },
   {
     q: "Is this an official film database?",
-    a: `No. ${siteConfig.name} is an independent project built by a small team. We're not affiliated with any studio, streaming service, or rating site.`,
+    a: `No. ${siteConfig.name} is an independent project built by a small team. We’re not affiliated with any studio, streaming service, or rating site.`,
   },
   {
     q: "Found a bug or have feedback?",
@@ -81,126 +109,336 @@ const faqs = [
   },
 ];
 
-function MemberCard({ member }: { member: TeamMember }) {
+const milestones = [
+  { date: "Spring 2025", label: "Idea sketched on a napkin in a film cafe." },
+  { date: "Summer 2025", label: "First CineTest prototype with 8 traits." },
+  { date: "Autumn 2025", label: "16 CineTypes finalized. Closed alpha opens." },
+  { date: "Winter 2026", label: "CineMatch launches. Early access public." },
+  { date: "Spring 2026", label: "Movie Night sessions enter private beta." },
+];
+
+function MemberCard({ member, index }: { member: TeamMember; index: number }) {
+  const initials = member.name
+    .split(" ")
+    .map((s) => s[0])
+    .slice(0, 2)
+    .join("");
   return (
-    <Card className="h-full">
-      <CardHeader className="items-center text-center">
-        <Badge variant="secondary">{member.role}</Badge>
-        <h3 className="mt-2 text-base font-medium leading-snug">
-          {member.name}
-        </h3>
-        <p className="text-sm text-muted-foreground">{member.department}</p>
-        <p className="text-sm">{member.university}</p>
-      </CardHeader>
-      <CardContent className="mt-auto flex items-center justify-center gap-4 pt-0">
-        <a
-          href={`mailto:${member.email}`}
-          aria-label={`Email ${member.name}`}
-          className="text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <MailIcon className="size-5" />
-        </a>
-        <a
-          href={member.linkedin}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`${member.name} on LinkedIn`}
-          className="text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <LinkedinIcon className="size-5" />
-        </a>
-      </CardContent>
-    </Card>
+    <article className="group relative overflow-hidden rounded-2xl border border-foreground/10 bg-panel p-7 transition-all hover:border-foreground/20">
+      <div
+        aria-hidden
+        className="absolute -right-16 -top-16 size-56 rounded-full bg-[#ecb756]/[0.06] blur-3xl transition-opacity duration-500 group-hover:opacity-100"
+      />
+      <div className="relative">
+        <div className="flex items-center justify-between">
+          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            0{index + 1} · {member.role}
+          </span>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <a
+              href={`mailto:${member.email}`}
+              aria-label={`Email ${member.name}`}
+              className="transition-colors hover:text-[#ecb756]"
+            >
+              <MailIcon className="size-4" />
+            </a>
+            <a
+              href={member.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${member.name} on LinkedIn`}
+              className="transition-colors hover:text-[#ecb756]"
+            >
+              <LinkedinIcon className="size-4" />
+            </a>
+          </div>
+        </div>
+
+        <div className="mt-8 flex items-baseline gap-4">
+          <span className="font-display text-5xl leading-none text-[#ecb756]">
+            {initials}
+          </span>
+          <div>
+            <h3 className="font-display text-xl leading-tight tracking-tight">
+              {member.name}
+            </h3>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {member.department}
+            </p>
+          </div>
+        </div>
+
+        <p className="mt-6 border-t border-foreground/10 pt-4 text-xs text-muted-foreground">
+          {member.university}
+        </p>
+      </div>
+    </article>
   );
 }
 
 export default function AboutPage() {
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-12 px-4 pt-12 pb-24 sm:px-6 md:space-y-16">
-      <section className="space-y-3">
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          About {siteConfig.name}
-        </h1>
-        <p className="text-base text-muted-foreground sm:text-lg">
-          {siteConfig.name} is a small project with a simple goal: help you
-          discover films that genuinely fit your taste. We turn the way you
-          watch into a CineType and recommend movies that feel made for you —
-          built by a team that cares as much about cinema as it does about the
-          craft behind the product.
-        </p>
+    <div>
+      {/* ============== HERO ============== */}
+      <section className="mx-auto w-full max-w-6xl px-4 pb-16 pt-16 sm:px-6 sm:pt-24">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-end">
+          <div className="lg:col-span-8">
+            <h1 className="font-display text-[44px] leading-[1.02] tracking-tight sm:text-[64px] lg:text-[72px]">
+              A film app that{" "}
+              <span className="text-[#ecb756]">
+                reads how you watch.
+              </span>
+            </h1>
+          </div>
+          <div className="lg:col-span-4">
+            <p className="text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
+              {siteConfig.name} is a small project with one clean goal: turn
+              the way you watch into a CineType and recommend films that
+              feel made for you — not for the algorithm.
+            </p>
+          </div>
+        </div>
       </section>
 
-      <section className="space-y-4 md:space-y-6">
-        <h2 className="text-xl font-semibold tracking-tight md:text-2xl">
-          How it works
-        </h2>
-        <ol className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
-          {steps.map((step, index) => {
+      {/* ============== HOW IT WORKS ============== */}
+      <section className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
+        <div className="mb-12">
+          <h2 className="max-w-2xl font-display text-3xl tracking-tight sm:text-5xl">
+            How it works,{" "}
+            <span className="text-muted-foreground">
+              in three takes.
+            </span>
+          </h2>
+        </div>
+        <ol className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-foreground/10 bg-foreground/5 md:grid-cols-3">
+          {steps.map((step) => {
             const Icon = step.icon;
             return (
-              <li key={step.title}>
-                <Card className="h-full">
-                  <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                        <Icon className="size-4" />
-                      </div>
-                      <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Step {index + 1}
-                      </span>
-                    </div>
-                    <h3 className="mt-2 text-base font-medium leading-snug">
-                      {step.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {step.body}
-                    </p>
-                  </CardHeader>
-                </Card>
+              <li
+                key={step.title}
+                className="group bg-panel p-7 transition-colors hover:bg-panel-2 sm:p-8"
+              >
+                <div className="flex items-baseline justify-between">
+                  <span className="font-display text-6xl leading-none text-[#ecb756]/90 transition-transform duration-500 group-hover:-translate-y-0.5">
+                    {step.n}
+                  </span>
+                  <span className="inline-flex size-9 items-center justify-center rounded-full border border-[#ecb756]/20 bg-[#ecb756]/10 text-[#ecb756]">
+                    <Icon className="size-4" />
+                  </span>
+                </div>
+                <h3 className="mt-8 font-display text-2xl tracking-tight">
+                  {step.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {step.body}
+                </p>
               </li>
             );
           })}
         </ol>
       </section>
 
-      <section className="space-y-4 md:space-y-6">
-        <h2 className="text-xl font-semibold tracking-tight md:text-2xl">
-          The team
-        </h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
-          {team.map((member) => (
-            <MemberCard key={member.email} member={member} />
-          ))}
+      {/* ============== PRINCIPLES ============== */}
+      <section>
+        <div className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
+            <div className="lg:col-span-5">
+              <h2 className="font-display text-3xl tracking-tight sm:text-5xl">
+                Four rules{" "}
+                <span className="text-[#ecb756]">
+                  we keep on the wall.
+                </span>
+              </h2>
+              <p className="mt-5 max-w-md text-muted-foreground">
+                The things we don’t compromise on — even when shipping faster
+                would feel good.
+              </p>
+            </div>
+            <div className="lg:col-span-7">
+              <ol className="space-y-px overflow-hidden rounded-2xl border border-foreground/10 bg-foreground/5">
+                {principles.map((p) => (
+                  <li
+                    key={p.n}
+                    className="grid grid-cols-[64px_1fr] items-start gap-5 bg-panel p-6 sm:grid-cols-[88px_1fr] sm:p-7"
+                  >
+                    <span className="font-display text-2xl text-[#ecb756] sm:text-3xl">
+                      {p.n}
+                    </span>
+                    <div>
+                      <h3 className="font-display text-xl tracking-tight">
+                        {p.title}
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                        {p.body}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="space-y-4 md:space-y-6">
-        <h2 className="text-xl font-semibold tracking-tight md:text-2xl">
-          Frequently asked questions
-        </h2>
-        <Accordion>
-          {faqs.map((faq, index) => (
-            <AccordionItem key={faq.q} value={`faq-${index}`}>
-              <AccordionTrigger>{faq.q}</AccordionTrigger>
-              <AccordionContent>
-                <p className="text-muted-foreground">{faq.a}</p>
-              </AccordionContent>
-            </AccordionItem>
+      {/* ============== TIMELINE ============== */}
+      <section className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
+        <div className="mb-12">
+          <h2 className="max-w-2xl font-display text-3xl tracking-tight sm:text-5xl">
+            How we got here.
+          </h2>
+        </div>
+        <ol className="relative ml-3 border-l border-foreground/10 sm:ml-5">
+          {milestones.map((m, i) => (
+            <li
+              key={m.date}
+              className="relative pb-10 pl-8 last:pb-0 sm:pl-10"
+            >
+              <span
+                className={cn(
+                  "absolute left-[-7px] top-1 size-3.5 rounded-full ring-4 ring-background",
+                  i === milestones.length - 1
+                    ? "bg-[#ecb756] animate-pulse-dot"
+                    : "bg-[#2e2a64]",
+                )}
+              />
+              <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#ecb756]">
+                {m.date}
+              </div>
+              <p className="mt-2 font-display text-lg leading-snug sm:text-xl">
+                {m.label}
+              </p>
+            </li>
           ))}
-        </Accordion>
+        </ol>
       </section>
 
-      <section className="space-y-4 md:space-y-6">
-        <div className="space-y-2">
-          <h2 className="text-xl font-semibold tracking-tight md:text-2xl">
-            Get in touch
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Have feedback, an idea, or just want to say hello? Send us a
-            message and we&apos;ll get back to you.
+      {/* ============== TEAM ============== */}
+      <section className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
+        <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="font-display text-3xl tracking-tight sm:text-5xl">
+              The team behind{" "}
+              <span className="text-[#ecb756]">the cut.</span>
+            </h2>
+          </div>
+          <p className="max-w-sm text-sm text-muted-foreground">
+            A small group who care as much about cinema as they do about the
+            craft behind the product.
           </p>
         </div>
-        <ContactForm />
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {team.map((member, i) => (
+            <MemberCard key={member.email} member={member} index={i} />
+          ))}
+        </div>
+      </section>
+
+      {/* ============== FAQ ============== */}
+      <section className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
+          <div className="lg:col-span-4">
+            <h2 className="font-display text-3xl tracking-tight sm:text-5xl">
+              Frequently asked.
+            </h2>
+            <p className="mt-5 max-w-sm text-muted-foreground">
+              Short answers to the things people write in most. Can’t find it?
+              The contact form is right below.
+            </p>
+          </div>
+          <div className="lg:col-span-8">
+            <div className="overflow-hidden rounded-2xl border border-foreground/10 bg-panel">
+              <Accordion>
+                {faqs.map((faq, index) => (
+                  <AccordionItem
+                    key={faq.q}
+                    value={`faq-${index}`}
+                    className="border-foreground/5 last:border-b-0 [&_button]:px-5 [&_button]:py-4 [&_div]:px-5 [&_div]:pb-4"
+                  >
+                    <AccordionTrigger className="text-left font-display text-lg hover:no-underline">
+                      <span className="flex items-baseline gap-3">
+                        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#ecb756]">
+                          Q.0{index + 1}
+                        </span>
+                        <span>{faq.q}</span>
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <p className="text-sm leading-relaxed text-muted-foreground">
+                        {faq.a}
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============== CONTACT ============== */}
+      <section className="mx-auto w-full max-w-6xl px-4 pb-24 sm:px-6 lg:pb-32">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <h2 className="font-display text-3xl tracking-tight sm:text-5xl">
+              Get in touch.
+            </h2>
+            <p className="mt-5 max-w-md text-muted-foreground">
+              Have feedback, an idea, or just want to say hello? Send us a
+              message — every note lands in our shared inbox.
+            </p>
+            <div className="mt-8 space-y-3 text-sm text-muted-foreground">
+              <div className="flex items-center gap-3">
+                <span className="size-1.5 rounded-full bg-[#ecb756]" />
+                We reply within 1–3 business days.
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="size-1.5 rounded-full bg-[#ecb756]" />
+                Bug reports get triaged the same week.
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="size-1.5 rounded-full bg-[#ecb756]" />
+                Press &amp; partnerships welcome.
+              </div>
+            </div>
+          </div>
+          <div className="lg:col-span-7">
+            <div className="rounded-2xl border border-foreground/10 bg-panel p-7 sm:p-8">
+              <ContactForm />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============== FINAL CTA ============== */}
+      <section className="mx-auto w-full max-w-6xl px-4 pb-20 sm:px-6 lg:pb-28">
+        <div className="rounded-[28px] border border-[#ecb756]/20 bg-panel p-10 text-center sm:p-16">
+          <h2 className="mx-auto max-w-2xl font-display text-4xl leading-[1.05] tracking-tight sm:text-6xl">
+            Curious what your CineType is?{" "}
+            <span className="text-[#ecb756]">60 seconds.</span>
+          </h2>
+          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link
+              href="/cinetest"
+              className={cn(
+                buttonVariants({ size: "lg" }),
+                "group h-12 rounded-full bg-[#ecb756] px-7 text-base font-medium text-[#1a1840] hover:bg-[#f3cd84] hover:text-[#1a1840]",
+              )}
+            >
+              Take the CineTest
+              <ArrowRight className="ml-1 size-4 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <Link
+              href="/pricing"
+              className={cn(
+                buttonVariants({ variant: "ghost", size: "lg" }),
+                "h-12 rounded-full border border-foreground/15 px-6 text-base hover:bg-foreground/[0.06]",
+              )}
+            >
+              See pricing
+            </Link>
+          </div>
+        </div>
       </section>
     </div>
   );

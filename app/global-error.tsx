@@ -17,51 +17,103 @@ export default function GlobalError({
     <html lang="en">
       <body
         style={{
+          margin: 0,
           minHeight: "100dvh",
+          background: "#0a0820",
+          color: "#f4f1e8",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: "0.75rem",
+          gap: "1rem",
           padding: "2rem",
           textAlign: "center",
           fontFamily:
-            "system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+            "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
-        <title>Something went wrong</title>
-        <h1 style={{ fontSize: "1.5rem", fontWeight: 600 }}>
-          Something went wrong
+        <title>Projection error · CinePersona</title>
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(ellipse at top, #2e2a64 0%, transparent 55%)",
+            opacity: 0.5,
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          style={{
+            position: "relative",
+            fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+            fontSize: "10px",
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: "rgba(244,241,232,0.6)",
+          }}
+        >
+          Catastrophic stop
+        </div>
+        <h1
+          style={{
+            position: "relative",
+            fontSize: "2.25rem",
+            fontWeight: 400,
+            margin: 0,
+            fontFamily: "ui-serif, Georgia, serif",
+            letterSpacing: "-0.02em",
+          }}
+        >
+          The projector stopped.
         </h1>
-        <p style={{ fontSize: "0.875rem", opacity: 0.7 }}>
-          The application crashed unexpectedly.
+        <p
+          style={{
+            position: "relative",
+            fontSize: "0.875rem",
+            opacity: 0.7,
+            maxWidth: 420,
+            margin: 0,
+          }}
+        >
+          The application crashed unexpectedly. You can try rewinding, or
+          reload the page.
         </p>
         {error.digest && (
           <p
             style={{
-              fontSize: "0.75rem",
-              opacity: 0.5,
+              position: "relative",
+              fontSize: "0.7rem",
+              opacity: 0.55,
               fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
             }}
           >
-            ref: {error.digest}
+            Ref · {error.digest}
           </p>
         )}
         <button
           type="button"
           onClick={() => unstable_retry()}
           style={{
+            position: "relative",
             marginTop: "0.5rem",
-            padding: "0.5rem 1rem",
+            padding: "0.75rem 1.5rem",
             fontSize: "0.875rem",
-            border: "1px solid currentColor",
-            borderRadius: "0.375rem",
-            background: "transparent",
-            color: "inherit",
+            fontWeight: 500,
+            background: "#ecb756",
+            color: "#1a1840",
+            border: 0,
+            borderRadius: 9999,
+            boxShadow: "0 8px 28px -12px rgba(236,183,86,0.5)",
             cursor: "pointer",
           }}
         >
-          Try again
+          Rewind & retry
         </button>
       </body>
     </html>

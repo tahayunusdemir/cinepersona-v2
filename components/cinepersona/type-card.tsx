@@ -1,32 +1,34 @@
 import Link from "next/link";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import type { PersonalityType } from "@/lib/cinepersona";
 
 export function TypeCard({ type }: { type: PersonalityType }) {
   return (
     <Link
       href={`/cinetype/${type.slug}`}
-      className="group block focus:outline-none"
+      className="group relative block overflow-hidden rounded-2xl border border-foreground/10 bg-panel p-5 transition-all hover:border-[#ecb756]/40 focus:outline-none focus-visible:border-[#ecb756]/60"
       aria-label={`${type.code} — ${type.name}`}
     >
-      <Card className="h-full transition-colors group-hover:border-foreground/40 group-focus-visible:border-foreground/70">
-        <CardHeader className="space-y-2">
-          <div className="flex items-center justify-between gap-2">
-            <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-              {type.code}
-            </span>
-            <Badge variant="outline" className="capitalize text-[10px]">
-              {type.strategy.replace("-", " ")}
-            </Badge>
-          </div>
-          <CardTitle className="text-base font-semibold">{type.name}</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full bg-[#ecb756]/[0.06] blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+      />
+      <div className="relative">
+        <div className="flex items-center justify-between gap-2">
+          <span className="font-display text-3xl leading-none text-[#ecb756]">
+            {type.code}
+          </span>
+          <span className="rounded-full border border-foreground/10 bg-foreground/[0.02] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground capitalize">
+            {type.strategy.replace("-", " ")}
+          </span>
+        </div>
+        <h3 className="mt-5 font-display text-lg leading-snug tracking-tight">
+          {type.name}
+        </h3>
+        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
           {type.tagline}
-        </CardContent>
-      </Card>
+        </p>
+      </div>
     </Link>
   );
 }

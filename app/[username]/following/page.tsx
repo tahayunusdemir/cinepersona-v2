@@ -142,19 +142,22 @@ export default async function FollowingPage({
   const heading = profileHeading(target.display_name, target.username);
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 pt-12 pb-24 sm:px-6">
-      <header className="mb-8 flex flex-col gap-2">
-        <Link
-          href={`/${target.username}`}
-          className="inline-flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground hover:underline"
-        >
-          <ArrowLeftIcon className="size-4" />
-          {heading}
-        </Link>
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          Following · {total}
-        </h1>
-      </header>
+    <div className="relative isolate overflow-hidden">
+
+      <div className="mx-auto w-full max-w-4xl px-4 pt-12 pb-24 sm:px-6">
+        <header className="mb-8">
+          <Link
+            href={`/${target.username}`}
+            className="inline-flex w-fit items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:text-[#ecb756]"
+          >
+            <ArrowLeftIcon className="size-3" />
+            {heading}
+          </Link>
+          <h1 className="mt-3 font-display text-3xl tracking-tight sm:text-5xl">
+            Following ·{" "}
+            <span className="text-[#ecb756]">{total}</span>
+          </h1>
+        </header>
 
       {people.length === 0 ? (
         <Empty>
@@ -194,11 +197,12 @@ export default async function FollowingPage({
         </ul>
       )}
 
-      <PaginationBar
-        page={page}
-        pageCount={pageCount}
-        baseHref={`/${target.username}/following`}
-      />
+        <PaginationBar
+          page={page}
+          pageCount={pageCount}
+          baseHref={`/${target.username}/following`}
+        />
+      </div>
     </div>
   );
 }

@@ -21,25 +21,50 @@ export function SiteNav() {
   return (
     <nav
       aria-label="Primary"
-      className="hidden flex-1 items-center justify-center gap-1 md:flex"
+      className="hidden flex-1 items-center justify-center md:flex"
     >
-      {navItems.map((item) => {
-        const active =
-          pathname === item.href || pathname.startsWith(`${item.href}/`);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={active ? "page" : undefined}
-            className={cn(
-              "rounded-md px-3 py-1.5 text-sm font-medium transition-colors hover:text-foreground",
-              active ? "text-foreground" : "text-muted-foreground",
-            )}
-          >
-            {item.label}
-          </Link>
-        );
-      })}
+      <ul className="flex items-center gap-1">
+        {navItems.map((item) => {
+          const active =
+            pathname === item.href || pathname.startsWith(`${item.href}/`);
+          return (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "group relative inline-flex items-center rounded-md px-3 py-1.5 text-[15px] font-medium transition-colors",
+                  active
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <span
+                  aria-hidden
+                  className={cn(
+                    "mr-1.5 size-1 rounded-full transition-all duration-300",
+                    active
+                      ? "bg-[#ecb756] opacity-100"
+                      : "bg-[#ecb756] opacity-0 -translate-x-1 group-hover:opacity-70 group-hover:translate-x-0",
+                  )}
+                />
+                {item.label}
+                <span
+                  aria-hidden
+                  className={cn(
+                    "pointer-events-none absolute inset-x-2 -bottom-[7px] flex items-center justify-between transition-opacity duration-300",
+                    active ? "opacity-100" : "opacity-0",
+                  )}
+                >
+                  <span className="size-[3px] rounded-full bg-[#ecb756]" />
+                  <span className="h-px flex-1 mx-1 bg-gradient-to-r from-[#ecb756]/70 via-[#ecb756]/40 to-[#ecb756]/70" />
+                  <span className="size-[3px] rounded-full bg-[#ecb756]" />
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
     </nav>
   );
 }

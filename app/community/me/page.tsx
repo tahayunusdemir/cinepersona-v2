@@ -94,17 +94,17 @@ export default async function MeActivityPage() {
 
   return (
     <div>
-      <header className="mb-6">
+      <header className="mb-8">
         <Link
           href="/community"
-          className="text-sm text-muted-foreground hover:text-foreground"
+          className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:text-[#ecb756]"
         >
           ← Community
         </Link>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
-          My activity
+        <h1 className="mt-3 font-display text-3xl tracking-tight sm:text-5xl">
+          My activity.
         </h1>
-        <p className="mt-2 text-base text-muted-foreground sm:text-lg">
+        <p className="mt-2 max-w-xl text-muted-foreground">
           Your latest comments and upvotes.
         </p>
       </header>
@@ -137,7 +137,7 @@ export default async function MeActivityPage() {
               {comments.map((c) => (
                 <li
                   key={c.id}
-                  className="rounded-lg border bg-card p-4 transition-colors hover:bg-card/80"
+                  className="rounded-2xl border border-foreground/10 bg-panel p-5 transition-colors hover:border-[#ecb756]/40"
                 >
                   <p className="text-xs text-muted-foreground">
                     On{" "}
@@ -188,7 +188,7 @@ export default async function MeActivityPage() {
               {upvotedThreads.map((t) => (
                 <li
                   key={t.id}
-                  className="rounded-lg border bg-card p-4 transition-colors hover:bg-card/80"
+                  className="rounded-2xl border border-foreground/10 bg-panel p-5 transition-colors hover:border-[#ecb756]/40"
                 >
                   <Link
                     href={`/community/${t.board.slug}/${t.id}`}

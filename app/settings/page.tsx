@@ -48,29 +48,32 @@ export default async function SettingsPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 pt-12 pb-24 sm:px-6">
-      <header className="mb-8 space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          Settings
-        </h1>
-        <p className="text-base text-muted-foreground sm:text-lg">
-          Manage your profile, sign-in details, and account.
-        </p>
-      </header>
+    <div className="relative isolate overflow-hidden">
 
-      <div className="flex flex-col gap-6">
-        <ProfileCard
-          username={profile.username}
-          initialDisplayName={profile.display_name}
-          initialBio={profile.bio}
-          initialLink={profile.link}
-        />
-        <BannerCard initial={bannerFilm} />
-        <PasswordCard />
-        <EmailCard initialEmail={userData.user.email ?? ""} />
-        <CommunityCard />
-        <AccountCard />
-      </div>
-    </main>
+      <main className="mx-auto w-full max-w-4xl px-4 pt-12 pb-24 sm:px-6 sm:pt-16">
+        <header className="mb-10">
+          <h1 className="mt-3 font-display text-3xl tracking-tight sm:text-5xl">
+            Settings.
+          </h1>
+          <p className="mt-2 max-w-xl text-base text-muted-foreground">
+            Manage your profile, sign-in details, and account.
+          </p>
+        </header>
+
+        <div className="flex flex-col gap-6">
+          <ProfileCard
+            username={profile.username}
+            initialDisplayName={profile.display_name}
+            initialBio={profile.bio}
+            initialLink={profile.link}
+          />
+          <BannerCard initial={bannerFilm} />
+          <PasswordCard />
+          <EmailCard initialEmail={userData.user.email ?? ""} />
+          <CommunityCard />
+          <AccountCard />
+        </div>
+      </main>
+    </div>
   );
 }

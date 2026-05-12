@@ -3,17 +3,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MessageSquareIcon, UserRoundCheckIcon } from "lucide-react";
 
+import { FrameTag } from "@/components/cinema/atoms";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
-import { Separator } from "@/components/ui/separator";
 import {
   countUnreadFromPartner,
   listFriends,
@@ -52,89 +44,86 @@ export default async function MessagesIndexPage() {
   );
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 pb-24 pt-8 sm:px-6">
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          Messages
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Chat with friends. Add someone from their profile to start a
-          conversation.
-        </p>
-      </header>
+    <div className="relative isolate overflow-hidden">
 
-      {incoming.length > 0 ? (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="text-base">
-              Friend requests
-              <Badge variant="secondary" className="ml-2 tabular-nums">
+      <div className="mx-auto w-full max-w-3xl px-4 pb-24 pt-12 sm:px-6">
+        <header className="mb-8">
+          <h1 className="mt-3 font-display text-3xl tracking-tight sm:text-5xl">
+            Messages.
+          </h1>
+          <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+            Chat with friends. Add someone from their profile to start a
+            conversation.
+          </p>
+        </header>
+
+        {incoming.length > 0 ? (
+          <section className="mb-5 overflow-hidden rounded-2xl border border-foreground/10 bg-panel">
+            <div className="flex items-center justify-between border-b border-foreground/5 px-5 py-3">
+              <FrameTag>Friend requests</FrameTag>
+              <Badge
+                variant="secondary"
+                className="border-0 bg-[#ecb756] tabular-nums text-[#1a1840]"
+              >
                 {incoming.length}
               </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <ul className="divide-y">
+            </div>
+            <ul className="divide-y divide-white/5">
               {incoming.map((r) => (
                 <RequestRow key={r.id} row={r} direction="incoming" />
               ))}
             </ul>
-          </CardContent>
-        </Card>
-      ) : null}
+          </section>
+        ) : null}
 
-      {outgoing.length > 0 ? (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="text-base">
-              Pending requests
-              <Badge variant="outline" className="ml-2 tabular-nums">
+        {outgoing.length > 0 ? (
+          <section className="mb-5 overflow-hidden rounded-2xl border border-foreground/10 bg-panel">
+            <div className="flex items-center justify-between border-b border-foreground/5 px-5 py-3">
+              <FrameTag>Pending requests</FrameTag>
+              <Badge
+                variant="outline"
+                className="border-foreground/15 bg-foreground/[0.02] tabular-nums text-muted-foreground"
+              >
                 {outgoing.length}
               </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <ul className="divide-y">
+            </div>
+            <ul className="divide-y divide-white/5">
               {outgoing.map((r) => (
                 <RequestRow key={r.id} row={r} direction="outgoing" />
               ))}
             </ul>
-          </CardContent>
-        </Card>
-      ) : null}
+          </section>
+        ) : null}
 
-      <Separator className="my-4" />
+        <div className="mb-4 flex items-baseline gap-3">
+          <FrameTag>Conversations</FrameTag>
+          <span className="h-px flex-1 bg-gradient-to-r from-foreground/15 to-transparent" />
+        </div>
 
-      <h2 className="mb-3 text-sm font-medium text-muted-foreground">
-        Conversations
-      </h2>
-      {friends.length === 0 ? (
-        <Empty className="my-8 border">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <MessageSquareIcon />
-            </EmptyMedia>
-            <EmptyTitle>No conversations yet</EmptyTitle>
-            <EmptyDescription>
+        {friends.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-foreground/15 bg-foreground/[0.015] p-10 text-center">
+            <div className="mx-auto grid size-12 place-items-center rounded-full border border-[#ecb756]/20 bg-[#ecb756]/10 text-[#ecb756]">
+              <MessageSquareIcon className="size-5" />
+            </div>
+            <h2 className="mt-5 font-display text-2xl tracking-tight">
+              No conversations yet.
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
               Add a friend from their profile to start chatting.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : (
-        <Card>
-          <CardContent className="p-0">
-            <ul className="divide-y">
-              {friends.map((f) => (
-                <FriendRow
-                  key={f.id}
-                  row={f}
-                  unread={unreadCounts.get(f.id) ?? 0}
-                />
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
+            </p>
+          </div>
+        ) : (
+          <ul className="overflow-hidden rounded-2xl border border-foreground/10 bg-panel divide-y divide-white/5">
+            {friends.map((f) => (
+              <FriendRow
+                key={f.id}
+                row={f}
+                unread={unreadCounts.get(f.id) ?? 0}
+              />
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }
@@ -154,7 +143,7 @@ function FriendRow({
     <li>
       <Link
         href={`/messages/${username}`}
-        className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-accent/40 sm:px-5"
+        className="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-foreground/[0.03]"
       >
         <Avatar className="size-10 shrink-0">
           <AvatarImage
@@ -179,7 +168,9 @@ function FriendRow({
           </p>
         </div>
         {unread > 0 ? (
-          <Badge className="tabular-nums">{unread}</Badge>
+          <Badge className="border-0 bg-[#ecb756] tabular-nums text-[#1a1840] hover:bg-[#f3cd84]">
+            {unread}
+          </Badge>
         ) : (
           <UserRoundCheckIcon
             className="size-4 shrink-0 text-muted-foreground"

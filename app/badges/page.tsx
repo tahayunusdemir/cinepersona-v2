@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { FrameTag } from "@/components/cinema/atoms";
 import { BadgeGrid } from "@/components/badges/badge-grid";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAchievementsForUser } from "@/lib/badges/queries";
 import { getViewerId } from "@/lib/match/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -24,45 +23,67 @@ export default async function BadgesPage() {
   const { sections, unlockedCount, totalVisible } =
     await getAchievementsForUser(supabase, viewerId, { includeSecret: true });
 
-  const pct = totalVisible === 0 ? 0 : Math.round((unlockedCount / totalVisible) * 100);
+  const pct =
+    totalVisible === 0 ? 0 : Math.round((unlockedCount / totalVisible) * 100);
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 pb-24 pt-12 sm:px-6">
-      <header className="mb-8">
-        <Badge variant="secondary" className="mb-3">
-          Badges
-        </Badge>
-        <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-          Your achievements
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Earn badges across watching, discovery, matches and rewatching.
-          Secret achievements stay hidden until unlocked.
-        </p>
-      </header>
+    <div className="relative isolate overflow-hidden">
 
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-baseline justify-between">
-            <span>Progress</span>
-            <span className="font-mono text-2xl font-semibold tabular-nums">
-              {unlockedCount} / {totalVisible}
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
+      <div className="mx-auto w-full max-w-4xl px-4 pb-24 pt-12 sm:px-6 sm:pt-16">
+        <header className="mb-10">
+          <h1 className="mt-4 font-display text-balance text-4xl tracking-tight sm:text-5xl">
+            Your{" "}
+            <span className="text-[#ecb756]">badges.</span>
+          </h1>
+          <p className="mt-3 max-w-xl text-muted-foreground">
+            Earn badges across watching, discovery, matches and rewatching.
+            Secret achievements stay hidden until unlocked.
+          </p>
+        </header>
+
+        {/* Progress card */}
+        <div className="relative mb-10 overflow-hidden rounded-2xl border border-[#ecb756]/20 bg-gradient-to-br from-panel-2 to-panel p-7 sm:p-8">
+          <div
+            aria-hidden
+            className="absolute -right-24 -top-24 size-72 rounded-full bg-[#ecb756]/10 blur-3xl"
+          />
+          <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <FrameTag>Progress</FrameTag>
+              <h2 className="mt-3 font-display text-2xl tracking-tight">
+                Collection complete
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {pct}% unlocked — keep watching, keep matching.
+              </p>
+            </div>
+            <div className="text-right">
+              <div className="font-display text-5xl leading-none text-[#ecb756] tabular-nums sm:text-6xl">
+                {unlockedCount}
+                <span className="text-foreground/30"> / {totalVisible}</span>
+              </div>
+              <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                Earned
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-foreground/10"
+            role="progressbar"
+            aria-valuenow={pct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
             <div
-              className="absolute inset-y-0 left-0 bg-foreground/80"
+              className="h-full rounded-full bg-gradient-to-r from-[#ecb756] to-[#f3cd84]"
               style={{ width: `${pct}%` }}
-              aria-hidden
             />
           </div>
-          <p className="mt-2 text-sm text-muted-foreground">{pct}% unlocked</p>
-        </CardContent>
-      </Card>
+        </div>
 
-      <BadgeGrid sections={sections} />
+        <BadgeGrid sections={sections} />
+      </div>
     </div>
   );
 }

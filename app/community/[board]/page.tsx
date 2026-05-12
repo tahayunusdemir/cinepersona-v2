@@ -6,7 +6,6 @@ import { LockIcon, PlusIcon } from "lucide-react";
 import { PaginationBar } from "@/components/community/pagination-bar";
 import { SortTabs } from "@/components/community/sort-tabs";
 import { ThreadCard } from "@/components/community/thread-card";
-import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Empty,
@@ -97,36 +96,40 @@ export default async function BoardPage({
 
   return (
     <div>
-      <header className="mb-6 flex flex-wrap items-start gap-4">
-        <span className="flex size-11 items-center justify-center rounded-md bg-muted">
+      <header className="mb-8 flex flex-wrap items-start gap-4">
+        <span className="grid size-12 shrink-0 place-items-center rounded-xl border border-[#ecb756]/20 bg-[#ecb756]/10 text-[#ecb756]">
           <BoardIcon slug={board.slug} className="size-5" />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+          <Link
+            href="/community"
+            className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:text-[#ecb756]"
+          >
+            ← All boards
+          </Link>
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <h1 className="font-display text-3xl tracking-tight sm:text-4xl">
               {board.name}
             </h1>
             {board.locked ? (
-              <Badge variant="outline" className="gap-1">
+              <span className="inline-flex items-center gap-1 rounded-full border border-foreground/10 bg-foreground/[0.02] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                 <LockIcon className="size-3" /> Locked
-              </Badge>
+              </span>
             ) : null}
           </div>
           {board.description ? (
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-2 text-sm text-muted-foreground">
               {board.description}
             </p>
           ) : null}
-          <p className="mt-1 text-xs text-muted-foreground">
-            <Link href="/community" className="hover:text-foreground">
-              ← All boards
-            </Link>
-          </p>
         </div>
         {viewer && !board.locked ? (
           <Link
             href={`/community/${board.slug}/new`}
-            className={cn(buttonVariants({ size: "sm" }))}
+            className={cn(
+              buttonVariants({ size: "sm" }),
+              "h-10 rounded-full bg-[#ecb756] px-4 text-[#1a1840] hover:bg-[#f3cd84] hover:text-[#1a1840]",
+            )}
           >
             <PlusIcon /> New thread
           </Link>
@@ -159,8 +162,8 @@ export default async function BoardPage({
           />
         ) : null}
         {list.total > 0 ? (
-          <span className="text-xs text-muted-foreground">
-            Page {list.page} of {list.pageCount}
+          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            Page {list.page} / {list.pageCount}
           </span>
         ) : null}
       </div>

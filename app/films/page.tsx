@@ -85,44 +85,54 @@ export default async function FilmsPage({
   const priorityCount = params.view === "dense" ? 12 : 6;
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 pb-16 pt-8 sm:px-6">
-      <header className="flex items-end justify-between gap-4 pb-4">
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          Films
-        </h1>
-        <p
-          className="text-sm text-muted-foreground tabular-nums"
-          aria-live="polite"
-        >
-          {total === 1 ? "1 film" : `${total.toLocaleString("en-US")} films`}
-        </p>
-      </header>
+    <div className="relative isolate overflow-hidden">
 
-      <div className="flex flex-col gap-3">
-        <FilterBar params={params} />
-        <ActiveFilters params={params} />
+      <div className="mx-auto w-full max-w-7xl px-4 pb-16 pt-10 sm:px-6">
+        <header className="flex flex-col gap-5 pb-6 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="mt-3 font-display text-4xl tracking-tight sm:text-5xl">
+              Films.
+            </h1>
+            <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+              Browse by genre, decade, language and rating. Build a watchlist
+              that actually reflects your CineType.
+            </p>
+          </div>
+          <p
+            className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-foreground/[0.02] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground tabular-nums"
+            aria-live="polite"
+          >
+            <span className="size-1.5 rounded-full bg-[#ecb756]" />
+            {total === 1 ? "1 film" : `${total.toLocaleString("en-US")} films`}
+          </p>
+        </header>
+
+        <div className="flex flex-col gap-3">
+          <FilterBar params={params} />
+          <ActiveFilters params={params} />
+        </div>
+
+        <div className="mt-8">
+          {rows.length === 0 ? (
+            <FilmsEmptyState params={params} />
+          ) : (
+            <ul className={cn("grid", gridClass)}>
+              {rows.map((movie, idx) => (
+                <PosterItem
+                  key={movie.id}
+                  movie={movie}
+                  view={params.view}
+                  isAuthed={isAuthed}
+                  loginHref={loginHref}
+                  priority={params.page === 1 && idx < priorityCount}
+                />
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <FilmsPagination params={params} pageCount={pageCount} />
       </div>
-
-      <div className="mt-6">
-        {rows.length === 0 ? (
-          <FilmsEmptyState params={params} />
-        ) : (
-          <ul className={cn("grid", gridClass)}>
-            {rows.map((movie, idx) => (
-              <PosterItem
-                key={movie.id}
-                movie={movie}
-                view={params.view}
-                isAuthed={isAuthed}
-                loginHref={loginHref}
-                priority={params.page === 1 && idx < priorityCount}
-              />
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <FilmsPagination params={params} pageCount={pageCount} />
     </div>
   );
 }

@@ -1,5 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import {
+  DM_Mono,
+  Fraunces,
+  Hanken_Grotesk,
+  Marcellus,
+} from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "./sw-register";
 import { FlashToast } from "@/components/flash-toast";
@@ -9,14 +14,35 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { siteConfig } from "@/lib/site";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Display / headings — variable serif, upright only (no italic).
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
+  axes: ["SOFT", "WONK", "opsz"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// Body / UI — humanist grotesque, replaces Geist.
+const hankenGrotesk = Hanken_Grotesk({
+  variable: "--font-hanken",
   subsets: ["latin"],
+  display: "swap",
+});
+
+// Mono / numeric / credits — typewriter-leaning, film-credit feel.
+const dmMono = DM_Mono({
+  variable: "--font-dm-mono",
+  weight: ["300", "400", "500"],
+  subsets: ["latin"],
+  display: "swap",
+});
+
+// Signature poster moments — Trajan-style.
+const marcellus = Marcellus({
+  variable: "--font-marcellus",
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -51,7 +77,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${hankenGrotesk.variable} ${dmMono.variable} ${marcellus.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider
