@@ -82,7 +82,7 @@ export function Reveal({
   );
 }
 
-type StaggerProps = Omit<HTMLMotionProps<"div">, "variants"> & {
+type StaggerProps = Omit<HTMLMotionProps<"div">, "variants" | "initial"> & {
   as?: "div" | "section" | "ul" | "ol" | "header";
   /** Time between each child reveal (s). Default 0.07. */
   step?: number;
