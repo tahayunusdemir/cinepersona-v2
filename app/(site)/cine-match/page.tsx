@@ -49,19 +49,16 @@ export const metadata: Metadata = {
 
 const steps = [
   {
-    n: "01",
     label: "Join the pool",
     title: "You become matchable.",
     body: "Your CinePersona axes and the films you’ve marked watched become visible to the matcher — no profile photo, no bio shopping.",
   },
   {
-    n: "02",
     label: "Request a match",
     title: `${WEEKLY_REQUEST_LIMIT} requests per rolling week.`,
     body: `We page you the moment someone clears ${MATCH_THRESHOLD}% similarity. If nobody does, the closest candidate becomes a fallback after ${FALLBACK_WAIT_DAYS} days.`,
   },
   {
-    n: "03",
     label: "Both opt in",
     title: "Chat unlocks together.",
     body: "Either party can accept. The conversation only opens once both of you tap consent — no inbox creep, no cold DMs.",
@@ -188,12 +185,6 @@ export default async function CineMatchIntroPage() {
     <div className="bg-background text-foreground">
       {/* ============== HERO ============== */}
       <section className="relative isolate overflow-hidden">
-        <div className="pointer-events-none absolute inset-x-0 -top-24 -z-10 mx-auto h-[520px] max-w-5xl opacity-60">
-          <div className="absolute left-1/2 top-10 size-[420px] -translate-x-1/2 rounded-full bg-[#ecb756]/10 blur-3xl" />
-          <div className="absolute left-[18%] top-32 size-[260px] rounded-full bg-[#c8a4ff]/10 blur-3xl" />
-          <div className="absolute right-[14%] top-40 size-[240px] rounded-full bg-[#7fd1ff]/10 blur-3xl" />
-        </div>
-
         <div className="mx-auto w-full max-w-5xl px-4 pb-12 pt-16 text-center sm:px-6 sm:pt-24">
           <Badge
             variant="outline"
@@ -259,18 +250,13 @@ export default async function CineMatchIntroPage() {
         <ol className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-foreground/10 bg-foreground/5 md:grid-cols-3">
           {steps.map((step) => (
             <li
-              key={step.n}
+              key={step.label}
               className="group relative bg-panel p-7 transition-colors hover:bg-panel-2 sm:p-8"
             >
-              <div className="flex items-baseline justify-between">
-                <span className="font-display text-6xl leading-none text-[#ecb756]/90">
-                  {step.n}
-                </span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                  {step.label}
-                </span>
-              </div>
-              <div className="mt-8">
+              <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                {step.label}
+              </span>
+              <div className="mt-6">
                 <h3 className="font-display text-2xl tracking-tight">
                   {step.title}
                 </h3>
@@ -543,17 +529,12 @@ export default async function CineMatchIntroPage() {
           </h2>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
-          {faqs.map((f, i) => (
+          {faqs.map((f) => (
             <div
               key={f.q}
               className="rounded-2xl border border-foreground/10 bg-panel p-6"
             >
-              <div className="flex items-baseline gap-3">
-                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#ecb756]">
-                  Q.0{i + 1}
-                </span>
-                <h3 className="font-display text-lg">{f.q}</h3>
-              </div>
+              <h3 className="font-display text-lg">{f.q}</h3>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                 {f.a}
               </p>
@@ -564,10 +545,7 @@ export default async function CineMatchIntroPage() {
 
       {/* ============== FINAL CTA ============== */}
       <section className="mx-auto w-full max-w-6xl px-4 pb-20 sm:px-6 lg:pb-28">
-        <div className="relative overflow-hidden rounded-[28px] border border-[#ecb756]/20 bg-panel p-10 text-center sm:p-16">
-          <div className="pointer-events-none absolute inset-0 opacity-60">
-            <div className="absolute -top-20 left-1/2 size-[420px] -translate-x-1/2 rounded-full bg-[#ecb756]/[0.06] blur-3xl" />
-          </div>
+        <div className="relative overflow-hidden rounded-[28px] border border-foreground/10 bg-panel p-10 text-center sm:p-16">
           <div className="relative">
             <h2 className="mx-auto max-w-2xl font-display text-4xl leading-[1.05] tracking-tight sm:text-6xl">
               {isGuest ? (
@@ -651,10 +629,7 @@ function GuestActionPanel() {
   ];
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[#ecb756]/25 bg-panel p-6 sm:p-8">
-      <div className="pointer-events-none absolute inset-0 opacity-70">
-        <div className="absolute -right-12 -top-12 size-64 rounded-full bg-[#ecb756]/[0.08] blur-3xl" />
-      </div>
+    <div className="relative overflow-hidden rounded-3xl border border-foreground/10 bg-panel p-6 sm:p-8">
       <div className="relative grid grid-cols-1 items-center gap-6 sm:grid-cols-[1fr_auto]">
         <div>
           <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#ecb756]">
@@ -758,7 +733,7 @@ function MemberActionPanel({
           <span
             className={cn(
               buttonVariants({ variant: "secondary", size: "lg" }),
-              "h-12 w-full cursor-not-allowed rounded-full border border-foreground/10 bg-foreground/[0.02] opacity-50",
+              "w-full cursor-not-allowed border border-foreground/10 bg-foreground/[0.02] opacity-50",
             )}
             aria-disabled
           >
@@ -769,7 +744,7 @@ function MemberActionPanel({
           href="/cine-match/matches"
           className={cn(
             buttonVariants({ variant: "outline", size: "lg" }),
-            "h-12 w-full rounded-full border border-foreground/15 bg-foreground/[0.02] hover:bg-foreground/[0.06]",
+            "w-full border-foreground/15 bg-foreground/[0.02] hover:bg-foreground/[0.06]",
           )}
         >
           <MessagesSquareIcon className="size-4" />

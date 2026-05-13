@@ -15,31 +15,25 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-import { useTrackingActions } from "./use-tracking-actions";
-
 type Props = {
-  movieId: number;
-  watched: boolean;
-  inWatchlist: boolean;
   isAuthed: boolean;
   loginHref: string;
+  pending: boolean;
+  optimisticWatched: boolean;
+  optimisticWatchlist: boolean;
+  onWatched: () => void;
+  onWatchlist: () => void;
 };
 
 export function PosterActions({
-  movieId,
-  watched,
-  inWatchlist,
   isAuthed,
   loginHref,
+  pending,
+  optimisticWatched,
+  optimisticWatchlist,
+  onWatched,
+  onWatchlist,
 }: Props) {
-  const {
-    pending,
-    optimisticWatched,
-    optimisticWatchlist,
-    onWatched,
-    onWatchlist,
-  } = useTrackingActions({ movieId, watched, inWatchlist });
-
   if (!isAuthed) {
     return (
       <div className="absolute inset-x-2 bottom-2 flex justify-center gap-2 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">

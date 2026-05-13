@@ -94,19 +94,13 @@ export function CinemaCard({
       className={cn(
         "relative overflow-hidden rounded-2xl border transition-all",
         variant === "highlighted"
-          ? "border-[#ecb756]/40 bg-gradient-to-br from-panel-2 to-panel"
+          ? "border-foreground/15 bg-gradient-to-br from-panel-2 to-panel"
           : variant === "muted"
             ? "border-foreground/5 bg-foreground/[0.015]"
             : "border-foreground/10 bg-panel hover:border-foreground/20",
         className,
       )}
     >
-      {variant === "highlighted" && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-[#ecb756]/10 blur-3xl"
-        />
-      )}
       <div className="relative">{children}</div>
     </div>
   );

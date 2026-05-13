@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { CheckIcon } from "lucide-react";
 
+import { FrameTag } from "@/components/cinema/atoms";
 import type { DisplayPick } from "@/components/cinepersona/picks-display";
 import { ResultView } from "@/components/cinepersona/result-view";
-import { Badge } from "@/components/ui/badge";
 import { questions, type LikertValue } from "@/lib/cinepersona";
 import { createAdminClient, hasServiceRole } from "@/lib/supabase/admin";
 
@@ -117,9 +118,25 @@ export default async function SavedResultPage({ params }: PageParams) {
       picks={picks}
       picksHint="Picks were not attached when this result was saved."
       saveSlot={
-        <div className="mt-8 flex items-center justify-center">
-          <Badge variant="outline">Saved · share this link</Badge>
-        </div>
+        <section className="relative overflow-hidden rounded-2xl border border-[#ecb756]/25 bg-panel p-6 text-center sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-7 sm:text-left">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-[#ecb756]/10 blur-3xl"
+          />
+          <div className="relative">
+            <FrameTag>Saved</FrameTag>
+            <p className="mt-3 font-display text-lg tracking-tight">
+              This result has a permalink.
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Bookmark or share this URL — it&apos;ll always land back here.
+            </p>
+          </div>
+          <span className="relative mt-4 inline-flex items-center gap-2 self-center rounded-full border border-[#ecb756]/40 bg-[#ecb756]/10 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[#ecb756] sm:mt-0">
+            <CheckIcon className="size-3" />
+            Saved
+          </span>
+        </section>
       }
     />
   );

@@ -15,6 +15,7 @@ export type ProfileViewModel = {
   displayName: string | null;
   bio: string | null;
   link: string | null;
+  location: string | null;
   avatarUrl: string | null;
   isAdmin: boolean;
   followersCount: number;
@@ -41,7 +42,7 @@ async function _getProfileByUsername(
   const { data: profileRow, error: profileError } = await supabase
     .from("profiles")
     .select(
-      "id, username, display_name, bio, link, avatar_url, is_admin, deactivated_at, banner_movie_id",
+      "id, username, display_name, bio, link, location, avatar_url, is_admin, deactivated_at, banner_movie_id",
     )
     .eq("username", username)
     .maybeSingle<{
@@ -50,6 +51,7 @@ async function _getProfileByUsername(
       display_name: string | null;
       bio: string | null;
       link: string | null;
+      location: string | null;
       avatar_url: string | null;
       is_admin: boolean;
       deactivated_at: string | null;
@@ -123,6 +125,7 @@ async function _getProfileByUsername(
       displayName: profileRow.display_name,
       bio: profileRow.bio,
       link: profileRow.link,
+      location: profileRow.location,
       avatarUrl: profileRow.avatar_url,
       isAdmin: profileRow.is_admin,
       followersCount: Number(stats?.followers_count ?? 0),

@@ -48,7 +48,6 @@ export function ResetForm() {
             id="reset-password"
             name="password"
             autoComplete="new-password"
-            placeholder="At least 8 characters"
             required
             aria-invalid={Boolean(state?.fieldErrors?.password) || undefined}
             className={fieldClass}
@@ -66,7 +65,6 @@ export function ResetForm() {
             id="reset-confirm"
             name="confirm"
             autoComplete="new-password"
-            placeholder="Repeat your new password"
             required
             aria-invalid={Boolean(state?.fieldErrors?.confirm) || undefined}
             className={fieldClass}

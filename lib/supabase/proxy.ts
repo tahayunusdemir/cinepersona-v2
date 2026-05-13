@@ -7,7 +7,7 @@ const AUTH_ONLY_ROUTES = [
   "/forgot-password",
 ];
 
-const PROTECTED_PREFIXES = ["/settings"];
+const PROTECTED_PREFIXES = ["/settings", "/notifications"];
 // Prefixes whose sub-routes require auth, but whose index page stays public
 // so the marketing landing can render for guests.
 const PROTECTED_SUBROUTE_PREFIXES = ["/cine-match"];

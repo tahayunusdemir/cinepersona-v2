@@ -6,7 +6,7 @@ import { ctaPrimaryLg, ctaSecondaryLg } from "@/lib/ui-tokens";
 export default function NotFound() {
   return (
     <main className="flex min-h-[80dvh] flex-col items-center justify-center px-6 py-20 text-center">
-      <div className="mt-8 font-display text-[140px] leading-none tracking-tight text-[#ecb756] sm:text-[200px]">
+      <div className="font-display text-[140px] leading-none tracking-tight text-[#ecb756] sm:text-[200px]">
         404
       </div>
 
@@ -18,8 +18,8 @@ export default function NotFound() {
         Let’s get you back to the screening.
       </p>
 
-      <div className="mt-9 flex flex-col items-center gap-3 sm:flex-row">
-        <Link href="/" className={ctaPrimaryLg + " group"}>
+      <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
+        <Link href="/" className={`${ctaPrimaryLg} group`}>
           <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-0.5" />
           Back to home
         </Link>

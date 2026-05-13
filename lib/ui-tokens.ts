@@ -11,23 +11,23 @@
 
 /** Primary gold button, hero / page-level. ~48px tall. */
 export const ctaPrimaryLg =
-  "inline-flex h-12 items-center justify-center gap-1.5 rounded-full bg-[#ecb756] px-7 text-base font-medium text-[#1a1840] transition-colors hover:bg-[#f3cd84] hover:text-[#1a1840]";
+  "inline-flex h-12 items-center justify-center gap-1.5 rounded-full bg-[#ecb756] px-7 text-base font-medium leading-none text-[#1a1840] transition-colors hover:bg-[#f3cd84] hover:text-[#1a1840]";
 
 /** Primary gold button, inline / card-level. ~44px tall. */
 export const ctaPrimary =
-  "inline-flex h-11 items-center justify-center gap-1.5 rounded-full bg-[#ecb756] px-6 text-sm font-medium text-[#1a1840] transition-colors hover:bg-[#f3cd84] hover:text-[#1a1840]";
+  "inline-flex h-11 items-center justify-center gap-1.5 rounded-full bg-[#ecb756] px-6 text-sm font-medium leading-none text-[#1a1840] transition-colors hover:bg-[#f3cd84] hover:text-[#1a1840]";
 
 /** Compact gold button, header-level. ~36px tall. */
 export const ctaPrimarySm =
-  "inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-[#ecb756] px-4 text-[13px] font-medium text-[#1a1840] transition-colors hover:bg-[#f3cd84] hover:text-[#1a1840]";
+  "inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-[#ecb756] px-4 text-[13px] font-medium leading-none text-[#1a1840] transition-colors hover:bg-[#f3cd84] hover:text-[#1a1840]";
 
 /** Secondary outline button, hero / page-level. */
 export const ctaSecondaryLg =
-  "inline-flex h-12 items-center justify-center gap-1.5 rounded-full border border-foreground/15 bg-foreground/[0.02] px-6 text-base font-medium text-foreground transition-colors hover:bg-foreground/[0.06] hover:text-foreground";
+  "inline-flex h-12 items-center justify-center gap-1.5 rounded-full border border-foreground/15 bg-foreground/[0.02] px-6 text-base font-medium leading-none text-foreground transition-colors hover:bg-foreground/[0.06] hover:text-foreground";
 
 /** Secondary outline button, inline / card-level. */
 export const ctaSecondary =
-  "inline-flex h-11 items-center justify-center gap-1.5 rounded-full border border-foreground/15 bg-foreground/[0.02] px-6 text-sm font-medium text-foreground/85 transition-colors hover:bg-foreground/[0.06] hover:text-foreground";
+  "inline-flex h-11 items-center justify-center gap-1.5 rounded-full border border-foreground/15 bg-foreground/[0.02] px-6 text-sm font-medium leading-none text-foreground/85 transition-colors hover:bg-foreground/[0.06] hover:text-foreground";
 
 // ---------- Cards ----------
 

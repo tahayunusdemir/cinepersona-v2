@@ -17,7 +17,6 @@
 import {
   motion,
   MotionConfig,
-  useReducedMotion,
   type HTMLMotionProps,
   type Variants,
 } from "motion/react";
@@ -46,7 +45,19 @@ const containerVariants: Variants = {
 };
 
 type RevealProps = Omit<HTMLMotionProps<"div">, "variants"> & {
-  as?: "div" | "section" | "header" | "article" | "li" | "ul" | "p" | "span";
+  as?:
+    | "div"
+    | "section"
+    | "header"
+    | "article"
+    | "li"
+    | "ul"
+    | "ol"
+    | "p"
+    | "span"
+    | "dl"
+    | "footer"
+    | "blockquote";
   delay?: number;
   /** When true, plays once on mount instead of on viewport entry. */
   immediate?: boolean;
@@ -134,33 +145,13 @@ export function MotionShell({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * ProjectorBloom — a soft animated radial bloom that breathes behind hero
- * sections. Pure decoration; pointer-events: none.
+ * ProjectorBloom — kept as a no-op so existing hero markup doesn't break.
+ * The site-wide background (Alucard cream / Dracula slate) is now flat;
+ * no gold/lavender wash is rendered. Both props are accepted and ignored.
  */
-export function ProjectorBloom({
-  className,
-  color = "#ecb756",
-}: {
-  className?: string;
-  color?: string;
-}) {
-  const reduce = useReducedMotion();
-  return (
-    <motion.div
-      aria-hidden
-      initial={{ opacity: 0 }}
-      animate={{ opacity: reduce ? 0.18 : [0.16, 0.28, 0.18] }}
-      transition={
-        reduce
-          ? { duration: 0.8 }
-          : { duration: 9, repeat: Infinity, ease: "easeInOut" }
-      }
-      className={className}
-      style={{
-        background: `radial-gradient(circle at center, ${color}55 0%, ${color}22 28%, transparent 65%)`,
-      }}
-    />
-  );
+export function ProjectorBloom(_props: { className?: string; color?: string }) {
+  void _props;
+  return null;
 }
 
 export { motion as Motion };

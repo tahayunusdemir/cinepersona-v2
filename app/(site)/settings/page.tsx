@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { AccountCard } from "@/components/settings/account-card";
+import { AvatarCard } from "@/components/settings/avatar-card";
 import { BannerCard } from "@/components/settings/banner-card";
 import { CommunityCard } from "@/components/settings/community-card";
 import { EmailCard } from "@/components/settings/email-card";
@@ -21,13 +22,17 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("username, display_name, bio, link, banner_movie_id")
+    .select(
+      "username, display_name, bio, link, location, avatar_url, banner_movie_id",
+    )
     .eq("id", userData.user.id)
     .maybeSingle<{
       username: string;
       display_name: string | null;
       bio: string | null;
       link: string | null;
+      location: string | null;
+      avatar_url: string | null;
       banner_movie_id: number | null;
     }>();
 
@@ -53,7 +58,7 @@ export default async function SettingsPage() {
       <main className="mx-auto w-full max-w-4xl px-4 pt-12 pb-24 sm:px-6 sm:pt-16">
         <header className="mb-10">
           <h1 className="mt-3 font-display text-3xl tracking-tight sm:text-5xl">
-            Settings.
+            Settings
           </h1>
           <p className="mt-2 max-w-xl text-base text-muted-foreground">
             Manage your profile, sign-in details, and account.
@@ -66,6 +71,11 @@ export default async function SettingsPage() {
             initialDisplayName={profile.display_name}
             initialBio={profile.bio}
             initialLink={profile.link}
+            initialLocation={profile.location}
+          />
+          <AvatarCard
+            username={profile.username}
+            initialAvatarUrl={profile.avatar_url}
           />
           <BannerCard initial={bannerFilm} />
           <PasswordCard />

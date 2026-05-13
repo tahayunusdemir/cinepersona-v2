@@ -41,7 +41,7 @@ export default async function CineMatchListPage() {
         <header className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="mt-4 font-display text-3xl tracking-tight sm:text-5xl">
-              My matches.
+              My matches
             </h1>
           </div>
           <div className="inline-flex items-center gap-3 rounded-full border border-foreground/10 bg-foreground/[0.02] px-4 py-2">

@@ -84,11 +84,7 @@ export default async function CheckoutPage({
           </div>
 
           <aside className="lg:order-last">
-            <div className="sticky top-20 overflow-hidden rounded-2xl border border-[#ecb756]/20 bg-gradient-to-br from-panel-2 to-panel p-6">
-              <div
-                aria-hidden
-                className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-[#ecb756]/10 blur-3xl"
-              />
+            <div className="sticky top-20 overflow-hidden rounded-2xl border border-foreground/10 bg-gradient-to-br from-panel-2 to-panel p-6">
               <div className="relative">
                 <div className="flex items-start justify-between gap-3">
                   <div>

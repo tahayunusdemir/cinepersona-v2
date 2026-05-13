@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ArrowRightIcon } from "lucide-react";
 
+import { ProjectorBloom, Reveal, Stagger } from "@/components/cinema/motion";
 import { TypeCard } from "@/components/cinepersona/type-card";
 import {
   axes,
@@ -11,7 +12,6 @@ import {
   strategies,
   typesInGroup,
 } from "@/lib/cinepersona";
-import { siteConfig } from "@/lib/site";
 import {
   cardCtaBlock,
   ctaPrimaryLg,
@@ -33,53 +33,61 @@ export default function CineTypePage() {
 
       <div className="mx-auto w-full max-w-6xl px-4 pb-24 sm:px-6">
         {/* HERO */}
-        <section className="flex flex-col items-center pt-16 pb-12 text-center sm:pt-24">
-          <h1 className="mt-5 max-w-3xl font-display text-[44px] leading-[1.02] tracking-tight sm:text-[64px] lg:text-[72px]">
-            16 ways of{" "}
-            <span className="text-[#ecb756]">watching cinema</span>
-          </h1>
-          <p className="mt-5 max-w-2xl text-pretty text-base text-muted-foreground sm:text-lg">
-            CineType maps how you actually watch films on four axes —
-            connection, meaning, evaluation, discovery — and gives you a
-            four-letter code you’ll recognise immediately.
-          </p>
-          <div className="mt-9 flex flex-col items-center gap-3 sm:flex-row">
-            <Link href="/cinetest" className={cn(ctaPrimaryLg, "group")}>
-              Take the test
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-            </Link>
-            <Link href="#types" className={ctaSecondaryLg}>
-              Browse all 16 types
-            </Link>
-          </div>
+        <section className="relative flex flex-col items-center pt-16 pb-12 text-center sm:pt-24">
+          <ProjectorBloom className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[420px] w-[920px] max-w-[120vw] -translate-x-1/2 blur-3xl" />
+          <Stagger immediate step={0.09}>
+            <Reveal as="p" className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              <span className="mr-2 inline-flex items-center gap-1">
+                {[FAMILY_HEX.aut, FAMILY_HEX.vis, FAMILY_HEX.con, FAMILY_HEX.esc].map((c) => (
+                  <span key={c} className="inline-block size-1.5 rounded-full" style={{ background: c }} />
+                ))}
+              </span>
+              CineType atlas · 16 types · 4 families
+            </Reveal>
+            <Reveal as="header">
+              <h1 className="mt-5 max-w-3xl font-display text-[44px] leading-[1.02] tracking-tight sm:text-[64px] lg:text-[72px]">
+                16 ways of{" "}
+                <span className="text-[#ecb756]">watching cinema</span>
+              </h1>
+            </Reveal>
+            <Reveal as="p" className="mt-5 max-w-2xl text-pretty text-base text-muted-foreground sm:text-lg">
+              CineType maps how you actually watch films on four axes —
+              connection, meaning, evaluation, discovery — and gives you a
+              four-letter code you’ll recognise immediately.
+            </Reveal>
+            <Reveal className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link href="/cinetest" className={cn(ctaPrimaryLg, "group")}>
+                Take the test
+                <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <Link href="#types" className={ctaSecondaryLg}>
+                Browse all 16 types
+              </Link>
+            </Reveal>
+          </Stagger>
         </section>
 
         {/* AXES */}
         <section aria-label="Axes" className="mt-12">
-          <div className="mb-8">
+          <Reveal className="mb-8">
             <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-4xl">
               The four axes.
             </h2>
             <p className="mt-2 max-w-xl text-sm text-muted-foreground">
               Every type code is a single letter from each axis.
             </p>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
+          </Reveal>
+          <Stagger step={0.08} className="grid gap-4 sm:grid-cols-2">
             {axes.map((axis, i) => {
               const hue = familyAt(i);
               return (
-                <article
+                <Reveal
+                  as="article"
                   key={axis.id}
                   className="rounded-2xl border bg-panel p-6"
                   style={{ borderColor: `${hue}30` }}
                 >
-                  <div className="flex items-baseline justify-between">
-                    <span
-                      className="font-mono text-[10px] uppercase tracking-[0.22em]"
-                      style={{ color: hue }}
-                    >
-                      Axis 0{i + 1} / {axes.length}
-                    </span>
+                  <div className="flex items-baseline justify-end">
                     <span
                       className="font-mono text-xs"
                       style={{ color: hue }}
@@ -115,16 +123,16 @@ export default function CineTypePage() {
                       </p>
                     </div>
                   </div>
-                </article>
+                </Reveal>
               );
             })}
-          </div>
+          </Stagger>
         </section>
 
         {/* GROUPS + STRATEGIES */}
         <section aria-label="Groups & strategies" className="mt-20">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-10">
-            <div>
+            <Reveal>
               <h2 className="mt-4 font-display text-2xl tracking-tight sm:text-3xl">
                 Four groups —{" "}
                 <span className="text-[#ecb756]">what you seek.</span>
@@ -143,11 +151,10 @@ export default function CineTypePage() {
                       style={{ borderColor: `${hue}33` }}
                     >
                       <span
-                        className="font-display text-3xl leading-none"
-                        style={{ color: hue }}
-                      >
-                        0{i + 1}
-                      </span>
+                        aria-hidden
+                        className="mt-2 size-2 shrink-0 rounded-full"
+                        style={{ background: hue }}
+                      />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
                           <h3 className="font-display text-lg">{group.name}</h3>
@@ -164,9 +171,9 @@ export default function CineTypePage() {
                   );
                 })}
               </div>
-            </div>
+            </Reveal>
 
-            <div>
+            <Reveal delay={0.08}>
               <h2 className="mt-4 font-display text-2xl tracking-tight sm:text-3xl">
                 Four strategies —{" "}
                 <span className="text-[#ecb756]">how you watch.</span>
@@ -185,11 +192,10 @@ export default function CineTypePage() {
                       style={{ borderColor: `${hue}33` }}
                     >
                       <span
-                        className="font-display text-3xl leading-none"
-                        style={{ color: hue }}
-                      >
-                        0{i + 1}
-                      </span>
+                        aria-hidden
+                        className="mt-2 size-2 shrink-0 rounded-full"
+                        style={{ background: hue }}
+                      />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
                           <h3 className="font-display text-lg">{strategy.name}</h3>
@@ -206,26 +212,26 @@ export default function CineTypePage() {
                   );
                 })}
               </div>
-            </div>
+            </Reveal>
           </div>
         </section>
 
         {/* ALL 16 */}
         <section id="types" aria-label="Types" className="mt-20 scroll-mt-20">
-          <div className="mb-8">
+          <Reveal className="mb-8">
             <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-4xl">
               All 16 types.
             </h2>
             <p className="mt-2 max-w-xl text-sm text-muted-foreground">
               Group × strategy = a single distinctive way of watching.
             </p>
-          </div>
+          </Reveal>
 
           <div className="space-y-12">
             {groups.map((group, gi) => {
               const hue = familyAt(gi);
               return (
-              <div key={group.slug}>
+              <Reveal key={group.slug}>
                 <div className="mb-4 flex items-baseline justify-between gap-3">
                   <div className="flex items-baseline gap-3">
                     <span
@@ -249,22 +255,26 @@ export default function CineTypePage() {
                     <ArrowRightIcon className="size-3" />
                   </Link>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <Stagger step={0.06} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   {typesInGroup(group.slug).map((type) => (
-                    <TypeCard key={type.code} type={type} familyHue={hue} />
+                    <Reveal key={type.code}>
+                      <TypeCard type={type} familyHue={hue} />
+                    </Reveal>
                   ))}
-                </div>
-              </div>
+                </Stagger>
+              </Reveal>
               );
             })}
           </div>
         </section>
 
         {/* CTA */}
-        <section
+        <Reveal
+          as="section"
           aria-label="Take the test"
-          className={cn(cardCtaBlock, "mt-20 p-10 sm:p-14")}
+          className={cn(cardCtaBlock, "relative mt-20 overflow-hidden p-10 sm:p-14")}
         >
+          <ProjectorBloom className="pointer-events-none absolute left-1/2 top-1/2 -z-10 size-[460px] -translate-x-1/2 -translate-y-1/2 blur-3xl" />
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-[1fr_auto] sm:items-center">
             <div>
               <h3 className="font-display text-3xl tracking-tight sm:text-4xl">
@@ -284,7 +294,7 @@ export default function CineTypePage() {
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
           </div>
-        </section>
+        </Reveal>
 
         <p className="mt-10 text-center font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
           {personalityTypes.length} types · {axes.length} axes ·{" "}

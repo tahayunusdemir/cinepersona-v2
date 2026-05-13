@@ -52,28 +52,6 @@ export function SiteNav() {
                   style={{ background: hue }}
                 />
                 {item.label}
-                <span
-                  aria-hidden
-                  className={cn(
-                    "pointer-events-none absolute inset-x-2 -bottom-[7px] flex items-center justify-between transition-opacity duration-300",
-                    active ? "opacity-100" : "opacity-0",
-                  )}
-                >
-                  <span
-                    className="size-[3px] rounded-full"
-                    style={{ background: hue }}
-                  />
-                  <span
-                    className="h-px flex-1 mx-1"
-                    style={{
-                      backgroundImage: `linear-gradient(to right, ${hue}b3, ${hue}66, ${hue}b3)`,
-                    }}
-                  />
-                  <span
-                    className="size-[3px] rounded-full"
-                    style={{ background: hue }}
-                  />
-                </span>
               </Link>
             </li>
           );

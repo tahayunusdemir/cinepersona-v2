@@ -1,10 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import {
-  DM_Mono,
-  Fraunces,
-  Hanken_Grotesk,
-  Marcellus,
-} from "next/font/google";
+import { DM_Mono, Fraunces, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "./sw-register";
 import { FlashToast } from "@/components/flash-toast";
@@ -31,14 +26,6 @@ const hankenGrotesk = Hanken_Grotesk({
 const dmMono = DM_Mono({
   variable: "--font-dm-mono",
   weight: ["300", "400", "500"],
-  subsets: ["latin"],
-  display: "swap",
-});
-
-// Signature poster moments — Trajan-style.
-const marcellus = Marcellus({
-  variable: "--font-marcellus",
-  weight: "400",
   subsets: ["latin"],
   display: "swap",
 });
@@ -85,7 +72,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${fraunces.variable} ${hankenGrotesk.variable} ${dmMono.variable} ${marcellus.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${hankenGrotesk.variable} ${dmMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider

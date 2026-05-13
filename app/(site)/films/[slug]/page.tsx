@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { FrameTag } from "@/components/cinema/atoms";
+import { Reveal, Stagger } from "@/components/cinema/motion";
 import { FilmActions } from "@/components/films/film-actions";
 import { getFilmDetail, parseSlug } from "@/lib/films/detail";
 import { filmSlug } from "@/lib/films/slug";
@@ -116,7 +117,7 @@ export default async function FilmDetailPage({ params }: PageProps) {
           }
         >
           {/* Poster */}
-          <div className="shrink-0">
+          <Reveal as="div" immediate className="shrink-0">
             <div className="overflow-hidden rounded-xl border border-foreground/10 bg-panel shadow-2xl ring-1 ring-[#ecb756]/10">
               {detail.poster_path ? (
                 <Image
@@ -136,11 +137,11 @@ export default async function FilmDetailPage({ params }: PageProps) {
                 </div>
               )}
             </div>
-          </div>
+          </Reveal>
 
           {/* Meta */}
-          <div className="flex min-w-0 flex-1 flex-col gap-5 pt-6 sm:pt-24">
-            <div className="flex flex-col gap-2">
+          <Stagger as="div" immediate step={0.07} initial={0.1} className="flex min-w-0 flex-1 flex-col gap-5 pt-6 sm:pt-24">
+            <Reveal as="div" className="flex flex-col gap-2">
               <FrameTag>
                 {detail.tmdb_id} · {year ?? "—"}
               </FrameTag>
@@ -162,9 +163,9 @@ export default async function FilmDetailPage({ params }: PageProps) {
                   “{detail.tagline}”
                 </p>
               ) : null}
-            </div>
+            </Reveal>
 
-            <dl className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+            <Reveal as="dl" className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
               {detail.release_date ? (
                 <div className="flex items-center gap-1.5">
                   <CalendarIcon className="size-3.5 text-[#ecb756]" aria-hidden />
@@ -193,10 +194,10 @@ export default async function FilmDetailPage({ params }: PageProps) {
                   </dd>
                 </div>
               ) : null}
-            </dl>
+            </Reveal>
 
             {detail.genres.length > 0 ? (
-              <div className="flex flex-wrap gap-1.5">
+              <Reveal className="flex flex-wrap gap-1.5">
                 {detail.genres.map((g) => (
                   <span
                     key={g.id}
@@ -205,21 +206,23 @@ export default async function FilmDetailPage({ params }: PageProps) {
                     {g.name}
                   </span>
                 ))}
-              </div>
+              </Reveal>
             ) : null}
 
-            <FilmActions
-              movieId={detail.id}
-              watched={detail.watched}
-              inWatchlist={detail.in_watchlist}
-              isAuthed={isAuthed}
-              loginHref={loginHref}
-            />
-          </div>
+            <Reveal>
+              <FilmActions
+                movieId={detail.id}
+                watched={detail.watched}
+                inWatchlist={detail.in_watchlist}
+                isAuthed={isAuthed}
+                loginHref={loginHref}
+              />
+            </Reveal>
+          </Stagger>
         </div>
 
         {detail.overview ? (
-          <section className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-12">
+          <Reveal as="section" className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-12">
             <div className="lg:col-span-3">
               <FrameTag>Synopsis</FrameTag>
               <h2 className="mt-3 font-display text-2xl tracking-tight">
@@ -231,30 +234,36 @@ export default async function FilmDetailPage({ params }: PageProps) {
                 {detail.overview}
               </p>
             </div>
-          </section>
+          </Reveal>
         ) : null}
 
         {(directors.length > 0 || writers.length > 0) && (
-          <section className="mt-12 grid gap-4 sm:grid-cols-2">
+          <Stagger as="section" step={0.1} className="mt-12 grid gap-4 sm:grid-cols-2">
             {directors.length > 0 ? (
-              <CrewBlock
-                label={directors.length > 1 ? "Directors" : "Director"}
-                people={directors}
-              />
+              <Reveal>
+                <CrewBlock
+                  label={directors.length > 1 ? "Directors" : "Director"}
+                  people={directors}
+                />
+              </Reveal>
             ) : null}
             {writers.length > 0 ? (
-              <CrewBlock label="Writing" people={writers} />
+              <Reveal>
+                <CrewBlock label="Writing" people={writers} />
+              </Reveal>
             ) : null}
-          </section>
+          </Stagger>
         )}
 
         {topCast.length > 0 ? (
           <section className="mt-14">
-            <FrameTag>Cast list</FrameTag>
-            <h2 className="mt-3 font-display text-2xl tracking-tight">
-              Top cast
-            </h2>
-            <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5">
+            <Reveal>
+              <FrameTag>Cast list</FrameTag>
+              <h2 className="mt-3 font-display text-2xl tracking-tight">
+                Top cast
+              </h2>
+            </Reveal>
+            <ul className="mt-6 grid grid-cols-2 gap-3 grid-stagger sm:grid-cols-4 md:grid-cols-5">
               {topCast.map((person) => (
                 <li
                   key={person.credit_id}

@@ -129,13 +129,15 @@ export function FriendChatThread({ friendshipId, viewerId, initial }: Props) {
     <div className="flex flex-col gap-6">
       {groups.map((day) => (
         <section key={day.label} aria-label={day.label}>
-          <div className="mb-3 flex items-center justify-center">
+          <div className="mb-3 flex items-center justify-center gap-3">
+            <span className="h-px w-12 bg-gradient-to-r from-transparent to-foreground/15" />
             <span
-              className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground"
+              className="font-credits text-[10px] text-muted-foreground"
               suppressHydrationWarning
             >
               {day.label}
             </span>
+            <span className="h-px w-12 bg-gradient-to-l from-transparent to-foreground/15" />
           </div>
           <ul className="flex flex-col gap-0.5">
             {day.runs.map((run, runIdx) => (
@@ -208,13 +210,13 @@ function Bubble({
         isFirst ? "mt-2 first:mt-0" : "mt-0.5",
       )}
     >
-      <div className="flex max-w-[80%] flex-col gap-1 sm:max-w-[70%]">
+      <div className="flex max-w-[82%] flex-col gap-1 sm:max-w-[70%] lg:max-w-[60%]">
         <div
           className={cn(
-            "rounded-2xl px-3.5 py-2 text-sm leading-relaxed whitespace-pre-wrap break-words shadow-sm",
+            "rounded-2xl px-3.5 py-2 text-[15px] leading-relaxed whitespace-pre-wrap break-words sm:text-sm lg:px-4 lg:py-2.5",
             own
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted text-foreground",
+              ? "bg-[#ecb756] text-[#1a1840] shadow-[0_1px_0_color-mix(in_oklch,var(--color-brand-gold)_45%,transparent)]"
+              : "bg-panel-2 text-foreground shadow-sm ring-1 ring-foreground/[0.04]",
             corners,
           )}
         >
@@ -231,7 +233,7 @@ function Bubble({
             {own ? (
               message.read_at ? (
                 <CheckCheckIcon
-                  className="size-3 text-sky-500 dark:text-sky-400"
+                  className="size-3 text-[#ecb756]"
                   aria-label="Read"
                 />
               ) : (

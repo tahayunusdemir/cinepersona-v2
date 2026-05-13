@@ -63,19 +63,16 @@ const cineTypes = [
 
 const steps = [
   {
-    n: "01",
     label: "CineTest",
     title: "12 picks, 48 statements.",
     body: "Pick films you love, then answer 48 short Likert prompts that map taste — not trivia. About ten minutes, start to finish.",
   },
   {
-    n: "02",
     label: "CineType",
     title: "Your cinematic profile.",
     body: "One of 16 archetypes across four families — Auteurs, Visionaries, Connoisseurs, Escapists — with the pace, era, and feel you actually watch for.",
   },
   {
-    n: "03",
     label: "CineMatch",
     title: "Films and people, matched.",
     body: "Recommendations tuned to your CineType — and a small circle of viewers who think like you.",
@@ -172,22 +169,14 @@ export default function Home() {
         </Reveal>
 
         <Stagger as="ol" step={0.1} className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-foreground/10 bg-foreground/5 md:grid-cols-3">
-          {steps.map((step, i) => (
+          {steps.map((step) => (
             <Reveal
               as="li"
-              key={step.n}
+              key={step.label}
               className="group relative bg-panel p-7 transition-colors hover:bg-panel-2 sm:p-8"
             >
-              <div className="flex items-baseline justify-between">
-                <span
-                  className="font-display text-6xl leading-none"
-                  style={{ color: familyAt(i) }}
-                >
-                  {step.n}
-                </span>
-                <span className={credit}>{step.label}</span>
-              </div>
-              <div className="mt-8">
+              <span className={credit}>{step.label}</span>
+              <div className="mt-6">
                 <h3 className="font-display text-2xl tracking-tight">
                   {step.title}
                 </h3>
@@ -221,7 +210,7 @@ export default function Home() {
         </Reveal>
 
         <Stagger step={0.09} className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {cineTypes.map((t, i) => (
+          {cineTypes.map((t) => (
             <Reveal
               as="article"
               key={t.code}
@@ -235,20 +224,12 @@ export default function Home() {
                 style={{ background: `${t.accent}28` }}
               />
               <div className="relative">
-                <div className="flex items-center justify-between">
-                  <span
-                    className="font-display text-7xl leading-none"
-                    style={{ color: t.accent }}
-                  >
-                    {t.code}
-                  </span>
-                  <span
-                    className="font-mono text-[10px] uppercase tracking-[0.22em]"
-                    style={{ color: t.accent }}
-                  >
-                    Family 0{i + 1} / 04
-                  </span>
-                </div>
+                <span
+                  className="font-display text-7xl leading-none"
+                  style={{ color: t.accent }}
+                >
+                  {t.code}
+                </span>
                 <div className="mt-6 font-display text-2xl">{t.name}</div>
                 <p className="mt-1 max-w-sm text-sm text-muted-foreground">
                   “{t.tagline}”
@@ -465,10 +446,10 @@ export default function Home() {
                 <blockquote className="relative mt-6 font-display text-xl leading-snug">
                   “{c.quote}”
                 </blockquote>
-                <figcaption className="mt-8 border-t border-foreground/10 pt-4 text-sm">
+                <footer className="mt-8 border-t border-foreground/10 pt-4 text-sm">
                   <div className="font-medium">{c.author}</div>
                   <div className={cn(credit, "mt-0.5")}>{c.role}</div>
-                </figcaption>
+                </footer>
               </Reveal>
             );
           })}
@@ -477,7 +458,7 @@ export default function Home() {
 
       {/* ============== PRICING TEASER ============== */}
       <section className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
-        <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <Reveal className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <h2 className="max-w-2xl font-display text-4xl leading-tight tracking-tight sm:text-5xl">
             Open during early access.{" "}
             <span className="text-muted-foreground">
@@ -488,9 +469,9 @@ export default function Home() {
             No card on file. Every feature is unlocked while we build — pricing
             below is a preview.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Stagger step={0.12} className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {[
             {
               name: "Free",
@@ -524,7 +505,7 @@ export default function Home() {
               accent: FAMILY_HEX.aut, // amber — the highlighted plan
             },
           ].map((p) => (
-            <div
+            <Reveal
               key={p.name}
               className={cn(
                 "relative p-8 sm:p-10",
@@ -570,14 +551,15 @@ export default function Home() {
                 {p.cta}
                 <ArrowRight className="size-4" />
               </Link>
-            </div>
+            </Reveal>
           ))}
-        </div>
+        </Stagger>
       </section>
 
       {/* ============== FINAL CTA ============== */}
       <section className="mx-auto w-full max-w-6xl px-4 pb-20 sm:px-6 lg:pb-28">
-        <div className={cn(cardCtaBlock, "p-10 text-center sm:p-16")}>
+        <Reveal className={cn(cardCtaBlock, "relative overflow-hidden p-10 text-center sm:p-16")}>
+          <ProjectorBloom className="pointer-events-none absolute left-1/2 top-1/2 -z-10 size-[500px] -translate-x-1/2 -translate-y-1/2 blur-3xl" />
           <h2 className="mx-auto max-w-2xl font-display text-4xl leading-[1.05] tracking-tight sm:text-6xl">
             Your CineType is waiting.{" "}
             <span className="text-[#ecb756]">About ten minutes away</span>
@@ -595,7 +577,7 @@ export default function Home() {
               Browse all CineTypes
             </Link>
           </div>
-        </div>
+        </Reveal>
       </section>
     </div>
   );

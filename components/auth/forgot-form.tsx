@@ -56,7 +56,6 @@ export function ForgotForm() {
               name="email"
               type="email"
               autoComplete="email"
-              placeholder="you@example.com"
               required
               aria-invalid={Boolean(state?.fieldErrors?.email) || undefined}
               className="h-11 rounded-lg border-foreground/15 bg-foreground/[0.02] pl-10 pr-4 text-[15px] md:text-[15px] placeholder:text-muted-foreground/60"

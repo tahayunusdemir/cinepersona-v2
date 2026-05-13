@@ -1,6 +1,6 @@
 import type * as React from "react";
 import Link from "next/link";
-import { GlobeIcon, PencilIcon } from "lucide-react";
+import { GlobeIcon, MapPinIcon, PencilIcon } from "lucide-react";
 
 import { FollowButton } from "@/components/community/follow-button";
 import { ShareMenu } from "@/components/community/share-menu";
@@ -122,7 +122,7 @@ export function ProfileHeader({ profile }: Props) {
 
             <Bio bio={profile.bio} isSelf={profile.isSelf} />
 
-            <ProfileLink link={profile.link} />
+            <ProfileMeta link={profile.link} location={profile.location} />
           </div>
         </div>
       </Card>
@@ -329,21 +329,36 @@ const SpotifyGlyph = brandSvg(
   <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm4.6 14.4a.62.62 0 0 1-.86.2c-2.34-1.43-5.3-1.76-8.78-.96a.62.62 0 0 1-.28-1.22c3.8-.87 7.07-.5 9.7 1.12.3.18.4.57.22.86Zm1.23-2.74a.78.78 0 0 1-1.07.26c-2.68-1.65-6.76-2.13-9.92-1.17a.78.78 0 1 1-.46-1.5c3.6-1.1 8.1-.56 11.18 1.34.37.23.5.7.27 1.07Zm.1-2.85c-3.2-1.9-8.5-2.08-11.56-1.15a.93.93 0 1 1-.54-1.79c3.5-1.06 9.36-.85 13.05 1.34a.93.93 0 1 1-.95 1.6Z" />,
 );
 
-function ProfileLink({ link }: { link: string | null }) {
+function ProfileMeta({
+  link,
+  location,
+}: {
+  link: string | null;
+  location: string | null;
+}) {
   const href = (link ?? "").trim();
-  if (!href) return null;
-  const meta = describeLink(href);
-  if (!meta) return null;
-  const { Icon, label } = meta;
+  const meta = href ? describeLink(href) : null;
+  const loc = (location ?? "").trim();
+  if (!meta && !loc) return null;
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="me noopener noreferrer ugc"
-      className="inline-flex w-fit max-w-full items-center gap-1.5 truncate text-sm font-medium text-foreground/90 underline-offset-4 hover:text-foreground hover:underline"
-    >
-      <Icon className="size-4 shrink-0" aria-hidden />
-      <span className="truncate">{label}</span>
-    </a>
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+      {meta ? (
+        <a
+          href={href}
+          target="_blank"
+          rel="me noopener noreferrer ugc"
+          className="inline-flex min-w-0 max-w-full items-center gap-1.5 truncate font-medium text-foreground/90 underline-offset-4 hover:text-foreground hover:underline"
+        >
+          <meta.Icon className="size-4 shrink-0" aria-hidden />
+          <span className="truncate">{meta.label}</span>
+        </a>
+      ) : null}
+      {loc ? (
+        <span className="inline-flex min-w-0 max-w-full items-center gap-1.5 truncate text-muted-foreground">
+          <MapPinIcon className="size-4 shrink-0" aria-hidden />
+          <span className="truncate">{loc}</span>
+        </span>
+      ) : null}
+    </div>
   );
 }

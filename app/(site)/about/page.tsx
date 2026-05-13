@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -47,19 +48,16 @@ function LinkedinIcon({ className }: { className?: string }) {
 
 const steps = [
   {
-    n: "01",
     icon: ClapperboardIcon,
     title: "Take the CineTest",
     body: "A short, focused set of prompts — no long quizzes or homework. Answer honestly; there are no right answers.",
   },
   {
-    n: "02",
     icon: SparklesIcon,
     title: "Learn your CineType",
     body: "We translate your answers into a CineType: a compact profile of how you watch and what you respond to on screen.",
   },
   {
-    n: "03",
     icon: WandSparklesIcon,
     title: "Get CineMatches",
     body: "CineMatch turns your CineType into film recommendations that feel like you — without the noise of generic top-100 lists.",
@@ -124,20 +122,18 @@ const milestones = [
   { date: "Spring 2026", label: "Movie Night sessions enter private beta." },
 ];
 
-function MemberCard({ member, index }: { member: TeamMember; index: number }) {
+function MemberCard({ member }: { member: TeamMember }) {
   return (
     <article className={cn(cardInteractive, "p-7")}>
       <div className="flex items-center justify-between">
-        <span className={credit}>
-          0{index + 1} · {member.role}
-        </span>
-        <div className="flex items-center gap-2 text-muted-foreground">
+        <span className={credit}>{member.role}</span>
+        <div className="flex items-center gap-3 text-muted-foreground">
           <a
             href={`mailto:${member.email}`}
             aria-label={`Email ${member.name}`}
             className="transition-colors hover:text-[#ecb756]"
           >
-            <MailIcon className="size-4" />
+            <MailIcon className="size-5" />
           </a>
           <a
             href={member.linkedin}
@@ -146,24 +142,29 @@ function MemberCard({ member, index }: { member: TeamMember; index: number }) {
             aria-label={`${member.name} on LinkedIn`}
             className="transition-colors hover:text-[#ecb756]"
           >
-            <LinkedinIcon className="size-4" />
+            <LinkedinIcon className="size-5" />
           </a>
         </div>
       </div>
 
-      {/* Avatar placeholder frame — real avatars come later. */}
-      <div
-        aria-hidden
-        className="mt-6 aspect-square w-full rounded-xl border border-dashed border-foreground/15 bg-foreground/[0.03]"
-      />
-
-      <div className="mt-5">
-        <h3 className="font-display text-xl leading-tight tracking-tight">
-          {member.name}
-        </h3>
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          {member.department}
-        </p>
+      <div className="mt-6 flex flex-col items-center gap-4 text-center">
+        <div className="relative size-36 shrink-0 overflow-hidden rounded-full border border-foreground/10 bg-foreground/[0.03]">
+          <Image
+            src={member.avatar}
+            alt={member.name}
+            fill
+            sizes="144px"
+            className="object-cover"
+          />
+        </div>
+        <div>
+          <h3 className="font-display text-xl leading-tight tracking-tight">
+            {member.name}
+          </h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {member.department}
+          </p>
+        </div>
       </div>
 
       <p className="mt-5 border-t border-foreground/10 pt-4 text-xs text-muted-foreground">
@@ -215,13 +216,7 @@ export default function AboutPage() {
                 key={step.title}
                 className="group bg-panel p-7 transition-colors hover:bg-panel-2 sm:p-8"
               >
-                <div className="flex items-baseline justify-between">
-                  <span
-                    className="font-display text-6xl leading-none transition-transform duration-500 group-hover:-translate-y-0.5"
-                    style={{ color: familyAt(i) }}
-                  >
-                    {step.n}
-                  </span>
+                <div className="flex items-baseline justify-end">
                   <span
                     className="inline-flex size-9 items-center justify-center rounded-full border"
                     style={{
@@ -344,8 +339,8 @@ export default function AboutPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {team.map((member, i) => (
-            <MemberCard key={member.email} member={member} index={i} />
+          {team.map((member) => (
+            <MemberCard key={member.email} member={member} />
           ))}
         </div>
       </section>
@@ -372,15 +367,7 @@ export default function AboutPage() {
                     className="border-foreground/5 last:border-b-0 [&_button]:px-5 [&_button]:py-4 [&_div]:px-5 [&_div]:pb-4"
                   >
                     <AccordionTrigger className="text-left font-display text-lg hover:no-underline">
-                      <span className="flex items-baseline gap-3">
-                        <span
-                          className="font-mono text-[10px] uppercase tracking-[0.22em]"
-                          style={{ color: familyAt(index) }}
-                        >
-                          Q.0{index + 1}
-                        </span>
-                        <span>{faq.q}</span>
-                      </span>
+                      {faq.q}
                     </AccordionTrigger>
                     <AccordionContent>
                       <p className="text-sm leading-relaxed text-muted-foreground">

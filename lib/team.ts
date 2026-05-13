@@ -5,6 +5,7 @@ export type TeamMember = {
   department: string;
   email: string;
   linkedin: string;
+  avatar: string;
 };
 
 export const team: TeamMember[] = [
@@ -15,6 +16,7 @@ export const team: TeamMember[] = [
     department: "Computer Engineering",
     email: "tahayunusdemir@gmail.com",
     linkedin: "https://www.linkedin.com/in/taha-yunus-demir",
+    avatar: "/team/taha.png",
   },
   {
     name: "Alpaslan Kemal Pehlivanlı",
@@ -23,6 +25,7 @@ export const team: TeamMember[] = [
     department: "Industrial Engineering",
     email: "alpkemalpehlivanli@gmail.com",
     linkedin: "https://www.linkedin.com/in/alpaslankemal",
+    avatar: "/team/kemal.png",
   },
   {
     name: "Fırat Pala",
@@ -31,5 +34,6 @@ export const team: TeamMember[] = [
     department: "Graphic Design",
     email: "piratfala@gmail.com",
     linkedin: "https://www.linkedin.com/in/fırat-pala-431a9226a",
+    avatar: "/team/firat.png",
   },
 ];

@@ -37,6 +37,7 @@ export const profileSchema = z.object({
   display_name: optionalText(50, "Display name"),
   bio: optionalText(160, "Bio"),
   link: optionalLink,
+  location: optionalText(60, "Location"),
 });
 
 export const passwordSchema = z

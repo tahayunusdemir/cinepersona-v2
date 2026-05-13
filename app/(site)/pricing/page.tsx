@@ -48,17 +48,14 @@ export const metadata: Metadata = {
 
 const upgradePrompts = [
   {
-    n: "01",
     title: "Someone liked you",
     body: "See who’s into your taste — unlock with Plus.",
   },
   {
-    n: "02",
     title: "3 people matched your taste",
     body: "Daily matches keep your roll fresh on Plus and above.",
   },
   {
-    n: "03",
     title: "Movie Night invite waiting",
     body: "Host or join group watch parties with Pro.",
   },
@@ -325,13 +322,7 @@ export default function PricingPage() {
               key={p.title}
               className="group bg-panel p-7 transition-colors hover:bg-panel-2"
             >
-              <div className="flex items-baseline justify-between">
-                <span
-                  className="font-display text-5xl leading-none"
-                  style={{ color: familyAt(i) }}
-                >
-                  {p.n}
-                </span>
+              <div className="flex justify-end">
                 <ArrowRight
                   className="size-4 -translate-x-1 opacity-50 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100"
                   style={{ color: familyAt(i) }}
@@ -422,15 +413,7 @@ export default function PricingPage() {
               className={cn(card, "p-6")}
               style={{ borderColor: `${familyAt(i)}26` }}
             >
-              <div className="flex items-baseline gap-3">
-                <span
-                  className="font-mono text-[10px] uppercase tracking-[0.22em]"
-                  style={{ color: familyAt(i) }}
-                >
-                  Q.0{i + 1}
-                </span>
-                <h3 className="font-display text-lg">{f.q}</h3>
-              </div>
+              <h3 className="font-display text-lg">{f.q}</h3>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                 {f.a}
               </p>

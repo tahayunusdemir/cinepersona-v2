@@ -9,6 +9,7 @@ import {
   registerSchema,
   resetSchema,
 } from "@/lib/schemas/auth";
+import { DEMO_CREDENTIALS } from "@/lib/auth/demo";
 import { mapAuthError, type AuthErrorKey } from "@/lib/auth/errors";
 import { RECOVERY_COOKIE, safeNext } from "@/lib/auth/safe-next";
 import { createClient } from "@/lib/supabase/server";
@@ -75,6 +76,30 @@ export async function loginAction(
     .update({ deactivated_at: null })
     .eq("id", data.user.id)
     .not("deactivated_at", "is", null);
+
+  redirect(safeNextForm(formData.get("next")));
+}
+
+// ---------------------------------------------------------------------------
+// Demo login — one-click sign-in as the seeded demo account.
+//
+// Uses fixed credentials that match scripts/seed-demo.mjs. The action signs
+// the visitor in as the demo user and forwards to ?next= (or /). Errors
+// surface as a hard navigation to /login?error=… so the page can render
+// the familiar inline banner.
+// ---------------------------------------------------------------------------
+
+export async function demoLoginAction(formData: FormData): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({
+    email: DEMO_CREDENTIALS.email,
+    password: DEMO_CREDENTIALS.password,
+  });
+
+  if (error) {
+    const code = mapAuthError(error);
+    redirect(`/login?error=${code}`);
+  }
 
   redirect(safeNextForm(formData.get("next")));
 }
@@ -150,7 +175,7 @@ export async function registerAction(
     return { ok: false, error: "unknown", message: profileError.message };
   }
 
-  redirect(safeNextForm(formData.get("next")));
+  redirect(`/${parsed.data.username}`);
 }
 
 // ---------------------------------------------------------------------------

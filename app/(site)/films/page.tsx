@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { ProjectorBloom, Reveal } from "@/components/cinema/motion";
 import { ActiveFilters } from "@/components/films/active-filters";
 import { FilmsEmptyState } from "@/components/films/empty-state";
 import { FilterBar } from "@/components/films/filter-bar";
@@ -86,10 +87,15 @@ export default async function FilmsPage({
 
   return (
     <div className="relative isolate overflow-hidden">
+      <ProjectorBloom className="pointer-events-none absolute -top-32 left-1/2 -z-10 h-[400px] w-[1100px] max-w-[140vw] -translate-x-1/2 blur-3xl" />
 
       <div className="mx-auto w-full max-w-7xl px-4 pb-16 pt-10 sm:px-6">
-        <header className="flex flex-col gap-5 pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <Reveal as="header" immediate className="flex flex-col gap-5 pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              <span className="mr-2 inline-block size-1.5 -translate-y-[2px] rounded-full bg-[#ecb756] align-middle" />
+              The catalogue
+            </p>
             <h1 className="mt-3 font-display text-4xl tracking-tight sm:text-5xl">
               Films
             </h1>
@@ -105,18 +111,20 @@ export default async function FilmsPage({
             <span className="size-1.5 rounded-full bg-[#ecb756]" />
             {total === 1 ? "1 film" : `${total.toLocaleString("en-US")} films`}
           </p>
-        </header>
+        </Reveal>
 
-        <div className="flex flex-col gap-3">
+        <Reveal immediate delay={0.08} className="flex flex-col gap-3">
           <FilterBar params={params} />
           <ActiveFilters params={params} />
-        </div>
+        </Reveal>
 
         <div className="mt-8">
           {rows.length === 0 ? (
-            <FilmsEmptyState params={params} />
+            <Reveal>
+              <FilmsEmptyState params={params} />
+            </Reveal>
           ) : (
-            <ul className={cn("grid", gridClass)}>
+            <ul className={cn("grid grid-stagger", gridClass)}>
               {rows.map((movie, idx) => (
                 <PosterItem
                   key={movie.id}

@@ -97,17 +97,9 @@ export function PlansSection() {
             >
               <div className="flex flex-1 flex-col">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <div
-                      className="font-mono text-[10px] uppercase tracking-[0.22em]"
-                      style={{ color: hue }}
-                    >
-                      Plan 0{i + 1} / 04
-                    </div>
-                    <h3 className="mt-2 font-display text-2xl tracking-tight">
-                      {plan.name}
-                    </h3>
-                  </div>
+                  <h3 className="font-display text-2xl tracking-tight">
+                    {plan.name}
+                  </h3>
                   {plan.highlighted ? (
                     <Badge className={badgeBrandSolid}>Popular</Badge>
                   ) : null}

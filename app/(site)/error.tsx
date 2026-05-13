@@ -35,7 +35,7 @@ export default function Error({
         </p>
       )}
 
-      <div className="mt-9 flex flex-col items-center gap-3 sm:flex-row">
+      <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
         <button
           type="button"
           onClick={() => unstable_retry()}

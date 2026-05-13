@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed:tmdb": "node --env-file=.env.local scripts/seed-tmdb.mjs"
+    "seed:tmdb": "node --env-file=.env.local scripts/seed-tmdb.mjs",
+    "seed:demo": "node --env-file=.env.local scripts/seed-demo.mjs",
+    "wipe:demo": "node --env-file=.env.local scripts/wipe-demo.mjs",
+    "cleanup": "node --env-file=.env.local scripts/cleanup.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",

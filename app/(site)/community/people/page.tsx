@@ -200,7 +200,7 @@ export default async function PeoplePage({
     <div>
       <header className="mb-8">
         <h1 className="mt-3 font-display text-3xl tracking-tight sm:text-5xl">
-          People.
+          People
         </h1>
         <p className="mt-2 max-w-xl text-muted-foreground">
           Find members to follow on CinePersona.

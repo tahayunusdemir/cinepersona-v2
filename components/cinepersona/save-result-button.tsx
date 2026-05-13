@@ -2,11 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { CheckIcon, SaveIcon } from "lucide-react";
+import { CheckIcon, LinkIcon, SaveIcon } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { FrameTag } from "@/components/cinema/atoms";
+import { ctaPrimary } from "@/lib/ui-tokens";
 import { saveResultAction } from "@/lib/cinepersona/save-result";
 import type { LikertValue } from "@/lib/cinepersona";
+import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "cinepersona:test-answers:v1";
 
@@ -44,31 +46,50 @@ export function SaveResultButton({ answers, signedIn }: Props) {
   }
 
   return (
-    <section className="mt-10 flex flex-col items-center gap-3 rounded-xl border border-border bg-muted/30 p-6 text-center sm:flex-row sm:justify-between sm:text-left">
-      <div>
-        <p className="text-sm font-medium text-foreground">
-          {signedIn ? "Save to your profile" : "Save and get a shareable link"}
-        </p>
-        <p className="text-sm text-muted-foreground">
+    <section className="relative overflow-hidden rounded-2xl border border-[#ecb756]/25 bg-panel p-7 sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-8">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-[#ecb756]/15 blur-3xl"
+      />
+      <div className="relative">
+        <FrameTag>{signedIn ? "Save to profile" : "Keep this result"}</FrameTag>
+        <p className="mt-3 font-display text-xl tracking-tight">
           {signedIn
-            ? "Keeps the result on your account so it shows up in your settings."
-            : "We'll generate a permalink you can come back to. No account required."}
+            ? "Pin this to your profile."
+            : "Get a permalink you can come back to."}
+        </p>
+        <p className="mt-1 max-w-md text-sm text-muted-foreground">
+          {signedIn
+            ? "Your CineType will appear in your account and on your community profile."
+            : "We'll mint a shareable link to this result — no account needed."}
         </p>
         {error ? (
           <p className="mt-2 text-sm text-destructive">{error}</p>
         ) : null}
       </div>
-      <Button type="button" onClick={onSave} disabled={pending}>
+      <button
+        type="button"
+        onClick={onSave}
+        disabled={pending}
+        className={cn(
+          ctaPrimary,
+          "group relative mt-5 disabled:opacity-70 sm:mt-0",
+        )}
+      >
         {pending ? (
           <>
             <CheckIcon className="size-4" /> Saving…
           </>
+        ) : signedIn ? (
+          <>
+            <SaveIcon className="size-4" /> Save to profile
+          </>
         ) : (
           <>
-            <SaveIcon className="size-4" /> Save my result
+            <LinkIcon className="size-4" /> Save & get link
           </>
         )}
-      </Button>
+      </button>
     </section>
   );
 }

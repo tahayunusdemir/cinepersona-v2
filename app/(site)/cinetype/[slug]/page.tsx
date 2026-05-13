@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { FrameTag } from "@/components/cinema/atoms";
+import { ProjectorBloom, Reveal, Stagger } from "@/components/cinema/motion";
 import { TypeCard } from "@/components/cinepersona/type-card";
 import { ctaPrimary } from "@/lib/ui-tokens";
 import {
@@ -90,10 +91,21 @@ export default async function TypeProfilePage({ params }: PageParams) {
         </nav>
 
         {/* HEADER */}
-        <header className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12">
-          <div className="lg:col-span-8">
+        <header className="relative mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12">
+          <ProjectorBloom className="pointer-events-none absolute -top-24 left-0 -z-10 h-[420px] w-[820px] max-w-[110vw] blur-3xl" />
+          <Reveal as="div" immediate className="lg:col-span-8">
+            <div className="relative size-40 overflow-hidden rounded-full border border-[#ecb756]/30 bg-foreground/[0.02] sm:size-56">
+              <Image
+                src={type.image}
+                alt={`${type.name} portrait`}
+                fill
+                priority
+                sizes="224px"
+                className="object-cover"
+              />
+            </div>
 
-            <div className="mt-5 flex items-baseline gap-5">
+            <div className="mt-6 flex items-baseline gap-5">
               <span className="font-display text-[88px] leading-none text-[#ecb756] sm:text-[120px]">
                 {type.code}
               </span>
@@ -119,9 +131,9 @@ export default async function TypeProfilePage({ params }: PageParams) {
             <p className="mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
               {type.tagline}
             </p>
-          </div>
+          </Reveal>
 
-          <div className="lg:col-span-4 lg:flex lg:items-end">
+          <Reveal immediate delay={0.12} className="lg:col-span-4 lg:flex lg:items-end">
             <blockquote className="relative rounded-2xl border border-foreground/10 bg-panel p-6">
               <span
                 aria-hidden
@@ -133,15 +145,17 @@ export default async function TypeProfilePage({ params }: PageParams) {
                 {type.quote}
               </p>
             </blockquote>
-          </div>
+          </Reveal>
         </header>
 
         {/* TYPE BREAKDOWN */}
         <section className="mt-12">
-          <h2 className="mt-3 font-display text-2xl tracking-tight">
-            Type breakdown
-          </h2>
-          <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Reveal>
+            <h2 className="mt-3 font-display text-2xl tracking-tight">
+              Type breakdown
+            </h2>
+          </Reveal>
+          <Stagger as="ul" step={0.07} className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {axes.map((axis) => {
               const letter =
                 axis.id === 1
@@ -154,7 +168,8 @@ export default async function TypeProfilePage({ params }: PageParams) {
               const pole =
                 axis.primary.letter === letter ? axis.primary : axis.opposite;
               return (
-                <li
+                <Reveal
+                  as="li"
                   key={axis.id}
                   className="rounded-xl border border-foreground/10 bg-panel p-4"
                 >
@@ -169,10 +184,10 @@ export default async function TypeProfilePage({ params }: PageParams) {
                       {pole.name}
                     </span>
                   </div>
-                </li>
+                </Reveal>
               );
             })}
-          </ul>
+          </Stagger>
         </section>
 
         {/* NARRATIVE */}
@@ -180,7 +195,7 @@ export default async function TypeProfilePage({ params }: PageParams) {
           {profile.sections
             .filter((s) => NARRATIVE_SECTIONS.has(s.slug))
             .map((section, i) => (
-              <article key={section.slug} className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+              <Reveal as="article" key={section.slug} className="grid grid-cols-1 gap-5 lg:grid-cols-12">
                 <div className="lg:col-span-3">
                   <h2 className="mt-3 font-display text-2xl leading-tight tracking-tight sm:text-3xl">
                     {section.title}
@@ -196,13 +211,13 @@ export default async function TypeProfilePage({ params }: PageParams) {
                     </p>
                   ))}
                 </div>
-              </article>
+              </Reveal>
             ))}
         </section>
 
         {/* STRENGTHS / BLIND SPOTS */}
-        <section className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl border border-foreground/10 bg-panel p-6">
+        <Stagger as="section" step={0.12} className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Reveal className="rounded-2xl border border-foreground/10 bg-panel p-6">
             <FrameTag>Strengths</FrameTag>
             <h3 className="mt-3 font-display text-xl tracking-tight">
               What sharpens the print.
@@ -217,8 +232,8 @@ export default async function TypeProfilePage({ params }: PageParams) {
                 </li>
               ))}
             </ul>
-          </div>
-          <div className="rounded-2xl border border-foreground/10 bg-panel p-6">
+          </Reveal>
+          <Reveal className="rounded-2xl border border-foreground/10 bg-panel p-6">
             <FrameTag>Blind spots</FrameTag>
             <h3 className="mt-3 font-display text-xl tracking-tight">
               Frames that go out of focus.
@@ -236,14 +251,16 @@ export default async function TypeProfilePage({ params }: PageParams) {
                 </li>
               ))}
             </ul>
-          </div>
-        </section>
+          </Reveal>
+        </Stagger>
 
         {/* RECOMMENDATIONS */}
         <section className="mt-16">
-          <h2 className="mt-3 font-display text-3xl tracking-tight sm:text-4xl">
-            What they’d love.
-          </h2>
+          <Reveal>
+            <h2 className="mt-3 font-display text-3xl tracking-tight sm:text-4xl">
+              What they’d love.
+            </h2>
+          </Reveal>
           {profile.sections
             .filter((s) => s.slug === "recommendations")
             .map((s) => (
@@ -264,8 +281,8 @@ export default async function TypeProfilePage({ params }: PageParams) {
               </h3>
             </div>
             <ul className="mt-5 grid grid-cols-3 gap-3 sm:gap-4">
-              {directors.map((r) => (
-                <li key={r.title} className="flex flex-col gap-2">
+              {directors.map((r, i) => (
+                <Reveal as="li" key={r.title} delay={i * 0.04} className="flex flex-col gap-2">
                   <div className="relative aspect-[2/3] overflow-hidden rounded-xl border border-foreground/10 bg-foreground/[0.02]">
                     {r.imagePath ? (
                       <Image
@@ -284,7 +301,7 @@ export default async function TypeProfilePage({ params }: PageParams) {
                   <p className="line-clamp-2 text-sm font-medium">
                     {r.title}
                   </p>
-                </li>
+                </Reveal>
               ))}
             </ul>
           </div>
@@ -298,8 +315,8 @@ export default async function TypeProfilePage({ params }: PageParams) {
               </h3>
             </div>
             <ul className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
-              {films.map((r) => (
-                <li key={r.title} className="flex flex-col gap-2">
+              {films.map((r, i) => (
+                <Reveal as="li" key={r.title} delay={i * 0.04} className="flex flex-col gap-2">
                   <div className="relative aspect-[2/3] overflow-hidden rounded-xl border border-foreground/10 bg-foreground/[0.02]">
                     {r.imagePath ? (
                       <Image
@@ -325,7 +342,7 @@ export default async function TypeProfilePage({ params }: PageParams) {
                       </p>
                     ) : null}
                   </div>
-                </li>
+                </Reveal>
               ))}
             </ul>
           </div>
@@ -377,7 +394,8 @@ export default async function TypeProfilePage({ params }: PageParams) {
         )}
 
         {/* CTA */}
-        <section className="mt-16 overflow-hidden rounded-2xl border border-dashed border-foreground/15 bg-foreground/[0.015] p-7 sm:flex sm:items-center sm:justify-between sm:p-8">
+        <Reveal as="section" className="relative mt-16 overflow-hidden rounded-2xl border border-dashed border-foreground/15 bg-foreground/[0.015] p-7 sm:flex sm:items-center sm:justify-between sm:p-8">
+          <ProjectorBloom className="pointer-events-none absolute right-0 top-1/2 -z-10 size-[360px] -translate-y-1/2 blur-3xl" />
           <div>
             <FrameTag>Curious?</FrameTag>
             <p className="mt-3 font-display text-xl tracking-tight">
@@ -394,7 +412,7 @@ export default async function TypeProfilePage({ params }: PageParams) {
             Take the test
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
-        </section>
+        </Reveal>
 
         <p className="mt-8 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
           Strategy · {strategy.name} — {strategy.tagline}{" "}

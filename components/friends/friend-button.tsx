@@ -6,8 +6,8 @@ import {
   CheckIcon,
   Loader2Icon,
   MessageCircleIcon,
+  MessageCirclePlusIcon,
   UserMinusIcon,
-  UserPlusIcon,
   UserRoundCheckIcon,
   UserRoundXIcon,
   XIcon,
@@ -80,26 +80,30 @@ export function FriendButton({
       start(async () => {
         const res = await sendFriendRequest(targetId, targetUsername);
         if (res.ok) {
-          toast.success(`Friend request sent to @${targetUsername}.`);
+          toast.success(`Message request sent to @${targetUsername}.`);
           router.refresh();
         } else if (res.error === "blocked") {
-          toast.error("You can't add this user.");
+          toast.error("You can't message this user.");
         } else if (res.error === "already_requested") {
-          toast.message("Request already pending.");
+          toast.message("Message request already pending.");
           router.refresh();
         } else if (res.error === "already_friends") {
-          toast.success(`You're already friends with @${targetUsername}.`);
+          toast.success(`You can already message @${targetUsername}.`);
           router.refresh();
         } else {
-          toast.error("Could not send request.");
+          toast.error("Could not send message request.");
         }
       });
     };
 
     return (
       <Button size="default" onClick={send} disabled={pending} className={className}>
-        {pending ? <Loader2Icon className="animate-spin" /> : <UserPlusIcon />}
-        Add friend
+        {pending ? (
+          <Loader2Icon className="animate-spin" />
+        ) : (
+          <MessageCirclePlusIcon />
+        )}
+        Message
       </Button>
     );
   }
@@ -112,7 +116,7 @@ export function FriendButton({
       start(async () => {
         const res = await removeFriendship(state.id, targetUsername);
         if (res.ok) {
-          toast.message("Friend request cancelled.");
+          toast.message("Message request cancelled.");
           router.refresh();
         } else {
           toast.error("Could not cancel.");
@@ -138,7 +142,7 @@ export function FriendButton({
           </>
         ) : (
           <>
-            <UserRoundCheckIcon /> Request sent
+            <UserRoundCheckIcon /> Request pending
           </>
         )}
       </Button>
@@ -153,7 +157,7 @@ export function FriendButton({
       start(async () => {
         const res = await acceptFriendRequest(state.id, targetUsername);
         if (res.ok) {
-          toast.success(`You and @${targetUsername} are now friends.`);
+          toast.success(`You can now message @${targetUsername}.`);
           router.refresh();
         } else {
           toast.error("Could not accept.");
@@ -198,7 +202,7 @@ export function FriendButton({
     start(async () => {
       const res = await removeFriendship(state.id, targetUsername);
       if (res.ok) {
-        toast.message(`Removed @${targetUsername} as friend.`);
+        toast.message(`Stopped messaging @${targetUsername}.`);
         router.refresh();
       } else {
         toast.error("Could not remove.");
@@ -213,30 +217,29 @@ export function FriendButton({
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <Button size="default" onClick={message} disabled={pending}>
-        <MessageCircleIcon /> Message
+        <MessageCircleIcon /> Open chat
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
             <Button
               variant="outline"
-              size="default"
+              size="icon"
               disabled={pending}
-              aria-label="Friend options"
+              aria-label="Message options"
             >
               {pending ? (
                 <Loader2Icon className="animate-spin" />
               ) : (
                 <UserRoundCheckIcon />
               )}
-              Friends
             </Button>
           }
         />
         <DropdownMenuContent align="end" sideOffset={6} className="min-w-44">
           <DropdownMenuItem onClick={unfriend} variant="destructive">
             <UserMinusIcon />
-            Remove friend
+            Stop messaging
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

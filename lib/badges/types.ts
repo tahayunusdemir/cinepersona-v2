@@ -97,6 +97,26 @@ export const TIER_LABELS: Record<AchievementTier, string> = {
   super_legendary: "Super legendary",
 };
 
+// Asset map — codes that have a real PNG in /public/badges. Missing codes
+// fall back to the generic medal icon. Spaces in folder names are URL-
+// encoded so next/image accepts them.
+export const BADGE_ASSETS: Record<string, string> = {
+  total_films_bronze:    "/badges/Total%20Films%20Watched/Total%20Bronze.png",
+  total_films_silver:    "/badges/Total%20Films%20Watched/Total%20Silver.png",
+  total_films_gold:      "/badges/Total%20Films%20Watched/Total%20Gold.png",
+  total_films_legendary: "/badges/Total%20Films%20Watched/Total%20Legendary.png",
+  total_films_mythic:    "/badges/Total%20Films%20Watched/Total%20Mythic.png",
+
+  match_bronze:    "/badges/match/Match%20Bronze.png",
+  match_silver:    "/badges/match/Match%20Silver.png",
+  match_gold:      "/badges/match/Match%20Gold.png",
+  match_legendary: "/badges/match/Match%20Main.png",
+
+  emotional_bronze: "/badges/emotional-films/Bronze_Emo.png",
+  emotional_silver: "/badges/emotional-films/Silver_Emo.png",
+  emotional_gold:   "/badges/emotional-films/Gold_Emo.png",
+};
+
 // Tailwind ring/text accents per tier — kept as full class strings so the
 // JIT picks them up.
 export const TIER_STYLES: Record<

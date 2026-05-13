@@ -22,14 +22,14 @@ export function ProfileBanner({ banner }: Props) {
   // Two stacked linear gradients with `mask-composite: intersect` give a
   // soft halo without the radial gradient hiding most of the poster.
   const verticalFade =
-    "linear-gradient(to bottom, black 0%, black 55%, transparent 100%)";
+    "linear-gradient(to bottom, black 0%, black 75%, transparent 100%)";
   const sideFade =
     "linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)";
 
   return (
     <div
       aria-hidden
-      className="pointer-events-none relative h-80 w-full overflow-hidden sm:h-[28rem]"
+      className="pointer-events-none relative h-[28rem] w-full overflow-hidden sm:h-[36rem]"
     >
       <Image
         src={`https://image.tmdb.org/t/p/w1280${banner.posterPath}`}

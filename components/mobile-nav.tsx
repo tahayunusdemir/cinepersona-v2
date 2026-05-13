@@ -17,13 +17,13 @@ import { familyAt } from "@/lib/ui-tokens";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/cinetype", label: "CineType", code: "01" },
-  { href: "/cinetest", label: "CineTest", code: "02" },
-  { href: "/cine-match", label: "CineMatch", code: "03" },
-  { href: "/films", label: "Films", code: "04" },
-  { href: "/community", label: "Community", code: "05" },
-  { href: "/pricing", label: "Pricing", code: "06" },
-  { href: "/about", label: "About", code: "07" },
+  { href: "/cinetype", label: "CineType" },
+  { href: "/cinetest", label: "CineTest" },
+  { href: "/cine-match", label: "CineMatch" },
+  { href: "/films", label: "Films" },
+  { href: "/community", label: "Community" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/about", label: "About" },
 ];
 
 export function MobileNav() {
@@ -87,16 +87,8 @@ export function MobileNav() {
                           : "text-foreground/85 hover:bg-foreground/[0.03]",
                       )}
                     >
-                      <span className="flex items-center gap-4">
-                        <span
-                          className="font-mono text-[10px] tracking-[0.18em]"
-                          style={{ color: active ? hue : undefined }}
-                        >
-                          {item.code}
-                        </span>
-                        <span className="text-xl font-medium tracking-tight">
-                          {item.label}
-                        </span>
+                      <span className="text-xl font-medium tracking-tight">
+                        {item.label}
                       </span>
                       <span
                         aria-hidden

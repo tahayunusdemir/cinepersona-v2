@@ -1,7 +1,9 @@
+import Image from "next/image";
 import { LockIcon, MedalIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
+  BADGE_ASSETS,
   TIER_LABELS,
   TIER_STYLES,
   type AchievementWithStatus,
@@ -16,6 +18,7 @@ export function BadgeCard({ achievement, hideSecret }: Props) {
   const styles = TIER_STYLES[achievement.tier];
   const isLocked = !achievement.unlocked;
   const isSecret = achievement.secret && hideSecret && isLocked;
+  const asset = BADGE_ASSETS[achievement.code];
 
   const name = isSecret ? "???" : achievement.name;
   const label = isSecret
@@ -31,14 +34,39 @@ export function BadgeCard({ achievement, hideSecret }: Props) {
     >
       <div
         className={cn(
-          "flex size-10 items-center justify-center rounded-full ring-2",
-          achievement.unlocked
-            ? styles.ring
-            : "ring-border/60 text-muted-foreground",
+          "relative flex size-12 items-center justify-center overflow-hidden rounded-full",
+          asset && !isSecret
+            ? achievement.unlocked
+              ? "ring-2 " + styles.ring
+              : "ring-1 ring-border/60"
+            : cn(
+                "ring-2",
+                achievement.unlocked
+                  ? styles.ring
+                  : "ring-border/60 text-muted-foreground",
+              ),
         )}
         aria-hidden
       >
-        {isLocked ? (
+        {asset && !isSecret ? (
+          <>
+            <Image
+              src={asset}
+              alt=""
+              fill
+              sizes="48px"
+              className={cn(
+                "object-cover",
+                isLocked && "scale-110 blur-[3px] grayscale brightness-75",
+              )}
+            />
+            {isLocked ? (
+              <span className="absolute inset-0 grid place-items-center bg-background/40">
+                <LockIcon className="size-4 text-foreground/80" />
+              </span>
+            ) : null}
+          </>
+        ) : isLocked ? (
           <LockIcon className="size-4" />
         ) : (
           <MedalIcon className={cn("size-5", styles.text)} />

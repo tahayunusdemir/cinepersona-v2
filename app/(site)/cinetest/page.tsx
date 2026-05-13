@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { FrameTag } from "@/components/cinema/atoms";
+import { ProjectorBloom, Reveal, Stagger } from "@/components/cinema/motion";
 import { SampleLikert } from "@/components/cinetest/sample-likert";
 import { SamplePicks } from "@/components/cinetest/sample-picks";
 import { SampleResult } from "@/components/cinetest/sample-result";
@@ -41,31 +42,28 @@ const facts = [
 
 const steps = [
   {
-    n: "01",
     icon: ListChecksIcon,
     eyebrow: "Picks",
     title: "Pick a few films that feel like you.",
     body: "Twelve prompts — favourites, guilty pleasures, the score you can’t stop replaying. Search by title, tap a poster. Picks don’t change your score; they personalise your matches later.",
     preview: <SamplePicks />,
-    caption: "Static preview — the real step searches TMDB and shows real posters.",
+    caption: "Illustration only — not the real picker.",
   },
   {
-    n: "02",
     icon: PencilLineIcon,
     eyebrow: "Likert",
     title: "Rate 48 short statements.",
     body: "Twelve questions per axis, on a 7-point scale from Strongly disagree to Strongly agree. Bigger circles mean stronger conviction. Trust your gut — there are no trick items.",
     preview: <SampleLikert />,
-    caption: "Tap a circle below to feel the interaction.",
+    caption: "Illustration only — not the real scale.",
   },
   {
-    n: "03",
     icon: FileTextIcon,
     eyebrow: "Result",
     title: "Read your CineType.",
     body: "A 4-letter code, four axis bars, and a short profile. One of 16 types — grouped into families like Auteurs, Pilgrims, and Wanderers — with a tagline and a quote that should feel suspiciously close to home.",
     preview: <SampleResult />,
-    caption: "Sample result — ESAC, The Interpreter. Yours will differ.",
+    caption: "Illustration only — your result will differ.",
   },
 ];
 
@@ -75,34 +73,45 @@ export default function CineTestIntroPage() {
 
       <div className="mx-auto w-full max-w-4xl px-4 pb-24 sm:px-6">
         {/* HERO */}
-        <section className="flex flex-col items-center pt-16 pb-12 text-center sm:pt-24">
-          <h1 className="mt-5 max-w-3xl font-display text-[44px] leading-[1.02] tracking-tight sm:text-[60px] lg:text-[68px]">
-            Find the way{" "}
-            <span className="text-[#ecb756]">you actually watch</span>
-          </h1>
-          <p className="mt-5 max-w-xl text-pretty text-base text-muted-foreground sm:text-lg">
-            Pick a handful of films you love, then answer 48 short statements
-            about how you watch. We map you onto four axes — and give you one
-            of 16 CineTypes.
-          </p>
-          <div className="mt-9 flex flex-col items-center gap-3 sm:flex-row">
-            <Link href="/cinetest/take" className={cn(ctaPrimaryLg, "group")}>
-              Start the test
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-            </Link>
-            <Link href="#how-it-works" className={ctaSecondaryLg}>
-              See an example first
-            </Link>
-          </div>
+        <section className="relative flex flex-col items-center pt-16 pb-12 text-center sm:pt-24">
+          <ProjectorBloom className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[420px] w-[820px] max-w-[120vw] -translate-x-1/2 blur-3xl" />
+          <Stagger immediate step={0.09}>
+            <Reveal as="p" className={cn(credit, "text-[10px]")}>
+              <span className="mr-2 inline-block size-1.5 -translate-y-[2px] rounded-full bg-[#ecb756] align-middle" />
+              CineTest · 12 picks · 48 statements
+            </Reveal>
+            <Reveal as="header">
+              <h1 className="mt-5 max-w-3xl font-display text-[44px] leading-[1.02] tracking-tight sm:text-[60px] lg:text-[68px]">
+                Find the way{" "}
+                <span className="text-[#ecb756]">you actually watch</span>
+              </h1>
+            </Reveal>
+            <Reveal as="p" className="mt-5 max-w-xl text-pretty text-base text-muted-foreground sm:text-lg">
+              Pick a handful of films you love, then answer 48 short statements
+              about how you watch. We map you onto four axes — and give you one
+              of 16 CineTypes.
+            </Reveal>
+            <Reveal className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link href="/cinetest/take" className={cn(ctaPrimaryLg, "group")}>
+                Start the test
+                <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <Link href="#how-it-works" className={ctaSecondaryLg}>
+                See an example first
+              </Link>
+            </Reveal>
+          </Stagger>
         </section>
 
         {/* FACTS */}
-        <section
+        <Stagger
+          as="section"
           aria-label="At a glance"
+          step={0.08}
           className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-foreground/10 bg-foreground/5 sm:grid-cols-3"
         >
           {facts.map((fact, i) => (
-            <div
+            <Reveal
               key={fact.label}
               className="flex items-center gap-3 bg-panel p-4"
             >
@@ -117,9 +126,9 @@ export default function CineTestIntroPage() {
                 <fact.icon className="size-3.5" />
               </span>
               <span className="text-sm">{fact.label}</span>
-            </div>
+            </Reveal>
           ))}
-        </section>
+        </Stagger>
 
         {/* HOW IT WORKS */}
         <section
@@ -127,20 +136,20 @@ export default function CineTestIntroPage() {
           aria-label="How it works"
           className="mt-20 scroll-mt-20"
         >
-          <div className="mb-12 flex items-end justify-between gap-4">
+          <Reveal className="mb-12 flex items-end justify-between gap-4">
             <div>
               <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-4xl">
                 How it works.
               </h2>
             </div>
             <span className={credit}>~10 min · 3 stages</span>
-          </div>
+          </Reveal>
 
-          <ol className="space-y-12">
+          <Stagger as="ol" step={0.12} className="space-y-12">
             {steps.map((step, index) => {
               const last = index === steps.length - 1;
               return (
-                <li key={step.title} className="relative">
+                <Reveal as="li" key={step.title} className="relative">
                   {!last && (
                     <span
                       aria-hidden
@@ -149,21 +158,17 @@ export default function CineTestIntroPage() {
                   )}
                   <div className="flex items-start gap-5 sm:gap-6">
                     <span
-                      className="relative z-10 grid size-14 shrink-0 place-items-center rounded-full border bg-panel font-display text-xl"
+                      className="relative z-10 grid size-14 shrink-0 place-items-center rounded-full border bg-panel"
                       style={{
                         color: familyAt(index),
                         borderColor: `${familyAt(index)}40`,
                       }}
                     >
-                      {step.n}
+                      <step.icon className="size-5" />
                     </span>
                     <div className="min-w-0 flex-1 pt-1.5">
-                      <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                        <step.icon
-                          className="size-3.5"
-                          style={{ color: familyAt(index) }}
-                        />
-                        Step {step.n} · {step.eyebrow}
+                      <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                        {step.eyebrow}
                       </p>
                       <h3 className="mt-3 font-display text-2xl leading-tight tracking-tight sm:text-3xl">
                         {step.title}
@@ -179,25 +184,28 @@ export default function CineTestIntroPage() {
                       </p>
                     </div>
                   </div>
-                </li>
+                </Reveal>
               );
             })}
-          </ol>
+          </Stagger>
         </section>
 
         {/* AXES */}
         <section aria-label="What we measure" className="mt-20">
-          <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-4xl">
-            What the test{" "}
-            <span className="text-[#ecb756]">measures.</span>
-          </h2>
-          <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-            Each axis is a continuum between two poles. Your code shows which
-            side you lean toward; the percentages show how strongly.
-          </p>
-          <ul className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Reveal>
+            <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-4xl">
+              What the test{" "}
+              <span className="text-[#ecb756]">measures.</span>
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
+              Each axis is a continuum between two poles. Your code shows which
+              side you lean toward; the percentages show how strongly.
+            </p>
+          </Reveal>
+          <Stagger as="ul" step={0.08} className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {axes.map((axis, i) => (
-              <li
+              <Reveal
+                as="li"
                 key={axis.id}
                 className="relative overflow-hidden rounded-2xl border bg-panel p-5"
                 style={{ borderColor: `${familyAt(i)}33` }}
@@ -207,13 +215,7 @@ export default function CineTestIntroPage() {
                   className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full blur-3xl opacity-30"
                   style={{ background: `${familyAt(i)}22` }}
                 />
-                <div className="relative flex items-center justify-between">
-                  <span
-                    className="font-mono text-[10px] uppercase tracking-[0.22em]"
-                    style={{ color: familyAt(i) }}
-                  >
-                    Axis 0{i + 1} / {axes.length}
-                  </span>
+                <div className="relative flex items-center justify-end">
                   <span
                     className="font-mono text-xs"
                     style={{ color: familyAt(i) }}
@@ -236,13 +238,14 @@ export default function CineTestIntroPage() {
                     {axis.opposite.blurb}
                   </p>
                 </div>
-              </li>
+              </Reveal>
             ))}
-          </ul>
+          </Stagger>
         </section>
 
         {/* NOTE */}
-        <section
+        <Reveal
+          as="section"
           aria-label="A note on what this is"
           className="mt-16 rounded-2xl border border-dashed border-foreground/15 bg-foreground/[0.015] p-7"
         >
@@ -256,13 +259,15 @@ export default function CineTestIntroPage() {
             see yourself watching, which is exactly what we want it to do. Take
             it when you’re rested; the results read better that way.
           </p>
-        </section>
+        </Reveal>
 
         {/* CTA */}
-        <section
+        <Reveal
+          as="section"
           aria-label="Start the test"
-          className={cn(cardCtaBlock, "mt-12 p-10 text-center sm:p-14")}
+          className={cn(cardCtaBlock, "relative mt-12 overflow-hidden p-10 text-center sm:p-14")}
         >
+          <ProjectorBloom className="pointer-events-none absolute left-1/2 top-1/2 -z-10 size-[460px] -translate-x-1/2 -translate-y-1/2 blur-3xl" />
           <SparklesIcon className="mx-auto size-6 text-[#ecb756]" />
           <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-5xl">
             Ready when <span className="text-[#ecb756]">you are</span>
@@ -278,7 +283,7 @@ export default function CineTestIntroPage() {
             Start the test
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
-        </section>
+        </Reveal>
       </div>
     </div>
   );

@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { FilmIcon } from "lucide-react";
@@ -12,6 +14,7 @@ import { filmSlug } from "@/lib/films/slug";
 import type { MovieRow, ViewMode } from "@/lib/films/types";
 
 import { PosterActions } from "./poster-actions";
+import { useTrackingActions } from "./use-tracking-actions";
 
 type Props = {
   movie: MovieRow;
@@ -35,15 +38,21 @@ export function PosterItem({
   const height = view === "dense" ? 180 : 330;
   const tooltipText = year ? `${movie.title} (${year})` : movie.title;
 
-  const ringClass = movie.watched
+  const tracking = useTrackingActions({
+    movieId: movie.id,
+    watched: movie.watched,
+    inWatchlist: movie.in_watchlist,
+  });
+
+  const ringClass = tracking.optimisticWatched
     ? "ring-2 ring-emerald-500"
-    : movie.in_watchlist
+    : tracking.optimisticWatchlist
       ? "ring-2 ring-amber-400"
       : "ring-1 ring-border/50";
 
-  const overlayClass = movie.watched
+  const overlayClass = tracking.optimisticWatched
     ? "bg-emerald-500/20 backdrop-blur-[0.5px]"
-    : movie.in_watchlist
+    : tracking.optimisticWatchlist
       ? "bg-amber-400/20 backdrop-blur-[0.5px]"
       : null;
 
@@ -57,7 +66,7 @@ export function PosterItem({
               aria-label={tooltipText}
               className={cn(
                 "relative block overflow-hidden rounded-md bg-muted",
-                "aspect-[2/3]",
+                "aspect-[2/3] transition-[box-shadow,background-color] duration-100",
                 "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
                 ringClass,
               )}
@@ -95,11 +104,13 @@ export function PosterItem({
       </Tooltip>
 
       <PosterActions
-        movieId={movie.id}
-        watched={movie.watched}
-        inWatchlist={movie.in_watchlist}
         isAuthed={isAuthed}
         loginHref={loginHref}
+        pending={tracking.pending}
+        optimisticWatched={tracking.optimisticWatched}
+        optimisticWatchlist={tracking.optimisticWatchlist}
+        onWatched={tracking.onWatched}
+        onWatchlist={tracking.onWatchlist}
       />
     </li>
   );

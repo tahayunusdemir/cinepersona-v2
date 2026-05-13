@@ -6,11 +6,11 @@ import { siteConfig } from "@/lib/site";
 import { credit, FAMILY_HEX, familyAt } from "@/lib/ui-tokens";
 
 const explore = [
-  { href: "/cinetype", label: "CineType", code: "01" },
-  { href: "/cinetest", label: "CineTest", code: "02" },
-  { href: "/cine-match", label: "CineMatch", code: "03" },
-  { href: "/films", label: "Films", code: "04" },
-  { href: "/community", label: "Community", code: "05" },
+  { href: "/cinetype", label: "CineType" },
+  { href: "/cinetest", label: "CineTest" },
+  { href: "/cine-match", label: "CineMatch" },
+  { href: "/films", label: "Films" },
+  { href: "/community", label: "Community" },
 ];
 
 const account = [
@@ -80,11 +80,7 @@ export function SiteFooter() {
             label="Explore"
             number="A"
             hue={FAMILY_HEX.aut}
-            items={explore.map((i) => ({
-              href: i.href,
-              label: i.label,
-              prefix: i.code,
-            }))}
+            items={explore}
           />
           <FooterColumn
             label="Account"
@@ -181,7 +177,7 @@ function FooterColumn({
   label: string;
   number: string;
   hue: string;
-  items: { href: string; label: string; prefix?: string }[];
+  items: { href: string; label: string }[];
 }) {
   return (
     <div className="col-span-1 md:col-span-2">
@@ -200,14 +196,6 @@ function FooterColumn({
               href={item.href}
               className="group inline-flex items-baseline gap-2.5 text-sm text-foreground/75 transition-colors hover:text-foreground"
             >
-              {item.prefix && (
-                <span
-                  className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground transition-colors"
-                  style={{ ["--hue" as string]: hue }}
-                >
-                  {item.prefix}
-                </span>
-              )}
               <span className="relative">
                 {item.label}
                 <span

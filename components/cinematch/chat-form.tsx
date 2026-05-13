@@ -74,7 +74,7 @@ export function ChatForm({ matchId, viewerId }: Props) {
         e.preventDefault();
         submit();
       }}
-      className="flex w-full items-end gap-2"
+      className="flex w-full items-end gap-2 sm:gap-2.5"
     >
       <div className="flex-1">
         <Textarea
@@ -91,7 +91,7 @@ export function ChatForm({ matchId, viewerId }: Props) {
           placeholder="Message…"
           aria-label="Message"
           aria-invalid={tooLong || undefined}
-          className="scrollbar-hide min-h-10 resize-none rounded-full px-4 py-2 text-sm leading-relaxed"
+          className="scrollbar-hide min-h-10 resize-none rounded-2xl border-foreground/15 bg-card/70 px-4 py-2.5 text-base leading-relaxed shadow-none focus-visible:ring-2 focus-visible:ring-[#ecb756]/60 focus-visible:ring-offset-0 sm:rounded-full sm:py-2 sm:text-sm lg:px-5 lg:py-2.5"
         />
         {showCounter ? (
           <p
@@ -110,9 +110,9 @@ export function ChatForm({ matchId, viewerId }: Props) {
         size="icon"
         aria-label="Send message"
         disabled={disabled}
-        className="size-10 shrink-0 rounded-full"
+        className="size-10 shrink-0 rounded-full bg-[#ecb756] text-[#1a1840] shadow-[0_1px_0_color-mix(in_oklch,var(--color-brand-gold)_55%,transparent)] transition-transform hover:bg-[#f3cd84] active:scale-95 disabled:bg-foreground/15 disabled:text-foreground/40 disabled:shadow-none lg:size-11"
       >
-        <SendHorizonalIcon className="size-4" />
+        <SendHorizonalIcon className="size-4 lg:size-[18px]" />
       </Button>
     </form>
   );

@@ -25,7 +25,7 @@ export default async function ProfileLayout({
       <div
         className={cn(
           "px-4 sm:px-6",
-          hasBanner ? "-mt-10 sm:-mt-14" : "pt-12",
+          hasBanner ? "-mt-16 sm:-mt-24" : "pt-12",
         )}
       >
         <ProfileHeader profile={result.profile} />

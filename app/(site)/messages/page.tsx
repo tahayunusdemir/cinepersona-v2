@@ -15,6 +15,7 @@ import {
 import type { FriendshipView } from "@/lib/friends/types";
 import { createClient } from "@/lib/supabase/server";
 import { profileHeading, profileInitials } from "@/lib/profile/queries";
+import { cn } from "@/lib/utils";
 
 import { IncomingActions, OutgoingActions } from "./request-actions";
 
@@ -45,13 +46,17 @@ export default async function MessagesIndexPage() {
 
   return (
     <div className="relative isolate overflow-hidden">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 [background:radial-gradient(60%_60%_at_50%_0%,color-mix(in_oklch,var(--color-brand-gold)_10%,transparent)_0%,transparent_70%)]"
+      />
 
-      <div className="mx-auto w-full max-w-3xl px-4 pb-24 pt-12 sm:px-6">
-        <header className="mb-8">
-          <h1 className="mt-3 font-display text-3xl tracking-tight sm:text-5xl">
-            Messages.
+      <div className="mx-auto w-full max-w-5xl px-4 pb-24 pt-12 sm:px-6 lg:px-8">
+        <header className="mb-10">
+          <h1 className="font-display text-4xl tracking-tight sm:text-6xl">
+            Messages
           </h1>
-          <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+          <p className="mt-3 max-w-xl text-sm text-muted-foreground">
             Chat with friends. Add someone from their profile to start a
             conversation.
           </p>
@@ -143,9 +148,16 @@ function FriendRow({
     <li>
       <Link
         href={`/messages/${username}`}
-        className="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-foreground/[0.03]"
+        className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-foreground/[0.03] sm:px-6"
       >
-        <Avatar className="size-10 shrink-0">
+        <Avatar
+          className={cn(
+            "size-11 shrink-0 transition-shadow",
+            unread > 0
+              ? "border border-[#ecb756]/40 shadow-[0_0_0_3px_color-mix(in_oklch,var(--color-brand-gold)_14%,transparent)]"
+              : "border border-foreground/10",
+          )}
+        >
           <AvatarImage
             src={row.partner.avatar_url ?? "/user.png"}
             alt={heading}
@@ -156,12 +168,21 @@ function FriendRow({
         </Avatar>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="truncate text-sm font-medium">{heading}</span>
-            <span className="truncate text-xs text-muted-foreground">
+            <span className="truncate font-display text-base tracking-tight">
+              {heading}
+            </span>
+            <span className="truncate font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               @{username}
             </span>
           </div>
-          <p className="truncate text-xs text-muted-foreground">
+          <p
+            className={cn(
+              "truncate text-xs",
+              unread > 0
+                ? "text-foreground/80"
+                : "text-muted-foreground",
+            )}
+          >
             {unread > 0
               ? `${unread} new message${unread === 1 ? "" : "s"}`
               : "Open conversation"}

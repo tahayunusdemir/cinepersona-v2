@@ -42,11 +42,7 @@ export default async function BadgesPage() {
         </header>
 
         {/* Progress card */}
-        <div className="relative mb-10 overflow-hidden rounded-2xl border border-[#ecb756]/20 bg-gradient-to-br from-panel-2 to-panel p-7 sm:p-8">
-          <div
-            aria-hidden
-            className="absolute -right-24 -top-24 size-72 rounded-full bg-[#ecb756]/10 blur-3xl"
-          />
+        <div className="relative mb-10 overflow-hidden rounded-2xl border border-foreground/10 bg-gradient-to-br from-panel-2 to-panel p-7 sm:p-8">
           <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <FrameTag>Progress</FrameTag>

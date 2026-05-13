@@ -50,6 +50,7 @@ export async function updateProfileAction(
     display_name: formData.get("display_name") ?? "",
     bio: formData.get("bio") ?? "",
     link: formData.get("link") ?? "",
+    location: formData.get("location") ?? "",
   });
 
   if (!parsed.success) {
@@ -70,6 +71,7 @@ export async function updateProfileAction(
       display_name: parsed.data.display_name,
       bio: parsed.data.bio,
       link: parsed.data.link,
+      location: parsed.data.location,
     })
     .eq("id", ctx.user.id);
 
@@ -169,6 +171,114 @@ export async function updateEmailAction(
   }
 
   return { ok: true, message: "email_updated" };
+}
+
+// ---------------------------------------------------------------------------
+// Avatar
+// ---------------------------------------------------------------------------
+
+const AVATAR_BUCKET = "avatars";
+const AVATAR_MAX_BYTES = 2 * 1024 * 1024; // 2 MB — matches bucket file_size_limit
+const AVATAR_ALLOWED_TYPES: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/gif": "gif",
+};
+
+async function clearUserAvatarFolder(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+): Promise<void> {
+  const { data: existing } = await supabase.storage
+    .from(AVATAR_BUCKET)
+    .list(userId);
+  if (existing && existing.length > 0) {
+    await supabase.storage
+      .from(AVATAR_BUCKET)
+      .remove(existing.map((entry) => `${userId}/${entry.name}`));
+  }
+}
+
+export async function updateAvatarAction(
+  _prev: SettingsActionState | undefined,
+  formData: FormData,
+): Promise<SettingsActionState> {
+  const file = formData.get("avatar");
+  if (!(file instanceof File) || file.size === 0) {
+    return {
+      ok: false,
+      error: "validation",
+      fieldErrors: { avatar: "Pick an image to upload." },
+    };
+  }
+  if (file.size > AVATAR_MAX_BYTES) {
+    return {
+      ok: false,
+      error: "validation",
+      fieldErrors: { avatar: "Image must be 2 MB or smaller." },
+    };
+  }
+  const ext = AVATAR_ALLOWED_TYPES[file.type];
+  if (!ext) {
+    return {
+      ok: false,
+      error: "validation",
+      fieldErrors: { avatar: "Use a JPG, PNG, WebP, or GIF image." },
+    };
+  }
+
+  const ctx = await requireUser();
+  if (!ctx) return { ok: false, error: "unknown" };
+
+  // Wipe the user's folder first so each upload yields a fresh URL (cache
+  // busting) and we never accumulate orphan blobs.
+  await clearUserAvatarFolder(ctx.supabase, ctx.user.id);
+
+  const path = `${ctx.user.id}/${Date.now()}.${ext}`;
+  const { error: uploadError } = await ctx.supabase.storage
+    .from(AVATAR_BUCKET)
+    .upload(path, file, {
+      cacheControl: "3600",
+      contentType: file.type,
+      upsert: false,
+    });
+  if (uploadError) {
+    return { ok: false, error: "unknown", message: uploadError.message };
+  }
+
+  const { data: pub } = ctx.supabase.storage
+    .from(AVATAR_BUCKET)
+    .getPublicUrl(path);
+
+  const { error: updateError } = await ctx.supabase
+    .from("profiles")
+    .update({ avatar_url: pub.publicUrl })
+    .eq("id", ctx.user.id);
+  if (updateError) {
+    return { ok: false, error: "unknown", message: updateError.message };
+  }
+
+  // Avatar appears in the header user menu and on the public profile.
+  revalidatePath("/", "layout");
+
+  return { ok: true, message: "avatar_updated" };
+}
+
+export async function removeAvatarAction(): Promise<SettingsActionState> {
+  const ctx = await requireUser();
+  if (!ctx) return { ok: false, error: "unknown" };
+
+  await clearUserAvatarFolder(ctx.supabase, ctx.user.id);
+
+  const { error } = await ctx.supabase
+    .from("profiles")
+    .update({ avatar_url: null })
+    .eq("id", ctx.user.id);
+  if (error) return { ok: false, error: "unknown", message: error.message };
+
+  revalidatePath("/", "layout");
+  return { ok: true, message: "avatar_removed" };
 }
 
 // ---------------------------------------------------------------------------

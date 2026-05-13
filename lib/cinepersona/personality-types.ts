@@ -12,6 +12,7 @@ export const personalityTypes: PersonalityType[] = [
     group: "auteurs",
     strategy: "devoted",
     axes: { a1: "E", a2: "S", a3: "A", a4: "C" },
+    image: "/types/1.png",
   },
   {
     code: "ESAW",
@@ -22,6 +23,7 @@ export const personalityTypes: PersonalityType[] = [
     group: "auteurs",
     strategy: "free-spirit",
     axes: { a1: "E", a2: "S", a3: "A", a4: "W" },
+    image: "/types/2.png",
   },
   {
     code: "DSAC",
@@ -32,6 +34,7 @@ export const personalityTypes: PersonalityType[] = [
     group: "auteurs",
     strategy: "archivist",
     axes: { a1: "D", a2: "S", a3: "A", a4: "C" },
+    image: "/types/3.png",
   },
   {
     code: "DSAW",
@@ -42,6 +45,7 @@ export const personalityTypes: PersonalityType[] = [
     group: "auteurs",
     strategy: "drifter",
     axes: { a1: "D", a2: "S", a3: "A", a4: "W" },
+    image: "/types/4.png",
   },
 
   // Visionaries (_SI_)
@@ -55,6 +59,7 @@ export const personalityTypes: PersonalityType[] = [
     group: "visionaries",
     strategy: "devoted",
     axes: { a1: "E", a2: "S", a3: "I", a4: "C" },
+    image: "/types/5.png",
   },
   {
     code: "ESIW",
@@ -65,6 +70,7 @@ export const personalityTypes: PersonalityType[] = [
     group: "visionaries",
     strategy: "free-spirit",
     axes: { a1: "E", a2: "S", a3: "I", a4: "W" },
+    image: "/types/6.png",
   },
   {
     code: "DSIC",
@@ -75,6 +81,7 @@ export const personalityTypes: PersonalityType[] = [
     group: "visionaries",
     strategy: "archivist",
     axes: { a1: "D", a2: "S", a3: "I", a4: "C" },
+    image: "/types/7.png",
   },
   {
     code: "DSIW",
@@ -85,6 +92,7 @@ export const personalityTypes: PersonalityType[] = [
     group: "visionaries",
     strategy: "drifter",
     axes: { a1: "D", a2: "S", a3: "I", a4: "W" },
+    image: "/types/8.png",
   },
 
   // Connoisseurs (_LA_)
@@ -97,6 +105,7 @@ export const personalityTypes: PersonalityType[] = [
     group: "connoisseurs",
     strategy: "devoted",
     axes: { a1: "E", a2: "L", a3: "A", a4: "C" },
+    image: "/types/9.png",
   },
   {
     code: "ELAW",
@@ -107,6 +116,7 @@ export const personalityTypes: PersonalityType[] = [
     group: "connoisseurs",
     strategy: "free-spirit",
     axes: { a1: "E", a2: "L", a3: "A", a4: "W" },
+    image: "/types/10.png",
   },
   {
     code: "DLAC",
@@ -117,6 +127,7 @@ export const personalityTypes: PersonalityType[] = [
     group: "connoisseurs",
     strategy: "archivist",
     axes: { a1: "D", a2: "L", a3: "A", a4: "C" },
+    image: "/types/11.png",
   },
   {
     code: "DLAW",
@@ -127,6 +138,7 @@ export const personalityTypes: PersonalityType[] = [
     group: "connoisseurs",
     strategy: "drifter",
     axes: { a1: "D", a2: "L", a3: "A", a4: "W" },
+    image: "/types/12.png",
   },
 
   // Escapists (_LI_)
@@ -139,6 +151,7 @@ export const personalityTypes: PersonalityType[] = [
     group: "escapists",
     strategy: "devoted",
     axes: { a1: "E", a2: "L", a3: "I", a4: "C" },
+    image: "/types/13.png",
   },
   {
     code: "ELIW",
@@ -150,6 +163,7 @@ export const personalityTypes: PersonalityType[] = [
     group: "escapists",
     strategy: "free-spirit",
     axes: { a1: "E", a2: "L", a3: "I", a4: "W" },
+    image: "/types/14.png",
   },
   {
     code: "DLIC",
@@ -160,6 +174,7 @@ export const personalityTypes: PersonalityType[] = [
     group: "escapists",
     strategy: "archivist",
     axes: { a1: "D", a2: "L", a3: "I", a4: "C" },
+    image: "/types/15.png",
   },
   {
     code: "DLIW",
@@ -170,6 +185,7 @@ export const personalityTypes: PersonalityType[] = [
     group: "escapists",
     strategy: "drifter",
     axes: { a1: "D", a2: "L", a3: "I", a4: "W" },
+    image: "/types/16.png",
   },
 ];
 

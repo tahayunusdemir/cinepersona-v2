@@ -73,7 +73,7 @@ export default async function SettingsCommunityPage() {
             Settings
           </Link>
           <h1 className="mt-3 font-display text-3xl tracking-tight sm:text-5xl">
-            Community.
+            Community
           </h1>
           <p className="mt-2 max-w-xl text-base text-muted-foreground">
             People you have blocked. Their threads and comments are hidden from

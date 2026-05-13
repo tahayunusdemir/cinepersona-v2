@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import type { PersonalityType } from "@/lib/cinepersona";
@@ -36,7 +37,21 @@ export function TypeCard({ type, familyHue = FAMILY_HEX.aut }: Props) {
             {type.strategy.replace("-", " ")}
           </span>
         </div>
-        <h3 className="mt-5 font-display text-lg leading-snug tracking-tight">
+        <div className="mt-5 flex justify-center">
+          <div
+            className="relative aspect-square w-32 overflow-hidden rounded-full border bg-foreground/[0.02] sm:w-36"
+            style={{ borderColor: `${familyHue}40` }}
+          >
+            <Image
+              src={type.image}
+              alt={`${type.name} portrait`}
+              fill
+              sizes="144px"
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            />
+          </div>
+        </div>
+        <h3 className="mt-4 font-display text-lg leading-snug tracking-tight">
           {type.name}
         </h3>
         <p className="mt-1 text-sm leading-relaxed text-muted-foreground">

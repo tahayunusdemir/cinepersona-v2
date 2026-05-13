@@ -102,7 +102,7 @@ export default async function MeActivityPage() {
           ← Community
         </Link>
         <h1 className="mt-3 font-display text-3xl tracking-tight sm:text-5xl">
-          My activity.
+          My activity
         </h1>
         <p className="mt-2 max-w-xl text-muted-foreground">
           Your latest comments and upvotes.

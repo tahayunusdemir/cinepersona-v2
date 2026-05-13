@@ -2,6 +2,12 @@
 
 import { useEffect } from "react";
 
+const MONO =
+  "ui-monospace, SFMono-Regular, Menlo, monospace";
+const SANS =
+  "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif";
+const SERIF = "ui-serif, Georgia, serif";
+
 export default function GlobalError({
   error,
   unstable_retry,
@@ -19,7 +25,7 @@ export default function GlobalError({
         style={{
           margin: 0,
           minHeight: "100dvh",
-          background: "#000",
+          background: "#0a0a0a",
           color: "#f4f1e8",
           display: "flex",
           flexDirection: "column",
@@ -28,16 +34,14 @@ export default function GlobalError({
           gap: "1rem",
           padding: "2rem",
           textAlign: "center",
-          fontFamily:
-            "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+          fontFamily: SANS,
         }}
       >
         <title>Projection error · CinePersona</title>
         <div
           style={{
-            position: "relative",
-            fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-            fontSize: "10px",
+            fontFamily: MONO,
+            fontSize: 10,
             letterSpacing: "0.22em",
             textTransform: "uppercase",
             color: "rgba(244,241,232,0.6)",
@@ -47,11 +51,10 @@ export default function GlobalError({
         </div>
         <h1
           style={{
-            position: "relative",
+            margin: 0,
             fontSize: "2.25rem",
             fontWeight: 400,
-            margin: 0,
-            fontFamily: "ui-serif, Georgia, serif",
+            fontFamily: SERIF,
             letterSpacing: "-0.02em",
           }}
         >
@@ -59,11 +62,10 @@ export default function GlobalError({
         </h1>
         <p
           style={{
-            position: "relative",
+            margin: 0,
+            maxWidth: 420,
             fontSize: "0.875rem",
             opacity: 0.7,
-            maxWidth: 420,
-            margin: 0,
           }}
         >
           The application crashed unexpectedly. You can try rewinding, or
@@ -72,10 +74,10 @@ export default function GlobalError({
         {error.digest && (
           <p
             style={{
-              position: "relative",
+              margin: 0,
+              fontFamily: MONO,
               fontSize: "0.7rem",
               opacity: 0.55,
-              fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
             }}
@@ -87,7 +89,6 @@ export default function GlobalError({
           type="button"
           onClick={() => unstable_retry()}
           style={{
-            position: "relative",
             marginTop: "0.5rem",
             padding: "0.75rem 1.5rem",
             fontSize: "0.875rem",
@@ -96,7 +97,6 @@ export default function GlobalError({
             color: "#1a1840",
             border: 0,
             borderRadius: 9999,
-            boxShadow: "0 8px 28px -12px rgba(236,183,86,0.5)",
             cursor: "pointer",
           }}
         >

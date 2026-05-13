@@ -2,7 +2,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 import { AuthShell } from "@/components/auth/auth-shell";
+import { DemoLoginButton } from "@/components/auth/demo-login-button";
 import { LoginForm } from "@/components/auth/login-form";
+import { OAuthDivider, OAuthGrid } from "@/components/auth/oauth-buttons";
 import { authErrorMessages, type AuthErrorKey } from "@/lib/auth/errors";
 
 export const metadata: Metadata = { title: "Sign in" };
@@ -59,7 +61,20 @@ export default async function LoginPage({
         </p>
       ) : null}
 
+      <DemoLoginButton next={safeNext} />
+
+      <div className="my-7 flex items-center gap-4">
+        <div className="h-px flex-1 bg-foreground/10" />
+        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+          or sign in with your account
+        </span>
+        <div className="h-px flex-1 bg-foreground/10" />
+      </div>
+
       <LoginForm next={safeNext} />
+
+      <OAuthDivider />
+      <OAuthGrid />
     </AuthShell>
   );
 }

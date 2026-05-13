@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { MobileNav } from "@/components/mobile-nav";
 import { ModeToggle } from "@/components/mode-toggle";
+import { NotificationsBell } from "@/components/notifications/notifications-bell";
 import { SiteLogo } from "@/components/site-logo";
 import { SiteNav } from "@/components/site-nav";
 import { UserMenu } from "@/components/auth/user-menu";
@@ -44,17 +45,23 @@ export async function SiteHeader() {
           <SiteNav />
 
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2 md:ml-0">
-            <ModeToggle />
             {viewer ? (
-              <UserMenu
-                username={viewer.username}
-                displayName={viewer.display_name}
-                avatarUrl={viewer.avatar_url}
-              />
+              <>
+                <NotificationsBell />
+                <UserMenu
+                  username={viewer.username}
+                  displayName={viewer.display_name}
+                  avatarUrl={viewer.avatar_url}
+                />
+                <ModeToggle />
+              </>
             ) : (
-              <Link href="/login" className={ctaPrimarySm}>
-                Sign in
-              </Link>
+              <>
+                <Link href="/login" className={ctaPrimarySm}>
+                  Sign in
+                </Link>
+                <ModeToggle />
+              </>
             )}
           </div>
         </div>

@@ -60,6 +60,8 @@ export type PersonalityType = {
     a3: "A" | "I";
     a4: "C" | "W";
   };
+  /** Public-path image for the type. Placeholder art under /public/types. */
+  image: string;
 };
 
 export type TypeTrait = {

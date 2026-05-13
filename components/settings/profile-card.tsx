@@ -35,12 +35,14 @@ const initialState: SettingsActionState = {};
 const DISPLAY_NAME_MAX = 50;
 const BIO_MAX = 160;
 const LINK_MAX = 200;
+const LOCATION_MAX = 60;
 
 type Props = {
   username: string;
   initialDisplayName: string | null;
   initialBio: string | null;
   initialLink: string | null;
+  initialLocation: string | null;
 };
 
 function counterTone(length: number, max: number): string {
@@ -54,6 +56,7 @@ export function ProfileCard({
   initialDisplayName,
   initialBio,
   initialLink,
+  initialLocation,
 }: Props) {
   const [state, formAction, pending] = useActionState(
     updateProfileAction,
@@ -63,6 +66,7 @@ export function ProfileCard({
   const [displayName, setDisplayName] = useState(initialDisplayName ?? "");
   const [bio, setBio] = useState(initialBio ?? "");
   const [link, setLink] = useState(initialLink ?? "");
+  const [location, setLocation] = useState(initialLocation ?? "");
 
   useEffect(() => {
     if (state?.error && state.error !== "validation") {
@@ -192,6 +196,42 @@ export function ProfileCard({
               </FieldDescription>
               {state?.fieldErrors?.link ? (
                 <FieldError>{state.fieldErrors.link}</FieldError>
+              ) : null}
+            </Field>
+
+            <Field
+              data-invalid={Boolean(state?.fieldErrors?.location) || undefined}
+            >
+              <FieldLabel htmlFor="settings-location">
+                <span>Location</span>
+                <span
+                  className={cn(
+                    "ml-auto text-xs tabular-nums",
+                    counterTone(location.length, LOCATION_MAX),
+                  )}
+                  aria-live="polite"
+                >
+                  {location.length}/{LOCATION_MAX}
+                </span>
+              </FieldLabel>
+              <Input
+                id="settings-location"
+                name="location"
+                type="text"
+                maxLength={LOCATION_MAX}
+                autoComplete="address-level2"
+                placeholder="Istanbul, TR"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                aria-invalid={
+                  Boolean(state?.fieldErrors?.location) || undefined
+                }
+              />
+              <FieldDescription>
+                Shown next to your link on your profile. Up to 60 characters.
+              </FieldDescription>
+              {state?.fieldErrors?.location ? (
+                <FieldError>{state.fieldErrors.location}</FieldError>
               ) : null}
             </Field>
 
