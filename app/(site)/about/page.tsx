@@ -60,7 +60,7 @@ const steps = [
   {
     icon: WandSparklesIcon,
     title: "Get CineMatches",
-    body: "CineMatch turns your CineType into film recommendations that feel like you — without the noise of generic top-100 lists.",
+    body: "CineMatch pairs you with viewers whose CineType and watch history line up with yours — 90%+ similarity, mutual consent before any chat opens.",
   },
 ];
 
@@ -82,8 +82,8 @@ const principles = [
   },
   {
     n: "IV.",
-    title: "Recommendations you can defend.",
-    body: "Every match comes with reasoning you can read — and disagree with. No black box. No engagement bait.",
+    title: "Matches you can defend.",
+    body: "Every match comes with reasoning you can read — the axes you share and the films you both rated. No black box. No engagement bait.",
   },
 ];
 
@@ -191,8 +191,8 @@ export default function AboutPage() {
           <div className="lg:col-span-4">
             <p className="text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
               {siteConfig.name} is a small project with one clean goal: turn
-              the way you watch into a CineType and recommend films that
-              feel made for you — not for the algorithm.
+              the way you watch into a CineType and pair you with viewers
+              who actually watch like you — not with a feed.
             </p>
           </div>
         </div>
