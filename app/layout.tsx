@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Mono, Inter, Sora } from "next/font/google";
+import { DM_Mono, Poppins } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "./sw-register";
 import { FlashToast } from "@/components/flash-toast";
@@ -7,16 +7,11 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { siteConfig } from "@/lib/site";
 
-// Display / headings — Sora, modern geometric grotesque (SaaS display).
-const sora = Sora({
-  variable: "--font-sora",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-// Body / UI — Inter, neutral humanist sans.
-const inter = Inter({
-  variable: "--font-inter",
+// Body + display — Poppins, assertive geometric/rounded sans, closest free
+// match to TS Damas Sans. Used for headings and UI text alike.
+const poppins = Poppins({
+  variable: "--font-poppins",
+  weight: ["400", "500", "600", "700", "800"],
   subsets: ["latin"],
   display: "swap",
 });
@@ -71,7 +66,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${sora.variable} ${inter.variable} ${dmMono.variable} h-full antialiased`}
+      className={`${poppins.variable} ${dmMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider
