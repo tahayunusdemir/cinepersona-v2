@@ -126,7 +126,7 @@ export default function Home() {
           <Reveal as="header">
             <h1 className="font-display text-balance text-[44px] leading-[1.05] tracking-tight sm:text-[64px] lg:text-[72px]">
               Find the films{" "}
-              <span className="text-[#ecb756]">that fit</span>{" "}
+              <span className="gold-foil">that fit</span>{" "}
               the way you actually watch
             </h1>
           </Reveal>

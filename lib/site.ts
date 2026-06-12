@@ -6,8 +6,8 @@ export const siteConfig = {
     process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
     "http://localhost:3000",
   themeColor: {
-    light: "#fffbeb",
-    dark: "#0a0a0a",
+    light: "#e9eefb",
+    dark: "#0a1336",
   },
 } as const;
 
