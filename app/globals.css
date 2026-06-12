@@ -8,10 +8,10 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   /* Type system — three roles: sans (body), display (headings), mono (credits). */
-  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
-  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
-  --font-heading: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-display: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
   /* Brand + CineType family accents (AUT/VIS/CON/ESC). */
   --color-brand-gold: #ecb756;
   --color-aut: #ecb756;   /* Auteurs · amber */
@@ -177,12 +177,11 @@
 }
 
 @layer utilities {
-  /* Primary display — Fraunces variable. Use for H1, hero, CineType names. */
+  /* Primary display — Sora, modern geometric grotesque. Use for H1, hero,
+     CineType names. Tight tracking for large SaaS-style headings. */
   .font-display {
-    font-family: var(--font-fraunces), ui-serif, Georgia, serif;
-    font-feature-settings: "ss01", "ss02", "liga", "dlig";
-    font-variation-settings: "opsz" 144, "SOFT" 30, "WONK" 0;
-    letter-spacing: -0.02em;
+    font-family: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.025em;
   }
   /* Cinematic credits — DM Mono, for scores, axis labels, "FILM 04 / 16". */
   .font-credits {

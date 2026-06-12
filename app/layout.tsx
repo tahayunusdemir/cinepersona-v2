@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Mono, Fraunces, Hanken_Grotesk } from "next/font/google";
+import { DM_Mono, Inter, Sora } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "./sw-register";
 import { FlashToast } from "@/components/flash-toast";
@@ -7,17 +7,16 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { siteConfig } from "@/lib/site";
 
-// Display / headings — variable serif, upright only (no italic).
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+// Display / headings — Sora, modern geometric grotesque (SaaS display).
+const sora = Sora({
+  variable: "--font-sora",
   subsets: ["latin"],
-  axes: ["SOFT", "WONK", "opsz"],
   display: "swap",
 });
 
-// Body / UI — humanist grotesque, replaces Geist.
-const hankenGrotesk = Hanken_Grotesk({
-  variable: "--font-hanken",
+// Body / UI — Inter, neutral humanist sans.
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
 });
@@ -72,7 +71,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${fraunces.variable} ${hankenGrotesk.variable} ${dmMono.variable} h-full antialiased`}
+      className={`${sora.variable} ${inter.variable} ${dmMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider
